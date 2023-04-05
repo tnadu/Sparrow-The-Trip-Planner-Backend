@@ -12,7 +12,6 @@ class Member(models.Model):
     birthDate = models.DateField(null=True, db_column='birth_date')
 
     class Meta:
-        ordering = ['user']
+        ordering = ['baseUser']
         db_table = 'member'
         default_related_name = 'member'
-
