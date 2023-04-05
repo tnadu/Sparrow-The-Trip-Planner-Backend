@@ -15,4 +15,4 @@ def createMember(sender, instance, created, **kwargs):
     # on said User will also be created and saved;
     if created:
         Member.objects.create(baseUser=instance)
-        Member.save()
+
