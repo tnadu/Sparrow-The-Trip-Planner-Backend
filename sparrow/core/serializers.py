@@ -24,3 +24,10 @@ class SmallMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = Member
         fields = ['baseUser', 'profilePhoto', 'birthDate']
+
+
+# read-only, nestable serializer
+class SmallGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ['name']
