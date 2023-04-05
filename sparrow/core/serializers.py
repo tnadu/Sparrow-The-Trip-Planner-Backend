@@ -1,7 +1,12 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Member, Group
+from .models import Member, Group, Route
 
+# used in 'LargeUserSerializer' and 'LargeGroupSerializer'
+class ExtraSmallRouteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Route
+        fields = ['title', 'description']
 
 # used in 'LargeMemberSerializer' and 'WriteMemberSerializer'
 class LargeUserSerializer(serializers.ModelSerializer):
