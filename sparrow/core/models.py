@@ -15,3 +15,12 @@ class Member(models.Model):
         ordering = ['baseUser']
         db_table = 'member'
         default_related_name = 'member'
+
+
+class Group(models.Model):
+    name = models.CharField(max_length=30, db_column='name')
+    description = models.CharField(max_length=1500, db_column='description')
+    
+    class Meta:
+        db_table = 'group'
+        default_related_name = 'group'
