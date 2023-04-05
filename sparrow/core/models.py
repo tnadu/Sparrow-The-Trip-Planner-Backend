@@ -6,6 +6,15 @@ from django.contrib import admin
 from datetime import datetime
 #from django.contrib.auth.models import User, Group
 
+
+# many - many between Route & Attraction
+class RouteAttraction(models.Model):
+    route = models.ForeignKey(Route, on_delete=models.CASCADE)
+    attraction = models.ForeignKey(Attraction, on_delete=models.CASCADE)
+    orderNumber = models.IntegerField() # the orderNumber of the attraction in the current route
+    class Meta:
+        unique_together = ('route', 'attraction',)
+
 class Route(models.Model):
     title = models.CharField(max_length=50, db_column='route_title')
     description = models.CharField(max_length=3000, db_column='route_description')
