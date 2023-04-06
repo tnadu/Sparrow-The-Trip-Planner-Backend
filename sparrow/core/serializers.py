@@ -17,8 +17,8 @@ class ExtraSmallRouteSerializer(serializers.ModelSerializer):
 
 
 class IsWithinSerializer(serializers.ModelSerializer):
-
     attraction = SmallAttractionSerializer()
+    
     class Meta:
         model = IsWithin
         fields = ['orderNumber', 'attraction']
