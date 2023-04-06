@@ -16,11 +16,11 @@ class ExtraSmallRouteSerializer(serializers.ModelSerializer):
 
 
 
-class RouteAttractionSerializer(serializers.ModelSerializer):
+class IsWithinSerializer(serializers.ModelSerializer):
 
     smallRouteSerializer = SmallRouteSerializer()
     class Meta:
-        model = RouteAttraction # isWithin in case we rename it
+        model = IsWithin
         fields = ['orderNumber', 'smallRouteSerializer']
 
 # used in 'LargeMemberSerializer' and 'WriteMemberSerializer'
