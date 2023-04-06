@@ -8,6 +8,15 @@ class ExtraSmallRouteSerializer(serializers.ModelSerializer):
         model = Route
         fields = ['title', 'description']
 
+
+
+class RouteAttractionSerializer(serializers.ModelSerializer):
+
+    smallRouteSerializer = SmallRouteSerializer()
+    class Meta:
+        model = RouteAttraction # isWithin in case we rename it
+        fields = ['orderNumber', 'smallRouteSerializer']
+
 # used in 'LargeMemberSerializer' and 'WriteMemberSerializer'
 class LargeUserSerializer(serializers.ModelSerializer):
     class Meta:
