@@ -1,9 +1,4 @@
-import datetime
-
 from django.db import models
-from django.utils import timezone
-from django.contrib import admin
-from datetime import datetime
 from django.contrib.auth.models import User
 
 
@@ -13,9 +8,11 @@ class isWithin (models.Model):
     attraction = models.ForeignKey('Attraction', on_delete=models.CASCADE, db_column='attraction_id')
     # the orderNumber of the attraction in the current route
     orderNumber = models.IntegerField(db_column='order_number') 
+    
     class Meta:
         db_table = 'isWithin'
         unique_together = ('route', 'attraction')
+        default_related_name = 'isWithin'
 
 
 class Route(models.Model):
@@ -28,8 +25,11 @@ class Route(models.Model):
     publicationDate = models.DateTimeField('date published', auto_now_add=True, db_column='routePublicationDate')
     user = models.ForeignKey('Member', on_delete=models.CASCADE, null=True, blank=True, db_column='route_user')  # nullable
     group = models.ForeignKey('Group', on_delete=models.CASCADE, null=True, blank=True, db_column='route_group')  # nullable
+    
     class Meta:
+        db_table = 'route'
         ordering = ['publicationDate', 'user']
+        default_related_name = 'route'
 
     def __str__(self):
         return self.title + self.description
@@ -45,8 +45,8 @@ class Member(models.Model):
     birthDate = models.DateField(null=True, db_column='birth_date')
 
     class Meta:
-        ordering = ['baseUser']
         db_table = 'member'
+        ordering = ['baseUser']
         default_related_name = 'member'
 
 
