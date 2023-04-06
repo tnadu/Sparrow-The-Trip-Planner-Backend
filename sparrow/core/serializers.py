@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Member, Group, Route
 
+
 class WriteRouteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Route
@@ -13,6 +14,15 @@ class ExtraSmallRouteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Route
         fields = ['title', 'description']
+
+
+class IsWithinSerializer(serializers.ModelSerializer):
+
+    attraction = SmallAttractionSerializer()
+    class Meta:
+        model = IsWithin
+        fields = ['orderNumber', 'attraction']
+
 
 # used in 'LargeMemberSerializer' and 'WriteMemberSerializer'
 class LargeUserSerializer(serializers.ModelSerializer):
