@@ -43,7 +43,7 @@ class SmallGroupSerializer(serializers.ModelSerializer):
 
 
 # used for post/put/patch on the Group model
-class WriteGroupSerializer(serializers.GroupSerializer):
+class WriteGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
-        fields = ['name', 'description']
+        fields = ['id', 'name', 'description']
