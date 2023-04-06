@@ -14,13 +14,12 @@ class Route(models.Model):
     startingPointLat = models.FloatField(db_column='route_starting_point_lat')
     startingPointLon = models.FloatField(db_column='route_starting_point_lon')
     publicationDate = models.DateTimeField('date published', auto_now_add=True, db_column='routePublicationDate')
-    user = models.ForeignKey(Member, on_delete=models.CASCADE, null=True, blank=True, db_column='route_user')  # nullable
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True, blank=True, db_column='route_group')  # nullable
+    user = models.ForeignKey('Member', on_delete=models.CASCADE, null=True, blank=True, db_column='route_user')  # nullable
+    group = models.ForeignKey('Group', on_delete=models.CASCADE, null=True, blank=True, db_column='route_group')  # nullable
     class Meta:
+        db_table = 'route'
         ordering = ['publicationDate', 'user']
 
-    def __str__(self):
-        return self.title + self.description
 
 # member model, extending the User model via a one-to-one relationship;
 # a member instance is generated whenever a user signs up, with both 
