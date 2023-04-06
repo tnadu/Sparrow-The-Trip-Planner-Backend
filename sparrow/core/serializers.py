@@ -7,14 +7,14 @@ from .models import Member, Group
 class LargeUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'last_name', 'email']
+        fields = ['id', 'username', 'first_name', 'last_name', 'email']
 
 
 # nested in 'SmallMemberSerializer'
 class SmallUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'last_name']
+        fields = ['id', 'username', 'first_name', 'last_name']
 
 
 # read-only, nestable serializer
@@ -26,13 +26,32 @@ class SmallMemberSerializer(serializers.ModelSerializer):
         fields = ['baseUser', 'profilePhoto', 'birthDate']
 
 
-# used for post/put/patch on the Member model
+# used for post/put/patch/delete on the Member model
 class WriteMemberSerializer(serializers.ModelSerializer):
     baseUser = LargeUserSerializer()
 
     class Meta:
         model = Member
         fields = ['baseUser', 'profilePhoto', 'birthDate']
+
+    # custom update method, for updating the related user
+    # with the corresponding validated data, before updating
+    # their associated member
+    def update(self, instance, validated_data):
+        # extract validated user data
+        extractedUserData = validated_data.pop('baseUser', None)
+
+        if extractedUserData:
+            # aquire instance
+            currentBaseUser = instance.baseUser
+            # serialize and verify the validated user data
+            currentBaseUserSerializer = LargeUserSerializer(currentBaseUser, data=extractedUserData, partial=True)
+            currentBaseUserSerializer.is_valid(raise_exception=True)
+            # save the changes
+            currentBaseUserSerializer.save()
+        
+        # update the member itself
+        return super().update(instance, validated_data)
 
 
 # read-only, nestable serializer
@@ -42,8 +61,8 @@ class SmallGroupSerializer(serializers.ModelSerializer):
         fields = ['name']
 
 
-# used for post/put/patch on the Group model
+# used for post/put/patch/delete on the Group model
 class WriteGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
-        fields = ['id', 'name', 'description']
+        fields = ['name', 'description']
