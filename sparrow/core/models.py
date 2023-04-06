@@ -2,19 +2,34 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
-class Route(models.Model):
-    title = models.CharField(max_length=50, db_column='route_title')
-    description = models.CharField(max_length=3000, db_column='route_description')
-    verified = models.BooleanField(default=False, db_column='route_verified')
-    public = models.BooleanField(default=False, db_column='route_public')
-    startingPointLat = models.FloatField(db_column='route_starting_point_lat')
-    startingPointLon = models.FloatField(db_column='route_starting_point_lon')
-    publicationDate = models.DateTimeField('date published', auto_now_add=True, db_column='routePublicationDate')
-    user = models.ForeignKey('Member', on_delete=models.CASCADE, null=True, blank=True, db_column='route_user')  # nullable
-    group = models.ForeignKey('Group', on_delete=models.CASCADE, null=True, blank=True, db_column='route_group')  # nullable
+# many-to-many between Route & Attraction
+class isWithin (models.Model):
+    route = models.ForeignKey('Route', on_delete=models.CASCADE, db_column='route_id')
+    attraction = models.ForeignKey('Attraction', on_delete=models.CASCADE, db_column='attraction_id')
+    # the orderNumber of the attraction in the current route
+    orderNumber = models.IntegerField(db_column='order_number') 
     
     class Meta:
-        ordering = ['publicationDate', 'user']
+        db_table = 'isWithin'
+        unique_together = ('route', 'attraction')
+        default_related_name = 'isWithin'
+
+
+class Route(models.Model):
+    title = models.CharField(max_length=50, db_column='title')
+    description = models.CharField(max_length=3000, db_column='description')
+    verified = models.BooleanField(default=False, db_column='verified')
+    public = models.BooleanField(default=False, db_column='public')
+    startingPointLat = models.FloatField(db_column='starting_point_lat')
+    startingPointLon = models.FloatField(db_column='starting_point_lon')
+    publicationDate = models.DateTimeField(auto_now_add=True, db_column='routePublicationDate')
+    user = models.ForeignKey('Member', on_delete=models.CASCADE, null=True, blank=True, db_column='user_id')  # nullable
+    group = models.ForeignKey('Group', on_delete=models.CASCADE, null=True, blank=True, db_column='group_id')  # nullable
+    
+    class Meta:
+        db_table = 'route'
+        ordering = ['publicationDate']
+        default_related_name = 'route'
 
     def __str__(self):
         return self.title + self.description
@@ -30,8 +45,8 @@ class Member(models.Model):
     birthDate = models.DateField(null=True, db_column='birth_date')
 
     class Meta:
-        ordering = ['baseUser']
         db_table = 'member'
+        ordering = ['baseUser']
         default_related_name = 'member'
 
 
