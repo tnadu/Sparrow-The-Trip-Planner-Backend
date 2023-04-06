@@ -8,12 +8,13 @@ from datetime import datetime
 
 
 # many - many between Route & Attraction
-class RouteAttraction(models.Model):
-    route = models.ForeignKey(Route, on_delete=models.CASCADE)
-    attraction = models.ForeignKey(Attraction, on_delete=models.CASCADE)
-    orderNumber = models.IntegerField() # the orderNumber of the attraction in the current route
+class isWithin (models.Model):
+    route = models.ForeignKey('Route', on_delete=models.CASCADE, db_column='isWithinRouteId')
+    attraction = models.ForeignKey('Attraction', on_delete=models.CASCADE, db_column='isWithinAttractionId')
+    orderNumber = models.IntegerField(db_column='isWithinOrderNumber') # the orderNumber of the attraction in the current route
     class Meta:
-        unique_together = ('route', 'attraction',)
+        db_table = 'isWithin'
+        unique_together = ('route', 'attraction')
 
 class Route(models.Model):
     title = models.CharField(max_length=50, db_column='route_title')
