@@ -1,7 +1,6 @@
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.response import Response
-from rest_framework import status, permissions
-from django.contrib.auth.models import User
+from rest_framework import status, permissions, mixins
 from .models import Member, Group
 from .serializers import *
 
@@ -38,3 +37,8 @@ class MemberViewSet(ModelViewSet):
         member.baseUser.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
+
+# since only the update action will be performed, a mixin is used
+class ChangePasswordViewSet(mixins.UpdateModelMixin, GenericViewSet):
+    queryset = User.objects.all()
+    serializer_class = ChangePasswordSerializer

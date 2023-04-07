@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import GroupViewSet, MemberViewSet
+from .views import *
 
 
 app_name = 'core'
@@ -27,10 +27,15 @@ memberDetail = MemberViewSet.as_view({
     'delete': 'destroy'
 })
 
+changePassword = ChangePasswordViewSet.as_view({
+    'put': 'update'
+})
+
 
 urlpatterns = [
     path('member/list/', memberList, name='member-list'),
     path('member/detail/<int:pk>/', memberDetail, name='member-detail'),
+    path('member/change-password/<int:pk>/', changePassword, name='member-change-password'),
     path('group/list/', groupList, name='group-list'),
     path('group/detail/<int:pk>/', groupDetail, name='group-detail'),
 ]

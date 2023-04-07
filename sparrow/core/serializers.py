@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from django.contrib.auth.hashers import check_password
+from django.contrib.auth.password_validation import validate_password
 from .models import *
 
 
@@ -58,7 +60,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         
         # email can be neither null, nor blank
         if self.validated_data.get('email') is None or self.validated_data['email'] == '':
-            raise serializers.ValidationError({'email': "Email field is required."})
+            raise serializers.ValidationError({'email': 'Email field is required.'})
 
         # creating instance of User Model
         user = User(username=self.validated_data['username'], 
@@ -71,6 +73,33 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+
+class ChangePasswordSerializer(serializers.ModelSerializer):
+    newPassword = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['password', 'newPassword']
+
+    # custom update method for password checking and newPassword validation
+    def update(self, instance, validated_data):
+        password = validated_data['password']
+        updatedPassword = validated_data['newPassword']
+
+        # make sure provided current password is valid
+        if not check_password(password, instance.password):
+            raise serializers.ValidationError({'password': 'Incorrect password.'})
+
+        # validated provided new password
+        try:
+            validate_password(updatedPassword)
+        except Exception as invalidPassword:
+            raise serializers.ValidationError({'newPassword': invalidPassword})
+
+        instance.set_password(updatedPassword)
+        instance.save()
+        return instance
 
 
 # read-only, nestable serializer
