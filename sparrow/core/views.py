@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status, permissions
 from django.contrib.auth.models import User
 from .models import Member, Group
-from .serializers import SmallMemberSerializer, SmallGroupSerializer, WriteMemberSerializer, WriteGroupSerializer, LargeUserSerializer
+from .serializers import *
 
 
 # rough idea of the ViewSets associated with a Member and a Group
@@ -24,8 +24,12 @@ class MemberViewSet(ModelViewSet):
     def get_serializer_class(self):
         if self.request.method in permissions.SAFE_METHODS:
             return SmallMemberSerializer
+        
+        if self.action == 'create':
+            return RegisterMemberSerializer
+
         return WriteMemberSerializer
-    
+
     # custom deletion logic
     def destroy(self, request, *args, **kwargs):
         member = self.get_object()

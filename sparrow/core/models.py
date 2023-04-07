@@ -2,17 +2,17 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
-# many-to-many between Route & Attraction
-class isWithin (models.Model):
-    route = models.ForeignKey('Route', on_delete=models.CASCADE, db_column='route_id')
-    attraction = models.ForeignKey('Attraction', on_delete=models.CASCADE, db_column='attraction_id')
-    # the orderNumber of the attraction in the current route
-    orderNumber = models.IntegerField(db_column='order_number') 
+# # many-to-many between Route & Attraction
+# class isWithin (models.Model):
+#     route = models.ForeignKey('Route', on_delete=models.CASCADE, db_column='route_id')
+#     attraction = models.ForeignKey('Attraction', on_delete=models.CASCADE, db_column='attraction_id')
+#     # the orderNumber of the attraction in the current route
+#     orderNumber = models.IntegerField(db_column='order_number') 
     
-    class Meta:
-        db_table = 'isWithin'
-        unique_together = ('route', 'attraction')
-        default_related_name = 'isWithin'
+#     class Meta:
+#         db_table = 'isWithin'
+#         unique_together = ('route', 'attraction')
+#         default_related_name = 'isWithin'
 
 
 class Route(models.Model):

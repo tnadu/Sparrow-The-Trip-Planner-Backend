@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Member, Group, Route
+from .models import *
 
 
 class WriteRouteSerializer(serializers.ModelSerializer):
@@ -16,12 +16,12 @@ class ExtraSmallRouteSerializer(serializers.ModelSerializer):
         fields = ['title', 'description']
 
 
-class IsWithinSerializer(serializers.ModelSerializer):
-    attraction = SmallAttractionSerializer()
+# class IsWithinSerializer(serializers.ModelSerializer):
+#     attraction = SmallAttractionSerializer()
     
-    class Meta:
-        model = IsWithin
-        fields = ['orderNumber', 'attraction']
+#     class Meta:
+#         model = isWithin
+#         fields = ['orderNumber', 'attraction']
 
 
 # used in 'LargeMemberSerializer' and 'WriteMemberSerializer'
@@ -38,6 +38,31 @@ class SmallUserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'first_name', 'last_name']
 
 
+class RegisterUserSerializer(serializers.ModelSerializer):
+    passwordCheck = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'password', 'passwordCheck', 'first_name', 'last_name', 'email']
+        extra_kwargs = {'passwordCheck': {'write_only': True}}
+
+    def save(self, **kwargs):
+        password = self.validated_data['password']
+        passwordCheck = self.validated_data['passwordCheck']
+
+        if password != passwordCheck:
+            raise serializers.ValidationError({'password': 'Passwords must match!'})
+        
+        user = User(username=self.validated_data['username'], 
+                    first_name=self.validated_data['first_name'], 
+                    last_name=self.validated_data['last_name'],
+                      email=self.validated_data['email'])
+        
+        user.set_password(password)
+        user.save()
+        return user
+
+
 # read-only, nestable serializer
 class SmallMemberSerializer(serializers.ModelSerializer):
     baseUser = SmallUserSerializer(read_only=True)
@@ -47,7 +72,7 @@ class SmallMemberSerializer(serializers.ModelSerializer):
         fields = ['baseUser', 'profilePhoto', 'birthDate']
 
 
-# used for post/put/patch/delete on the Member model
+# used for put/patch/delete on the Member model
 class WriteMemberSerializer(serializers.ModelSerializer):
     baseUser = LargeUserSerializer()
 
@@ -73,6 +98,29 @@ class WriteMemberSerializer(serializers.ModelSerializer):
         
         # update the member itself
         return super().update(instance, validated_data)
+
+
+class RegisterMemberSerializer(serializers.ModelSerializer):
+    baseUser = RegisterUserSerializer()
+
+    class Meta:
+        model = Member
+        fields = ['baseUser', 'profilePhoto', 'birthDate']
+
+    def save(self, **kwargs):
+        baseUserData = self.validated_data['baseUser']
+        baseUserSerializer = RegisterUserSerializer(data=baseUserData)
+        baseUserSerializer.is_valid(raise_exception=True)
+        baseUser = baseUserSerializer.save()
+
+        member = Member(
+            baseUser=baseUser,
+            profilePhoto=self.validated_data.pop('profilePhoto', None),
+            birthDate=self.validated_data['birthDate']
+        )
+
+        member.save()
+        return member
 
 
 # read-only, nestable serializer

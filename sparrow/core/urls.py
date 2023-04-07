@@ -17,7 +17,8 @@ groupDetail = GroupViewSet.as_view({
 })
 
 memberList = MemberViewSet.as_view({
-    'get': 'list'
+    'get': 'list',
+    'post': 'create'
 })
 
 memberDetail = MemberViewSet.as_view({
