@@ -46,18 +46,28 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         fields = ['username', 'password', 'passwordCheck', 'first_name', 'last_name', 'email']
         extra_kwargs = {'passwordCheck': {'write_only': True}}
 
+    # custom save method logic, to accommodate password 
+    # matching and properly setting the validated password
     def save(self, **kwargs):
         password = self.validated_data['password']
         passwordCheck = self.validated_data['passwordCheck']
 
+        # the two passwords fields must match
         if password != passwordCheck:
             raise serializers.ValidationError({'password': 'Passwords must match!'})
         
+        # email can be neither null, nor blank
+        if self.validated_data.get('email') is None or self.validated_data['email'] == '':
+            raise serializers.ValidationError({'email': "Email field is required."})
+
+        # creating instance of User Model
         user = User(username=self.validated_data['username'], 
-                    first_name=self.validated_data['first_name'], 
-                    last_name=self.validated_data['last_name'],
-                      email=self.validated_data['email'])
+                    # first and last names can be blank
+                    first_name=self.validated_data.pop('first_name', ''), 
+                    last_name=self.validated_data.pop('last_name', ''),
+                    email=self.validated_data.pop('email'))
         
+        # properly setting the password
         user.set_password(password)
         user.save()
         return user
@@ -107,10 +117,15 @@ class RegisterMemberSerializer(serializers.ModelSerializer):
         model = Member
         fields = ['baseUser', 'profilePhoto', 'birthDate']
 
+    # custom save method, so that a baseUser can be instantiated
+    # before the Member instance itself;
     def save(self, **kwargs):
         baseUserData = self.validated_data['baseUser']
+        # creating serializer based on validated data
         baseUserSerializer = RegisterUserSerializer(data=baseUserData)
+        # validating said data
         baseUserSerializer.is_valid(raise_exception=True)
+        # creating the instance
         baseUser = baseUserSerializer.save()
 
         member = Member(
