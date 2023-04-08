@@ -1,12 +1,23 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Member, Group, Route
+from .models import Member, Group, Route, isWithin
 
 class WriteRouteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Route
         fields = ['title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'user', 'group']
 
+# retreives all the information for a a route
+class LargeRouteSerializer(serializers.ModelSerializer):
+
+    author = SmallUserSerializer()
+    is_within = IsWithinSerializer(many=True) # one for each attraction of the route
+    group = SmallGroupSerializer()
+
+    class Meta:
+        model = Route
+        fields = ['title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'publicationDate',
+                  'author', 'is_within', 'group']
 
 # used in 'LargeUserSerializer' and 'LargeGroupSerializer'
 class ExtraSmallRouteSerializer(serializers.ModelSerializer):
