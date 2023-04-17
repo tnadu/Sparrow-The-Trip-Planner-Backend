@@ -6,11 +6,23 @@ from django.contrib.auth.password_validation import validate_password
 from .models import *
 
 
+#used for write operations (post/put)
 class WriteRouteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Route
         fields = ['title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'user', 'group']
 
+# retreives all the information for a a route
+class LargeRouteSerializer(serializers.ModelSerializer):
+
+    author = SmallUserSerializer()
+    is_within = IsWithinSerializer(many=True) # one for each attraction of the route
+    group = SmallGroupSerializer()
+
+    class Meta:
+        model = Route
+        fields = ['title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'publicationDate',
+                  'author', 'is_within', 'group']
 
 # used in 'LargeUserSerializer' and 'LargeGroupSerializer'
 class ExtraSmallRouteSerializer(serializers.ModelSerializer):
@@ -25,6 +37,13 @@ class ExtraSmallRouteSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = isWithin
 #         fields = ['orderNumber', 'attraction']
+
+
+# used for write operations(put, post)
+class WriteIsWithinSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IsWithin
+        fields = ['route', 'attraction', 'orderNumber']
 
 
 # used in 'LargeMemberSerializer' and 'WriteMemberSerializer'
