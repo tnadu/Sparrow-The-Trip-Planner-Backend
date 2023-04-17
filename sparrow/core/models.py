@@ -34,6 +34,17 @@ class Route(models.Model):
     def __str__(self):
         return self.title + self.description
 
+class Attraction(models.Model):
+    name = models.CharField(max_length=100, db_column='name')
+    generalDescription = models.CharField(max_length=3000, db_column='general_description')
+    photo = models.ImageField(upload_to='attraction_photos', default='attraction_photo_default.jpg', db_column='photo')
+    latitude = models.FloatField(db_column='latitude')
+    longitude = models.FloatField(db_column='longitude')
+
+    class Meta:
+        db_table = 'attraction'
+        ordering = ['name']
+        default_related_name = 'attraction'
 
 # member model, extending the User model via a one-to-one relationship;
 # a member instance is generated whenever a user signs up, with both 
