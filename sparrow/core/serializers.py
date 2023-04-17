@@ -63,13 +63,6 @@ class SmallMemberSerializer(serializers.ModelSerializer):
         model = Member
         fields = ['baseUser', 'profilePhoto', 'birthDate']
 
-
-# read-only, nestable serializer
-class SmallGroupSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Group
-        fields = ['name']
-
 # retrieves ALL the information about an attraction
 class LargeAttractionSerializer(serializers.ModelSerializer):
     tag = SmallTagSerializer()
