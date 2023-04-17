@@ -1,6 +1,8 @@
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions, mixins
+from django.contrib.auth import login, logout
 from .models import Member, Group
 from .serializers import *
 
@@ -37,6 +39,33 @@ class MemberViewSet(ModelViewSet):
         member.baseUser.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
+
+# none of the default actions will be performed using
+# this ViewSet, so a GenericViewSet is better suited
+class LoginViewSet(GenericViewSet):
+    queryset = User.objects.all()
+    serializer_class = LoginSerializer
+
+    # action associated with the POST method, which manages the login process
+    def post(self, request):
+        # validating the provided credentials using the associated serializer
+        userSerializer = LoginSerializer(data=request.data, context={'request': request})
+        userSerializer.is_valid(raise_exception=True)
+        
+        user = userSerializer.validated_data['user']
+        # the validated user gets logged in, which means that
+        # the response header will contain a session_id cookie
+        login(self.request, user)
+        return Response(None, status=status.HTTP_202_ACCEPTED)
+
+
+# since it is not necessary for a serializer or a model to be
+# associated with the logout action, an APIView will suffice
+class LogoutView(APIView):
+    def post(self, request):
+        logout(request)     # django handles the logout procedure
+        return Response(None, status=status.HTTP_204_NO_CONTENT)
+
 
 # since only the update action will be performed, a mixin is used
 class ChangePasswordViewSet(mixins.UpdateModelMixin, GenericViewSet):

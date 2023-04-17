@@ -27,12 +27,21 @@ memberDetail = MemberViewSet.as_view({
     'delete': 'destroy'
 })
 
+login = LoginViewSet.as_view({
+    'post': 'post'
+})
+
+logout = LogoutView.as_view()
+
 changePassword = ChangePasswordViewSet.as_view({
     'put': 'update'
 })
 
 
+
 urlpatterns = [
+    path('auth/login/', login, name='login'),
+    path('auth/logout/', logout, name='logout'),
     path('member/list/', memberList, name='member-list'),
     path('member/detail/<int:pk>/', memberDetail, name='member-detail'),
     path('member/change-password/<int:pk>/', changePassword, name='member-change-password'),

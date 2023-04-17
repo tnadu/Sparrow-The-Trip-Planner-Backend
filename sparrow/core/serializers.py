@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.password_validation import validate_password
@@ -75,6 +76,31 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         return user
 
 
+# a regular Serializer is used, so that no 'create'-related validations or
+# any other default behaviour of a ModelSerializer pollute the POST request
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField(label='Username', write_only=True)
+    password = serializers.CharField(label='Password', style={'input_type': 'password'}, trim_whitespace=False, write_only=True)
+
+    def validate(self, attrs):      # overwritten
+        username = attrs['username']
+        password = attrs['password']
+
+        if not username or not password:
+            raise serializers.ValidationError({'authorization': 'Both "username" and "password" are required!'})
+        
+        # using the built-in django method for authentication
+        user = authenticate(request=self.context['request'], username=username, password=password)
+
+        if not user:
+            raise serializers.ValidationError({'authorization': 'Invalid username or password!'})
+        
+        # the user is properly validated, which means it can be 
+        # placed in the serializer's validated_data attribute
+        attrs['user'] = user
+        return attrs
+
+
 class ChangePasswordSerializer(serializers.ModelSerializer):
     newPassword = serializers.CharField(style={'input_type': 'password'}, write_only=True)
 
@@ -91,7 +117,7 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
         if not check_password(password, instance.password):
             raise serializers.ValidationError({'password': 'Incorrect password.'})
 
-        # validated provided new password
+        # validate provided new password
         try:
             validate_password(updatedPassword)
         except Exception as invalidPassword:
