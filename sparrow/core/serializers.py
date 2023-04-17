@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Member, Group, Route, isWithin
+from .models import Member, Group, Route, isWithin, Attraction
 
 #used for write operations (post/put)
 class WriteRouteSerializer(serializers.ModelSerializer):
@@ -69,3 +69,12 @@ class SmallGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ['name']
+
+# retrieves ALL the information about an attraction
+class LargeAttractionSerializer(serializers.ModelSerializer):
+    tag = SmallTagSerializer()
+    rating = RatingSerializer()
+
+    class Meta:
+        model = Attraction
+        fields = ['name', 'generalDescription', 'photo', 'latitude', 'longitude', 'tag', 'rating']
