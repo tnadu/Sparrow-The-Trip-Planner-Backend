@@ -44,8 +44,8 @@ class Attraction(models.Model):
     class Meta:
         db_table = 'attraction'
         ordering = ['name']
-        default_related_name = 'attration'
-        
+        default_related_name = 'attraction'
+
 # member model, extending the User model via a one-to-one relationship;
 # a member instance is generated whenever a user signs up, with both 
 # 'profilePhoto' and 'birthDate' fields set to null; 
