@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Member, Group, Route, isWithin
+from .models import Member, Group, Route, isWithin, Tag
 
 #used for write operations (post/put)
 class WriteRouteSerializer(serializers.ModelSerializer):
@@ -69,3 +69,19 @@ class SmallGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ['name']
+ 
+   
+# will be nested in Attraction Serializers 
+class SmallTagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ['tagName']
+
+# with SmallAttractionSerializer nested   
+class LargeTagSerializer(serializers.ModelSerializer):
+    attractions = SmallAttractionSerializer(many=True, read_only=True)
+    class Meta:
+        model = Tag
+        fields = ['tagName','attractions']
+        
+
