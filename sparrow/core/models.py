@@ -57,3 +57,54 @@ class Group(models.Model):
     class Meta:
         db_table = 'group'
         default_related_name = 'group'
+
+
+# notebook model, used to store information about a user's experience with a particular route
+# this information includes their impressions, notes, and any photos they took during the trip
+# additionally, the model records the date and time of the journey;
+# 'route' - foreignKey, it specifies the route associated with the current entry in the notebook;
+# 'user' - foreignKey, holds the user who created the notebook;
+# 'status' - foreignKey, it specifies the current status of the trip
+class Notebook(models.Model):
+    route = models.ForeignKey('Route', null=False, blank=False, on_delete=models.CASCADE, db_column='route_id')
+    user = models.ForeignKey('Member', null=False, blank=False, on_delete=models.CASCADE, db_column='user_id')
+
+    # added a choices attribute to the Status model for easier access through a dropdown menu, 
+    # enabling me to select from pre-defined options and validate data
+    status = models.ForeignKey('Status', choices=models.Status.get_choices(), on_delete=models.CASCADE, null = True, blank = True, db_column='status_id')
+    
+    # added a title for the current notebook entry
+    title = models.CharField(null = True, blank=True, db_column='title')
+    note = models.TextField(null = True, blank = True, db_column = 'note')
+    # default max-length value for image field is 100 characters
+    photo = models.ImageField(upload_to='notebook-photos', null = True, blank = True, db_column='photo')
+    dateStarted = models.DateField(null = True, db_column = 'dateStarted') # nullable
+    dateCompleted = models.DateField(null = True, db_column = 'dateCompleted') # nullable
+
+    class Meta:
+        db_table = 'notebook'
+        ordering = ['dateStarted', 'dateCompleted', 'title']
+        default_related_name = 'notebook'
+        
+    def __str__(self):
+        return self.title
+
+# status model, used to store information about the state of a journey, 
+# such as whether it is completed, finished, ongoing, etc.
+class Status(models.Model):
+    status = models.CharField(null = False, blank = False, db_column='status')
+
+    # 'CHOICES extracts existing statuses from the database and returns a list of tuples (id, status_title)
+    # this is useful for defining the choices field of any notebook entry that requires a status value, 
+    # ensuring that the options are up-to-date and consistent with the database values.
+    @classmethod
+    def get_choices(cls):
+        return [(status.id, status.status) for status in cls.objects.all()]
+
+    class Meta:
+        db_table = 'status'
+        ordering = ['status']
+        default_related_name = 'status'
+    
+    def __str__(self):
+        return self.status
