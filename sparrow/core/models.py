@@ -94,7 +94,7 @@ class Notebook(models.Model):
 class Status(models.Model):
     status = models.CharField(null = False, blank = False, db_column='status')
 
-    # 'CHOICES extracts existing statuses from the database and returns a list of tuples (id, status_title)
+    # get_choices extracts existing statuses from the database and returns a list of tuples (id, status_title)
     # this is useful for defining the choices field of any notebook entry that requires a status value, 
     # ensuring that the options are up-to-date and consistent with the database values.
     @classmethod
