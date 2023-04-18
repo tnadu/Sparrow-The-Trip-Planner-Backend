@@ -68,3 +68,18 @@ class Group(models.Model):
     class Meta:
         db_table = 'group'
         default_related_name = 'group'
+
+# associative table between 'Member' and 'Group'
+class BelongsTo(models.Model):
+    # to_field not mentioned ==> will use the primary key from Route & Group
+    # as the foreign key in this table
+    member = models.ForeignKey('Route', on_delete=models.CASCADE, db_column='member_id')
+    group = models.ForeignKey('Group', on_delete=models.CASCADE, db_column="group_id")
+    isAdmin = models.BooleanField(db_column="isAdmin")
+    nickname = models.CharField(null=True, max_length=50, db_column="nickname")
+
+    class Meta:
+        db_table = 'belongsTo'
+        default_related_name = 'belongsTo'
+        # cannot have multiple identical entries for belonging relationship
+        unique_together = ('member', 'group')
