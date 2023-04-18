@@ -157,6 +157,17 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
         return instance
 
 
+class LargeMemberSerializer(serializers.ModelSerializer):
+    baseUser = LargeUserSerializer(read_only=True)
+    groups = GroupBelongsToSerializer(many=True, read_only=True)
+    routes = ExtraSmallRouteSerializer(many=True, read_only=True)
+    notebooks = SmallNotebookSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Member
+        fields = ['baseUser', 'profilePhoto', 'birthdate', 'groups', 'routes', 'notebooks']
+
+
 # read-only, nestable serializer
 class SmallMemberSerializer(serializers.ModelSerializer):
     baseUser = SmallUserSerializer(read_only=True)
