@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Member, Group, Route, isWithin
+from .models import Member, Group, Route, isWithin, BelongsTo
 
 #used for write operations (post/put)
 class WriteRouteSerializer(serializers.ModelSerializer):
@@ -10,7 +10,6 @@ class WriteRouteSerializer(serializers.ModelSerializer):
 
 # retreives all the information for a a route
 class LargeRouteSerializer(serializers.ModelSerializer):
-
     author = SmallUserSerializer()
     is_within = IsWithinSerializer(many=True) # one for each attraction of the route
     group = SmallGroupSerializer()
@@ -69,3 +68,26 @@ class SmallGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ['name']
+
+##### BelongsTo #####
+#####################
+
+class GroupBelongsToSerializer(serializers.Serializer):
+    group = SmallGroupSerializer()
+
+    class Meta:
+        model = BelongsTo
+        fields = ['group', 'isAdmin', 'nickname']
+
+class MemberBelongsToSerializer(serializers.Serializer):
+    member = SmallMemberSerializer()
+
+    class Meta:
+        model = BelongsTo
+        fields = ['member', 'isAdmin', 'nickname']
+
+# used for POST/PUT operations
+class WriteBelongsTo(serializers.Serializer):
+    class Meta:
+        model = BelongsTo
+        fields = ['member', 'group', 'isAdmin', 'nickname']
