@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Member, Group, Route, isWithin
+from .models import Member, Group, Route, isWithin, Attraction
 
 ###### Route ######
 ###################
@@ -80,3 +80,15 @@ class SmallGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ['name']
+
+##### Attraction #####
+######################
+
+# retrieves minimal information about an attraction, for queries with
+# minimal requirements
+class SmallAtractionSerializer(serializers.ModelSerializer):
+    tag = SmallTagSerializer()
+
+    class Meta:
+        model = Attraction
+        fields = ['name', 'generalDescription', 'tag']
