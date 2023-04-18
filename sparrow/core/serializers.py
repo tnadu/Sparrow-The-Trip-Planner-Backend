@@ -5,6 +5,8 @@ from django.contrib.auth.hashers import check_password
 from django.contrib.auth.password_validation import validate_password
 from .models import *
 
+###### Route ######
+###################
 
 #used for write operations (post/put)
 class WriteRouteSerializer(serializers.ModelSerializer):
@@ -12,9 +14,8 @@ class WriteRouteSerializer(serializers.ModelSerializer):
         model = Route
         fields = ['title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'user', 'group']
 
-# retreives all the information for a a route
+# retreives ALL the information for a a route
 class LargeRouteSerializer(serializers.ModelSerializer):
-
     author = SmallUserSerializer()
     is_within = IsWithinSerializer(many=True) # one for each attraction of the route
     group = SmallGroupSerializer()
@@ -23,6 +24,15 @@ class LargeRouteSerializer(serializers.ModelSerializer):
         model = Route
         fields = ['title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'publicationDate',
                   'author', 'is_within', 'group']
+
+# retrieves partial information about a route
+class SmallRouteSerializer(serializers.ModelSerializer):
+    author = SmallUserSerializer()
+    group = SmallGroupSerializer()
+
+    class Meta:
+        model = Route
+        fields = ['title', 'description', 'verified', 'author', 'group']
 
 # used in 'LargeUserSerializer' and 'LargeGroupSerializer'
 class ExtraSmallRouteSerializer(serializers.ModelSerializer):
@@ -224,3 +234,13 @@ class WriteGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ['name', 'description']
+
+
+# retrieves minimal information about an attraction, for queries with
+# minimal requirements
+class SmallAtractionSerializer(serializers.ModelSerializer):
+    tag = SmallTagSerializer()
+
+    class Meta:
+        model = Attraction
+        fields = ['name', 'generalDescription', 'tag']

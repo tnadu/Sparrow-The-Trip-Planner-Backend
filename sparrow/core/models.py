@@ -34,6 +34,17 @@ class Route(models.Model):
     def __str__(self):
         return self.title + self.description
 
+class Attraction(models.Model):
+    name = models.CharField(max_length=100, db_column='name')
+    generalDescription = models.CharField(max_length=3000, db_column='general_description')
+    photo = models.ImageField(upload_to='attraction_photos', default='attraction_photo_default.jpg', db_column='photo')
+    latitude = models.FloatField(db_column='latitude')
+    longitude = models.FloatField(db_column='longitude')
+
+    class Meta:
+        db_table = 'attraction'
+        ordering = ['name']
+        default_related_name = 'attraction'
 
 # member model, extending the User model via a one-to-one relationship;
 # a member instance is generated whenever a user signs up, with both 
@@ -57,3 +68,17 @@ class Group(models.Model):
     class Meta:
         db_table = 'group'
         default_related_name = 'group'
+
+
+# associative table between 'Member' and 'Group'
+class BelongsTo(models.Model):
+    member = models.ForeignKey('Member', on_delete=models.CASCADE, db_column='member_id')
+    group = models.ForeignKey('Group', on_delete=models.CASCADE, db_column="group_id")
+    isAdmin = models.BooleanField(db_column="isAdmin")
+    nickname = models.CharField(max_length=50, null=True, blank=True, db_column="nickname")
+
+    class Meta:
+        db_table = 'belongsTo'
+        default_related_name = 'belongsTo'
+        # cannot have multiple identical entries for belonging relationship
+        unique_together = ('member', 'group')
