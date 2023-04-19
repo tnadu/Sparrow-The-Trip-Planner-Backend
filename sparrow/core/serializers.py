@@ -65,9 +65,25 @@ class SmallMemberSerializer(serializers.ModelSerializer):
 
 # retrieves ALL the information about an attraction
 class LargeAttractionSerializer(serializers.ModelSerializer):
+    images = ImageSerializer(many=True)
     tag = SmallTagSerializer()
-    rating = RatingSerializer()
+    ratings = SmallRatingFlagSerializer(many=True)
 
     class Meta:
         model = Attraction
-        fields = ['name', 'generalDescription', 'photo', 'latitude', 'longitude', 'tag', 'rating']
+        fields = ['name', 'generalDescription', 'photo', 'latitude', 'longitude', 'images', 'tag', 'ratings']
+
+    # this method is automatically called during validation process, 
+    # after the input data has been deserialized 
+    def validate(self, data):
+        # extract the objects regarding the attraction's rating
+        attraction_rating_objects = data.get('ratings', {})
+
+         # afterwards, the 'rating' attribute itself for each one
+        for attraction_rating in attraction_rating_objects:
+            rating = attraction_rating.get('rating', '')
+
+            if rating < 0:
+                raise serializers.ValidationError("Ratings for attractions should only be positive!")
+
+        return data
