@@ -21,6 +21,7 @@ class GroupViewSet(ModelViewSet):
 
 class MemberViewSet(ModelViewSet):
     queryset = Member.objects.all()
+    search_fields = ['baseUser__username', 'baseUser__first_name', 'baseUser__last_name']
 
     def get_serializer_class(self):
         if self.request.method in permissions.SAFE_METHODS:
