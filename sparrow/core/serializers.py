@@ -24,25 +24,17 @@ class WriteRouteSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Only one of user and group can be specified")
         return data
 
-# retreives ALL the information for a a route
-class LargeRouteSerializer(serializers.ModelSerializer):
-    author = SmallUserSerializer()
-    is_within = IsWithinSerializer(many=True) # one for each attraction of the route
-    group = SmallGroupSerializer()
-
+# read-only, nestable serializer
+class SmallGroupSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Route
-        fields = ['title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'publicationDate',
-                  'author', 'is_within', 'group']
+        model = Group
+        fields = ['name']
 
-# retrieves partial information about a route
-class SmallRouteSerializer(serializers.ModelSerializer):
-    author = SmallUserSerializer()
-    group = SmallGroupSerializer()
-
+# nested in 'SmallMemberSerializer'
+class SmallUserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Route
-        fields = ['title', 'description', 'verified', 'author', 'group']
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name']
 
 # used in 'LargeUserSerializer' and 'LargeGroupSerializer'
 class ExtraSmallRouteSerializer(serializers.ModelSerializer):
@@ -58,20 +50,31 @@ class ExtraSmallRouteSerializer(serializers.ModelSerializer):
 #         model = isWithin
 #         fields = ['orderNumber', 'attraction']
 
+# retreives ALL the information for a a route
+class LargeRouteSerializer(serializers.ModelSerializer):
+    author = SmallUserSerializer()
+    is_within = IsWithinSerializer(many=True) # one for each attraction of the route
+    group = SmallGroupSerializer()
 
+    class Meta:
+        model = Route
+        fields = ['title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'publicationDate',
+                  'author', 'is_within', 'group']
+        
 # used in 'LargeMemberSerializer' and 'WriteMemberSerializer'
 class LargeUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'email']
 
+# retrieves partial information about a route
+class SmallRouteSerializer(serializers.ModelSerializer):
+    author = SmallUserSerializer()
+    group = SmallGroupSerializer()
 
-# nested in 'SmallMemberSerializer'
-class SmallUserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ['id', 'username', 'first_name', 'last_name']
-
+        model = Route
+        fields = ['title', 'description', 'verified', 'author', 'group']
 
 class RegisterUserSerializer(serializers.ModelSerializer):
     passwordCheck = serializers.CharField(style={'input_type': 'password'}, write_only=True)
@@ -159,17 +162,20 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-
-class LargeMemberSerializer(serializers.ModelSerializer):
-    baseUser = LargeUserSerializer(read_only=True)
-    groups = GroupBelongsToSerializer(many=True, read_only=True)
-    routes = ExtraSmallRouteSerializer(many=True, read_only=True)
-    ratings = SmallRatingSerializer(many=True, read_only=True)  
-    notebooks = SmallNotebookSerializer(many=True, read_only=True)
+# status serializer
+class StatusSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Member
-        fields = ['baseUser', 'profilePhoto', 'birthdate', 'groups', 'routes', 'ratings', 'notebooks']
+        model = Status
+        fields = ['status']
+        
+# shows minimum of information, used when displaying all entries in a list
+class SmallNotebookSerializer(serializers.ModelSerializer):
+
+    status = StatusSerializer()
+    class Meta:
+        model = Notebook
+        fields = ['title', 'note', 'status']
 
 
 # read-only, nestable serializer
@@ -236,13 +242,6 @@ class RegisterMemberSerializer(serializers.ModelSerializer):
         return member
 
 
-# read-only, nestable serializer
-class SmallGroupSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Group
-        fields = ['name']
-
-
 # used for post/put/patch/delete on the Group model
 class WriteGroupSerializer(serializers.ModelSerializer):
     class Meta:
@@ -258,6 +257,27 @@ class SmallAtractionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attraction
         fields = ['name', 'generalDescription', 'tag']
+
+# small flag serializer, gives minimal information about rating
+class SmallRatingFlagSerializer(serializers.ModelSerializer):
+
+    route = ExtraSmallRouteSerializer()
+    attraction = SmallAtractionSerializer()
+
+    class Meta:
+        model = Rating
+        fields = ['rating', 'comment', 'route', 'attraction']
+
+# large flag serializer, gives detailed information about rating
+class LargeRatingFlagSerializer(serializers.ModelSerializer):
+
+    user = SmallUserSerializer()
+    route = ExtraSmallRouteSerializer()
+    attraction = SmallAtractionSerializer()
+
+    class Meta:
+        model = Rating
+        fields = ['user', 'rating', 'comment', 'route', 'attraction']
 
 # retrieves ALL the information about an attraction
 class LargeAttractionSerializer(serializers.ModelSerializer):
@@ -296,27 +316,16 @@ class MemberBelongsToSerializer(serializers.ModelSerializer):
         model = BelongsTo
         fields = ['member', 'isAdmin', 'nickname']
 
-##### Status #####
-#####################
-
-# status serializer
-class StatusSerializer(serializers.ModelSerializer):
+class LargeMemberSerializer(serializers.ModelSerializer):
+    baseUser = LargeUserSerializer(read_only=True)
+    groups = GroupBelongsToSerializer(many=True, read_only=True)
+    routes = ExtraSmallRouteSerializer(many=True, read_only=True)
+    ratings = SmallRatingFlagSerializer(many=True, read_only=True)  
+    notebooks = SmallNotebookSerializer(many=True, read_only=True)
 
     class Meta:
-        model = Status
-        fields = ['status']
-
-##### Notebook #####
-#####################
-
-# notebook serializers
-# shows minimum of information, used when displaying all entries in a list
-class SmallNotebookSerializer(serializers.ModelSerializer):
-
-    status = StatusSerializer()
-    class Meta:
-        model = Notebook
-        fields = ['title', 'note', 'status']
+        model = Member
+        fields = ['baseUser', 'profilePhoto', 'birthdate', 'groups', 'routes', 'ratings', 'notebooks']
 
 # shows everything it is to know about a specific notebook-entry
 class LargeNotebookSerializer(serializers.ModelSerializer):
