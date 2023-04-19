@@ -2,17 +2,17 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
-# # many-to-many between Route & Attraction
-# class isWithin (models.Model):
-#     route = models.ForeignKey('Route', on_delete=models.CASCADE, db_column='route_id')
-#     attraction = models.ForeignKey('Attraction', on_delete=models.CASCADE, db_column='attraction_id')
-#     # the orderNumber of the attraction in the current route
-#     orderNumber = models.IntegerField(db_column='order_number') 
+# many-to-many between Route & Attraction
+class isWithin (models.Model):
+    route = models.ForeignKey('Route', on_delete=models.CASCADE, db_column='route_id')
+    attraction = models.ForeignKey('Attraction', on_delete=models.CASCADE, db_column='attraction_id')
+    # the orderNumber of the attraction in the current route
+    orderNumber = models.IntegerField(db_column='order_number') 
     
-#     class Meta:
-#         db_table = 'isWithin'
-#         unique_together = ('route', 'attraction')
-#         default_related_name = 'isWithin'
+    class Meta:
+        db_table = 'isWithin'
+        unique_together = ('route', 'attraction')
+        default_related_name = 'isWithin'
 
 
 class Route(models.Model):
@@ -84,7 +84,8 @@ class BelongsTo(models.Model):
         default_related_name = 'belongsTo'
         # cannot have multiple identical entries for belonging relationship
         unique_together = ('member', 'group')
-        
+
+
 # status model, used to store information about the state of a journey, 
 # such as whether it is completed, finished, ongoing, etc.
 class Status(models.Model):
@@ -98,6 +99,7 @@ class Status(models.Model):
     def __str__(self):
         return self.status
     
+
 # notebook model, used to store information about a user's experience with a particular route
 # this information includes their impressions, notes, and any photos they took during the trip
 # additionally, the model records the date and time of the journey;
@@ -110,15 +112,15 @@ class Notebook(models.Model):
 
     # added a choices attribute to the Status model for easier access through a dropdown menu, 
     # enabling me to select from pre-defined options and validate data
-    status = models.ForeignKey('Status', null=False, blank=False, on_delete=models.CASCADE, db_column='status_id')
+    status = models.ForeignKey('Status', null=False, blank=False, on_delete=models.CASCADE, db_column='status_id', default=1)
     
     # added a title for the current notebook entry
-    title = models.CharField(max_length = 50, null=False, blank=False, db_column='title')
+    title = models.CharField(max_length = 50, null=False, blank=False, db_column='title', default='type a title...')
 
     # note is nullable in order to let the user create a blank notebook, that they can fill later on their trip
-    note = models.CharField(max_length = 3000, null = True, blank = True, db_column = 'note')
+    note = models.CharField(max_length = 3000, null = False, blank = False, db_column = 'note', default='type a note...')
 
-    dateStarted = models.DateField(null = True, db_column = 'dateStarted') # nullable
+    dateStarted = models.DateField(auto_now_add=True, db_column = 'dateStarted') # nullable
     dateCompleted = models.DateField(null = True, db_column = 'dateCompleted') # nullable
 
     class Meta:
@@ -126,7 +128,6 @@ class Notebook(models.Model):
         # descending order for dateStarted, dateCompleted, in order to show the most recent trips first
         ordering = ['-dateStarted', '-dateCompleted', 'title']
         default_related_name = 'notebook'
-    # the user is allowed to have more notebooks based on the same route
         
     def __str__(self):
         return self.title
