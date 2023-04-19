@@ -1,0 +1,73 @@
+[
+    {
+      "model": "core.RatingFlag",
+      "pk": 1,
+      "fields": {
+        "value": "Not rated"
+      }
+    },
+    {
+      "model": "core.RatingFlag",
+      "pk": 2,
+      "fields": {
+        "value": "One star"
+      }
+    },
+    {
+      "model": "core.RatingFlag",
+      "pk": 3,
+      "fields": {
+        "value": "Two stars"
+      }
+    },
+    {
+      "model": "core.RatingFlag",
+      "pk": 4,
+      "fields": {
+        "value": "Three stars"
+      }
+    },
+    {
+      "model": "core.RatingFlag",
+      "pk": 5,
+      "fields": {
+        "value": "Four stars"
+      }
+    },
+    {
+      "model": "core.RatingFlag",
+      "pk": 6,
+      "fields": {
+        "value": "Five stars"
+      }
+    },
+    {
+      "model": "core.RatingFlag",
+      "pk": 7,
+      "fields": {
+        "value": "Inaccurate information"
+      }
+    },
+    {
+      "model": "core.RatingFlag",
+      "pk": 8,
+      "fields": {
+        "value": "Not accessible for disabled persons"
+      }
+    },
+    {
+      "model": "core.RatingFlag",
+      "pk": 9,
+      "fields": {
+        "value": "Inappropriate"
+      }
+    },
+    {
+      "model": "core.RatingFlag",
+      "pk": 10,
+      "fields": {
+        "value": "Closed"
+      }
+    }
+  ]
+  

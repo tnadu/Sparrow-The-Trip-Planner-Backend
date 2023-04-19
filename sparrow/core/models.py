@@ -60,12 +60,20 @@ class Group(models.Model):
   
         
 class Tag(models.Model):
-    tagName = models.CharField(max_length=100, db_column='tag_name')
+    tagName = models.CharField(max_length=50, null=False, blank=False, db_column='tag_name')
 
     class Meta:
         db_table = 'tag'
         ordering = ['tagName']
         default_related_name = 'tag'
+
+class RatingFlag(models.Model):
+    value = models.CharField(max_length=50, null=False, blank=False, db_column='value')
+    
+    class Meta:
+        db_table = 'ratingFlag'
+        ordering = ['pk']
+        default_related_name = 'ratingFlag'
 
 
 # many - many between Tag & Attraction
@@ -82,22 +90,11 @@ class IsTagged(models.Model):
         ordering = ['attraction', '-id']
   
 
-# a rating can be associated with either a route or an attraction or both, 
-# but it is not mandatory to have either of them => the default value of 0 will be stored in the database    
+# a rating can be associated with either a route or an attraction    
 class Rating(models.Model):
-    RATING_CHOICES = (
-        (0, 'Not rated'),
-        (1, 'One star'),
-        (2, 'Two stars'),
-        (3, 'Three stars'),
-        (4, 'Four stars'),
-        (5, 'Five stars'),
-        (-1, 'Flag'),
-    )
-
-    user = models.ForeignKey('Member', on_delete=models.CASCADE, db_column='user_id')
-    rating = models.IntegerField(choices=RATING_CHOICES, default=0, db_column='rating')
-    comment = models.TextField(null = True, blank = True, db_column='comment')
+    user = models.ForeignKey('Member', null=False, blank=False, on_delete=models.CASCADE, db_column='user_id')
+    rating = models.ForeignKey('RatingFlag', null=False, blank=False, on_delete=models.CASCADE, db_column='ratingFlag_id')
+    comment = models.CharField(max_length=2000, null = True, blank = True, db_column='comment')
     route = models.ForeignKey('Route', null=True, blank=True, on_delete=models.CASCADE, db_column='route_id') # nullable
     attraction = models.ForeignKey('Attraction', null=True, blank=True, on_delete=models.CASCADE, db_column='attraction_id') # nullable
     
