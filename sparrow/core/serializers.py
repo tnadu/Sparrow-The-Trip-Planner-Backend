@@ -6,10 +6,12 @@ from django.contrib.auth.password_validation import validate_password
 from .models import *
 
 
+##### Route #####
+#####################
 #used for write operations (post/put)
 class WriteRouteSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField()
-    group = serializers.PrimaryKeyRelatedField()
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+    group = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Route
@@ -36,13 +38,12 @@ class SmallRouteSerializer(serializers.ModelSerializer):
         model = Route
         fields = ['title', 'description', 'verified', 'author', 'group']
 
+
 # used in 'LargeUserSerializer' and 'LargeGroupSerializer'
 class ExtraSmallRouteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Route
         fields = ['title', 'description']
-
-
 # class IsWithinSerializer(serializers.ModelSerializer):
 #     attraction = SmallAttractionSerializer()
     
@@ -265,8 +266,8 @@ class LargeAttractionSerializer(serializers.ModelSerializer):
 #####################
 
 class WriteBelongsToSerializer(serializers.ModelSerializer):
-    member = serializers.PrimaryKeyRelatedField()
-    group = serializers.PrimaryKeyRelatedField()
+    member = serializers.PrimaryKeyRelatedField(read_only=True)
+    group = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = BelongsTo
@@ -287,3 +288,5 @@ class MemberBelongsToSerializer(serializers.ModelSerializer):
     class Meta:
         model = BelongsTo
         fields = ['member', 'isAdmin', 'nickname']
+
+

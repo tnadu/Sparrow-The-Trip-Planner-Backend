@@ -8,6 +8,7 @@ from .models import Member, Group
 from .serializers import *
 from django.http import Http404
 from rest_framework.permissions import IsAdminUser
+from rest_framework.decorators import action
 
 
 
