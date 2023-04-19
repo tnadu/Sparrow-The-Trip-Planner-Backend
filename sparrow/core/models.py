@@ -84,3 +84,49 @@ class BelongsTo(models.Model):
         default_related_name = 'belongsTo'
         # cannot have multiple identical entries for belonging relationship
         unique_together = ('member', 'group')
+        
+# status model, used to store information about the state of a journey, 
+# such as whether it is completed, finished, ongoing, etc.
+class Status(models.Model):
+    status = models.CharField(max_length=50, null = False, blank = False, db_column='status')
+    
+    class Meta:
+        db_table = 'status'
+        ordering = ['pk']
+        default_related_name = 'status'
+    
+    def __str__(self):
+        return self.status
+    
+# notebook model, used to store information about a user's experience with a particular route
+# this information includes their impressions, notes, and any photos they took during the trip
+# additionally, the model records the date and time of the journey;
+# 'route' - foreignKey, it specifies the route associated with the current entry in the notebook;
+# 'user' - foreignKey, holds the user who created the notebook;
+# 'status' - foreignKey, it specifies the current status of the trip
+class Notebook(models.Model):
+    route = models.ForeignKey('Route', null=False, blank=False, on_delete=models.CASCADE, db_column='route_id')
+    user = models.ForeignKey('Member', null=False, blank=False, on_delete=models.CASCADE, db_column='user_id')
+
+    # added a choices attribute to the Status model for easier access through a dropdown menu, 
+    # enabling me to select from pre-defined options and validate data
+    status = models.ForeignKey('Status', null=False, blank=False, on_delete=models.CASCADE, db_column='status_id')
+    
+    # added a title for the current notebook entry
+    title = models.CharField(max_length = 50, null=False, blank=False, db_column='title')
+
+    # note is nullable in order to let the user create a blank notebook, that they can fill later on their trip
+    note = models.CharField(max_length = 3000, null = True, blank = True, db_column = 'note')
+
+    dateStarted = models.DateField(null = True, db_column = 'dateStarted') # nullable
+    dateCompleted = models.DateField(null = True, db_column = 'dateCompleted') # nullable
+
+    class Meta:
+        db_table = 'notebook'
+        # descending order for dateStarted, dateCompleted, in order to show the most recent trips first
+        ordering = ['-dateStarted', '-dateCompleted', 'title']
+        default_related_name = 'notebook'
+    # the user is allowed to have more notebooks based on the same route
+        
+    def __str__(self):
+        return self.title
