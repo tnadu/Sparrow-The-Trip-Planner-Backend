@@ -73,6 +73,7 @@ class ChangePasswordViewSet(mixins.UpdateModelMixin, GenericViewSet):
     queryset = User.objects.all()
     serializer_class = ChangePasswordSerializer
 
+# notebook viewset
 class NotebookViewSet(ModelViewSet):
     queryset = Notebook.objects.all()
         
