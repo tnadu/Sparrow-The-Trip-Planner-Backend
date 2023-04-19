@@ -259,7 +259,7 @@ class LargeAttractionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Attraction
-        fields = ['name', 'generalDescription', 'photo', 'latitude', 'longitude', 'images', 'tag', 'ratings']
+        fields = ['name', 'generalDescription', 'latitude', 'longitude', 'images', 'tag', 'ratings']
 
 ##### BelongsTo #####
 #####################

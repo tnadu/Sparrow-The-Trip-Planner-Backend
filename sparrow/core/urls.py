@@ -43,9 +43,12 @@ attractionList = AttractionViewSet.as_view({
 })
 
 attractionDetail = AttractionViewSet.as_view({
+    'get': 'retrieve',
+    'put': 'update',
     'delete': 'destroy',
-    'put': 'update'
 })
+
+
 
 urlpatterns = [
     path('auth/login/', login, name='login'),
@@ -56,5 +59,5 @@ urlpatterns = [
     path('group/list/', groupList, name='group-list'),
     path('group/detail/<int:pk>/', groupDetail, name='group-detail'),
     path('attraction/list/', attractionList, name='attraction-list'),
-    path('attraction/detail/<int:pk>', attractionDetail, name='attraction-detail')
+    path('attraction/detail/<int:pk>/', attractionDetail, name='attraction-detail')
 ]
