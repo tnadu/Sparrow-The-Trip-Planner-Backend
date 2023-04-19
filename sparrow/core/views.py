@@ -6,7 +6,47 @@ from django.contrib.auth import login, logout
 from django.db.models import Prefetch
 from .models import Member, Group
 from .serializers import *
+from django.http import Http404
+from rest_framework.permissions import IsAdminUser
 
+
+
+class RouteViewSet(ModelViewSet):
+    queryset = Route.objects.all()
+
+    # obtain the object that will be used
+    def get_object(self, pk):
+        try:
+            return Route.objects.get(pk=pk)
+        except Route.DoesNotExist:
+            raise Http404
+
+    # depending of the type of request, a specific Serializer will be used
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return SmallRouteSerializer
+        elif self.action in ['create', 'update', 'partial_update']:
+            return WriteRouteSerializer
+        else:
+            return LargeRouteSerializer
+
+    # toggle the verify field, only the admin can do this
+    # detail = True means it is applied only for an instance
+    @action(detail = True, permission_classes=[IsAdminUser])
+    def verifiy(self, request, pk):
+
+        routeObject = self.get_object(pk)
+
+        if(routeObject.verified == True):
+            routeObject.verified = False
+        else: routeObject.verified = True
+
+        serializer = WriteRouteSerializer(routeObject)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # rough idea of the ViewSets associated with a Member and a Group
 class GroupViewSet(ModelViewSet):
@@ -18,7 +58,7 @@ class GroupViewSet(ModelViewSet):
         if self.request.method in permissions.SAFE_METHODS:
             return SmallGroupSerializer
         return WriteGroupSerializer
-        
+
 
 class MemberViewSet(ModelViewSet):
     queryset = Member.objects.all()
