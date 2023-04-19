@@ -246,3 +246,25 @@ class SmallAtractionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attraction
         fields = ['name', 'generalDescription', 'tag']
+
+##### BelongsTo #####
+#####################
+
+class WriteBelongsToSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BelongsTo
+        fields = ['member', 'group', 'isAdmin', 'nickname']
+
+class GroupBelongsToSerializer(serializers.ModelSerializer):
+    small_group = SmallGroupSerializer()
+    
+    class Meta:
+        model = BelongsTo
+        fields = ['small_group', 'isAdmin', 'nickname']
+
+class MemberBelongsToSerializer(serializers.ModelSerializer):
+    small_member = SmallMemberSerializer()
+
+    class Meta:
+        model = BelongsTo
+        fields = ['small_member', 'isAdmin', 'nickname']
