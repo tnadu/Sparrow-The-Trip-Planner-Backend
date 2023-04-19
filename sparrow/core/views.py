@@ -71,3 +71,21 @@ class LogoutView(APIView):
 class ChangePasswordViewSet(mixins.UpdateModelMixin, GenericViewSet):
     queryset = User.objects.all()
     serializer_class = ChangePasswordSerializer
+
+class NotebookViewSet(ModelViewSet):
+    queryset = Notebook.objects.all()
+        
+    def get_serializer_class(self):
+
+        if self.request.method in permissions.SAFE_METHODS: # get, head, options
+            # if details about a specific notebook are requested
+            if self.action == 'retrieve':
+                return LargeNotebookSerializer
+            # otherwise, general information about the notebook entry is presented
+            return SmallNotebookSerializer
+
+        # if a specific notebook entry is being modified
+        if self.action == 'create' or self.action == 'update':
+            return WriteNotebookSerializer
+
+        return LargeNotebookSerializer

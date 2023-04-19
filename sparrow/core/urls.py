@@ -37,6 +37,15 @@ changePassword = ChangePasswordViewSet.as_view({
     'put': 'update'
 })
 
+notebookList = NotebookViewSet.as_view({
+    'get' : 'list',
+    'post' : 'create'
+})
+notebookDetail = NotebookViewSet.as_view({
+    'get' : 'retrieve',
+    'put' : 'update',
+    'delete' : 'destroy'
+})
 
 
 urlpatterns = [
@@ -47,4 +56,6 @@ urlpatterns = [
     path('member/change-password/<int:pk>/', changePassword, name='member-change-password'),
     path('group/list/', groupList, name='group-list'),
     path('group/detail/<int:pk>/', groupDetail, name='group-detail'),
+    path('notebook/list/', notebookList, name='notebook-list'),
+    path('notebook/detail/<int:pk>/', notebookDetail, name='notebook-detail'),
 ]
