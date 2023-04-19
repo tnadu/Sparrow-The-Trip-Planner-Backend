@@ -154,6 +154,8 @@ class LargeMemberSerializer(serializers.ModelSerializer):
     routes = ExtraSmallRouteSerializer(many=True, read_only=True)
     notebooks = SmallNotebookSerializer(many=True, read_only=True)
 
+    search_fields = ['baseUser__username', 'baseUser__first_name', 'baseUser__last_name']
+
     class Meta:
         model = Member
         fields = ['baseUser', 'profilePhoto', 'birthdate', 'groups', 'routes', 'notebooks']
