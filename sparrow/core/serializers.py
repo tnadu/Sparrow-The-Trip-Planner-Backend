@@ -295,7 +295,9 @@ class MemberBelongsToSerializer(serializers.ModelSerializer):
         model = BelongsTo
         fields = ['member', 'isAdmin', 'nickname']
 
-# status serializer
+##### Status #####
+#####################
+
 class StatusSerializer(serializers.ModelSerializer):
     
     class Meta:
