@@ -5,8 +5,6 @@ from django.contrib.auth.hashers import check_password
 from django.contrib.auth.password_validation import validate_password
 from .models import *
 
-###### Route ######
-###################
 
 #used for write operations (post/put)
 class WriteRouteSerializer(serializers.ModelSerializer):
@@ -47,13 +45,6 @@ class ExtraSmallRouteSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = isWithin
 #         fields = ['orderNumber', 'attraction']
-
-
-# used for write operations(put, post)
-class WriteIsWithinSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = IsWithin
-        fields = ['route', 'attraction', 'orderNumber']
 
 
 # used in 'LargeMemberSerializer' and 'WriteMemberSerializer'
