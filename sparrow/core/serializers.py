@@ -172,7 +172,6 @@ class SmallMemberSerializer(serializers.ModelSerializer):
         model = Member
         fields = ['baseUser', 'profilePhoto', 'birthDate']
 
-
 # used for put/patch/delete on the Member model
 class WriteMemberSerializer(serializers.ModelSerializer):
     baseUser = LargeUserSerializer()
@@ -252,6 +251,16 @@ class SmallAtractionSerializer(serializers.ModelSerializer):
         model = Attraction
         fields = ['name', 'generalDescription', 'tag']
 
+# retrieves ALL the information about an attraction
+class LargeAttractionSerializer(serializers.ModelSerializer):
+    images = ImageSerializer(many=True)
+    tag = SmallTagSerializer()
+    ratings = SmallRatingFlagSerializer(source='filtered_ratings', many=True)
+
+    class Meta:
+        model = Attraction
+        fields = ['name', 'generalDescription', 'latitude', 'longitude', 'images', 'tag', 'ratings']
+
 ##### BelongsTo #####
 #####################
 
@@ -278,3 +287,10 @@ class MemberBelongsToSerializer(serializers.ModelSerializer):
     class Meta:
         model = BelongsTo
         fields = ['member', 'isAdmin', 'nickname']
+
+# status serializer
+class StatusSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Status
+        fields = ['status']
