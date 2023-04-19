@@ -16,6 +16,13 @@ from datetime import date
 #         model = Route
 #         fields = ['title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'user', 'group']
 
+    # Only one and exactly one of the two nullable fields (group, user) can be null at a time.
+    def validate(self, data):
+        user = data.get('user')
+        group = data.get('group')
+        if (user is not None and group is not None) or (user is None and group is None):
+            raise serializers.ValidationError("Only one of user and group can be specified")
+        return data
 
 # retreives ALL the information for a a route
 # class LargeRouteSerializer(serializers.ModelSerializer):
@@ -261,6 +268,16 @@ class WriteGroupSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Attraction
 #         fields = ['name', 'generalDescription', 'latitude', 'longitude', 'images', 'tag', 'ratings']
+
+# retrieves ALL the information about an attraction
+class LargeAttractionSerializer(serializers.ModelSerializer):
+    images = ImageSerializer(many=True)
+    tag = SmallTagSerializer()
+    ratings = SmallRatingFlagSerializer(source='filtered_ratings', many=True)
+
+    class Meta:
+        model = Attraction
+        fields = ['name', 'generalDescription', 'latitude', 'longitude', 'images', 'tag', 'ratings']
 
 ##### BelongsTo #####
 #####################
