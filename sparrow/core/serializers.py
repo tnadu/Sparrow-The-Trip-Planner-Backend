@@ -8,6 +8,9 @@ from .models import *
 
 #used for write operations (post/put)
 class WriteRouteSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField()
+    group = serializers.PrimaryKeyRelatedField()
+
     class Meta:
         model = Route
         fields = ['title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'user', 'group']
@@ -160,11 +163,12 @@ class LargeMemberSerializer(serializers.ModelSerializer):
     baseUser = LargeUserSerializer(read_only=True)
     groups = GroupBelongsToSerializer(many=True, read_only=True)
     routes = ExtraSmallRouteSerializer(many=True, read_only=True)
+    ratings = SmallRatingSerializer(many=True, read_only=True)  
     notebooks = SmallNotebookSerializer(many=True, read_only=True)
 
     class Meta:
         model = Member
-        fields = ['baseUser', 'profilePhoto', 'birthdate', 'groups', 'routes', 'notebooks']
+        fields = ['baseUser', 'profilePhoto', 'birthdate', 'groups', 'routes', 'ratings', 'notebooks']
 
 
 # read-only, nestable serializer
@@ -254,3 +258,30 @@ class SmallAtractionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attraction
         fields = ['name', 'generalDescription', 'tag']
+
+##### BelongsTo #####
+#####################
+
+class WriteBelongsToSerializer(serializers.ModelSerializer):
+    member = serializers.PrimaryKeyRelatedField()
+    group = serializers.PrimaryKeyRelatedField()
+
+    class Meta:
+        model = BelongsTo
+        fields = ['member', 'group', 'isAdmin', 'nickname']
+
+
+class GroupBelongsToSerializer(serializers.ModelSerializer):
+    groups = SmallGroupSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = BelongsTo
+        fields = ['groups', 'isAdmin', 'nickname']
+
+
+class MemberBelongsToSerializer(serializers.ModelSerializer):
+    member = SmallMemberSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = BelongsTo
+        fields = ['member', 'isAdmin', 'nickname']
