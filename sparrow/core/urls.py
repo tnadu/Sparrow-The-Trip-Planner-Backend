@@ -57,6 +57,15 @@ notebookDetail = NotebookViewSet.as_view({
     'put' : 'update',
     'delete' : 'destroy'
 })
+notebookList = NotebookViewSet.as_view({
+    'get' : 'list',
+    'post' : 'create'
+})
+notebookDetail = NotebookViewSet.as_view({
+    'get' : 'retrieve',
+    'put' : 'update',
+    'delete' : 'destroy'
+})
 
 
 urlpatterns = [

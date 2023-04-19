@@ -83,6 +83,7 @@ class AttractionViewSet(ModelViewSet):
     filterset_fields = ['tag__tagName']
     search_fields = ['name', 'generalDescription']
     
+# notebook viewset
 class NotebookViewSet(ModelViewSet):
     queryset = Notebook.objects.all()
         
@@ -100,3 +101,13 @@ class NotebookViewSet(ModelViewSet):
             return WriteNotebookSerializer
 
         return LargeNotebookSerializer
+
+class AttractionViewSet(ModelViewSet):
+    # prefetch only related rating instances with a rating greater than 0 (i.e. not a flag)
+    queryset = Attraction.objects.prefetch_related(
+            Prefetch('ratings', queryset=Rating.objects.filter(rating > 0), to_attr='filtered_ratings'))
+    serializer_class = LargeAttractionSerializer
+
+    filterset_fields = ['tag__tagName']
+    search_fields = ['name', 'generalDescription']
+    
