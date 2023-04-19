@@ -38,7 +38,6 @@ class Route(models.Model):
 class Attraction(models.Model):
     name = models.CharField(max_length=100, db_column='name')
     generalDescription = models.CharField(max_length=3000, db_column='general_description')
-    photo = models.ImageField(upload_to='attraction_photos', default='attraction_photo_default.jpg', db_column='photo')
     latitude = models.FloatField(db_column='latitude')
     longitude = models.FloatField(db_column='longitude')
 
