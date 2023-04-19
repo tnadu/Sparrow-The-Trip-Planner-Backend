@@ -48,8 +48,6 @@ attractionDetail = AttractionViewSet.as_view({
     'delete': 'destroy',
 })
 
-
-
 urlpatterns = [
     path('auth/login/', login, name='login'),
     path('auth/logout/', logout, name='logout'),

@@ -242,9 +242,18 @@ class WriteGroupSerializer(serializers.ModelSerializer):
         fields = ['name', 'description']
 
 
+##### Attraction #####
+######################
+
+# for POST/PUT operations
+class WriteAttractionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attraction
+        fields = ['name', 'generalDescription', 'latitude', 'longitude']
+
 # retrieves minimal information about an attraction, for queries with
 # minimal requirements
-class SmallAtractionSerializer(serializers.ModelSerializer):
+class SmallAttractionSerializer(serializers.ModelSerializer):
     tag = SmallTagSerializer()
 
     class Meta:
