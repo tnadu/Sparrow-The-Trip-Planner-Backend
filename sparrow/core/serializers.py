@@ -149,13 +149,12 @@ class RegisterMemberSerializer(serializers.ModelSerializer):
 #     baseUser = LargeUserSerializer(read_only=True)
 #     groups = GroupBelongsToSerializer(many=True, read_only=True)
 #     routes = ExtraSmallRouteSerializer(many=True, read_only=True)
+#     ratings = SmallRatingSerializer(source='filtered_ratings', many=True, read_only=True)  
 #     notebooks = SmallNotebookSerializer(many=True, read_only=True)
-
-#     search_fields = ['baseUser__username', 'baseUser__first_name', 'baseUser__last_name']
 
 #     class Meta:
 #         model = Member
-#         fields = ['baseUser', 'profilePhoto', 'birthdate', 'groups', 'routes', 'notebooks']
+#         fields = ['baseUser', 'profilePhoto', 'birthdate', 'groups', 'routes', 'ratings', 'notebooks']
 
 
 # read-only, nestable serializer
@@ -165,7 +164,6 @@ class SmallMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = Member
         fields = ['baseUser', 'profilePhoto', 'birthDate']
-
 
 # used for put/patch/delete on the Member model
 class WriteMemberSerializer(serializers.ModelSerializer):
@@ -209,17 +207,44 @@ class WriteGroupSerializer(serializers.ModelSerializer):
         fields = ['name', 'description']
 
 
+##### BelongsTo #####
+#####################
 
-# # retreives ALL the information for a a route
-# class LargeRouteSerializer(serializers.ModelSerializer):
-#     author = SmallMemberSerializer()
-#     is_within = IsWithinSerializer(many=True) # one for each attraction of the route
-#     group = SmallGroupSerializer()
+class WriteBelongsToSerializer(serializers.ModelSerializer):
+    member = serializers.PrimaryKeyRelatedField()
+    group = serializers.PrimaryKeyRelatedField()
 
-#     class Meta:
-#         model = Route
-#         fields = ['title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'publicationDate',
-#                   'author', 'is_within', 'group']
+    class Meta:
+        model = BelongsTo
+        fields = ['member', 'group', 'isAdmin', 'nickname']
+
+
+class GroupBelongsToSerializer(serializers.ModelSerializer):
+    groups = SmallGroupSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = BelongsTo
+        fields = ['member', 'groups', 'isAdmin', 'nickname']
+
+
+class MemberBelongsToSerializer(serializers.ModelSerializer):
+    members = SmallMemberSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = BelongsTo
+        fields = ['members', 'group', 'isAdmin', 'nickname']
+
+
+# retreives ALL the information for a a route
+class LargeRouteSerializer(serializers.ModelSerializer):
+    author = SmallUserSerializer()
+    is_within = IsWithinSerializer(many=True) # one for each attraction of the route
+    group = SmallGroupSerializer()
+
+    class Meta:
+        model = Route
+        fields = ['title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'publicationDate',
+                  'author', 'is_within', 'group']]
 
 
 # retrieves partial information about a route
@@ -234,9 +259,20 @@ class SmallRouteSerializer(serializers.ModelSerializer):
 
 #used for write operations (post/put)
 class WriteRouteSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField()
+    group = serializers.PrimaryKeyRelatedField()
+
     class Meta:
         model = Route
         fields = ['title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'user', 'group']
+
+    # Only one and exactly one of the two nullable fields (group, user) can be null at a time.
+    def validate(self, data):
+        user = data.get('user')
+        group = data.get('group')
+        if (user is not None and group is not None) or (user is None and group is None):
+            raise serializers.ValidationError("Only one of user and group can be specified")
+        return data
 
 
 # used in 'LargeUserSerializer' and 'LargeGroupSerializer'
@@ -256,9 +292,26 @@ class ExtraSmallRouteSerializer(serializers.ModelSerializer):
 
 # # retrieves minimal information about an attraction, for queries with
 # # minimal requirements
-# class SmallAtractionSerializer(serializers.ModelSerializer):
+# class SmallAttractionSerializer(serializers.ModelSerializer):
 #     tag = SmallTagSerializer()
 
 #     class Meta:
 #         model = Attraction
 #         fields = ['name', 'generalDescription', 'tag']
+
+# retrieves ALL the information about an attraction
+class LargeAttractionSerializer(serializers.ModelSerializer):
+    images = ImageSerializer(many=True)
+    tag = SmallTagSerializer()
+    ratings = SmallRatingFlagSerializer(source='filtered_ratings', many=True)
+
+    class Meta:
+        model = Attraction
+        fields = ['name', 'generalDescription', 'latitude', 'longitude', 'images', 'tag', 'ratings']
+
+
+class StatusSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Status
+        fields = ['status']

@@ -3,7 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions, mixins
 from django.contrib.auth import login, logout
-from .models import Member, Group
+from django.db.models import Prefetch
+from .models import *
 from .serializers import *
 
 
@@ -20,7 +21,8 @@ class GroupViewSet(ModelViewSet):
         
 
 class MemberViewSet(ModelViewSet):
-    queryset = Member.objects.all()
+    queryset = Member.objects.prefetch_related(
+        Prefetch('ratings', queryset=Rating.objects.filter(rating > 0), to_attr='filtered_ratings'))
     search_fields = ['baseUser__username', 'baseUser__first_name', 'baseUser__last_name']
 
     def get_serializer_class(self):
@@ -72,3 +74,14 @@ class LogoutView(APIView):
 class ChangePasswordViewSet(mixins.UpdateModelMixin, GenericViewSet):
     queryset = User.objects.all()
     serializer_class = ChangePasswordSerializer
+
+
+class AttractionViewSet(ModelViewSet):
+    # prefetch only related rating instances with a rating greater than 0 (i.e. not a flag)
+    queryset = Attraction.objects.prefetch_related(
+        Prefetch('ratings', queryset=Rating.objects.filter(rating > 0), to_attr='filtered_ratings'))
+    serializer_class = LargeAttractionSerializer
+
+    filterset_fields = ['tag__tagName']
+    search_fields = ['name', 'generalDescription']
+    
