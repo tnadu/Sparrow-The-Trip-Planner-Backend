@@ -130,3 +130,15 @@ class Notebook(models.Model):
         
     def __str__(self):
         return self.title
+
+class Image(models.Model):
+    imagePath = models.CharField(max_length = 100, null = False, blank = False, db_column = 'imagePath')
+    notebook = models.ForeignKey('Notebook', on_delete=models.CASCADE, null=True, blank=True, db_column='notebook_id') # nullable
+    attraction = models.ForeignKey('Attraction', on_delete=models.CASCADE, null=True, blank=True, db_column='attraction_id') # nullable
+    # setting up a timestamp is useful for letting users know when an image was taken 
+    # and for indicating if the information may be outdated or no longer available
+    timestamp = models.DateTimeField(null = False, db_column = 'datePosted')
+
+    class Meta:
+        db_table = 'Image'
+        default_related_name = 'image'
