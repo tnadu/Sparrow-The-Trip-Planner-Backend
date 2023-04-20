@@ -221,7 +221,7 @@ class WriteBelongsToSerializer(serializers.ModelSerializer):
 
 class GroupBelongsToSerializer(serializers.ModelSerializer):
     groups = SmallGroupSerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = BelongsTo
         fields = ['member', 'groups', 'isAdmin', 'nickname']
@@ -229,7 +229,7 @@ class GroupBelongsToSerializer(serializers.ModelSerializer):
 
 class MemberBelongsToSerializer(serializers.ModelSerializer):
     members = SmallMemberSerializer(many=True, read_only=True)
-
+    
     class Meta:
         model = BelongsTo
         fields = ['members', 'group', 'isAdmin', 'nickname']
