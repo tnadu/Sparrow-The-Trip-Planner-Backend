@@ -6,59 +6,6 @@ from django.contrib.auth.password_validation import validate_password
 from .models import *
 
 
-##### Route #####
-#####################
-#used for write operations (post/put)
-class WriteRouteSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(read_only=True)
-    group = serializers.PrimaryKeyRelatedField(read_only=True)
-
-    class Meta:
-        model = Route
-        fields = ['title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'user', 'group']
-
-    # Only one and exactly one of the two nullable fields (group, user) can be null at a time.
-    def validate(self, data):
-        user = data.get('user')
-        group = data.get('group')
-        if (user is not None and group is not None) or (user is None and group is None):
-            raise serializers.ValidationError("Only one of user and group can be specified")
-        return data
-
-# retreives ALL the information for a a route
-class LargeRouteSerializer(serializers.ModelSerializer):
-    author = SmallUserSerializer()
-    is_within = IsWithinSerializer(many=True) # one for each attraction of the route
-    group = SmallGroupSerializer()
-
-    class Meta:
-        model = Route
-        fields = ['title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'publicationDate',
-                  'author', 'is_within', 'group']
-
-# retrieves partial information about a route
-class SmallRouteSerializer(serializers.ModelSerializer):
-    author = SmallUserSerializer()
-    group = SmallGroupSerializer()
-
-    class Meta:
-        model = Route
-        fields = ['title', 'description', 'verified', 'author', 'group']
-
-
-# used in 'LargeUserSerializer' and 'LargeGroupSerializer'
-class ExtraSmallRouteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Route
-        fields = ['title', 'description']
-# class IsWithinSerializer(serializers.ModelSerializer):
-#     attraction = SmallAttractionSerializer()
-    
-#     class Meta:
-#         model = isWithin
-#         fields = ['orderNumber', 'attraction']
-
-
 # used in 'LargeMemberSerializer' and 'WriteMemberSerializer'
 class LargeUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -250,6 +197,65 @@ class WriteGroupSerializer(serializers.ModelSerializer):
         fields = ['name', 'description']
 
 
+##### Route #####
+#####################
+# used for write operations (post/put)
+class WriteRouteSerializer(serializers.ModelSerializer):
+    # i already have the field defined in the model
+    # user = serializers.PrimaryKeyRelatedField(read_only=True)
+    # group = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = Route
+        fields = ['title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'user', 'group']
+
+    # Only one and exactly one of the two nullable fields (group, user) can be null at a time.
+    def validate(self, data):
+        user = data.get('user')
+        group = data.get('group')
+        if (user is not None and group is not None) or (user is None and group is None):
+            raise serializers.ValidationError("Only one of user and group can be specified")
+        return data
+
+
+# retreives ALL the information for a a route
+class LargeRouteSerializer(serializers.ModelSerializer):
+    author = SmallUserSerializer()
+    is_within = IsWithinSerializer(many=True)  # one for each attraction of the route
+    group = SmallGroupSerializer()
+
+    class Meta:
+        model = Route
+        fields = ['title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon',
+                  'publicationDate',
+                  'author', 'is_within', 'group']
+
+
+# retrieves partial information about a route
+class SmallRouteSerializer(serializers.ModelSerializer):
+    author = SmallUserSerializer()
+    group = SmallGroupSerializer()
+
+    class Meta:
+        model = Route
+        fields = ['title', 'description', 'verified', 'author', 'group']
+
+
+# used in 'LargeUserSerializer' and 'LargeGroupSerializer'
+class ExtraSmallRouteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Route
+        fields = ['title', 'description']
+
+
+# class IsWithinSerializer(serializers.ModelSerializer):
+#     attraction = SmallAttractionSerializer()
+
+#     class Meta:
+#         model = isWithin
+#         fields = ['orderNumber', 'attraction']
+
+
 # retrieves minimal information about an attraction, for queries with
 # minimal requirements
 class SmallAtractionSerializer(serializers.ModelSerializer):
@@ -273,8 +279,8 @@ class LargeAttractionSerializer(serializers.ModelSerializer):
 #####################
 
 class WriteBelongsToSerializer(serializers.ModelSerializer):
-    member = serializers.PrimaryKeyRelatedField(read_only=True)
-    group = serializers.PrimaryKeyRelatedField(read_only=True)
+    member = serializers.PrimaryKeyRelatedField()
+    group = serializers.PrimaryKeyRelatedField()
 
     class Meta:
         model = BelongsTo

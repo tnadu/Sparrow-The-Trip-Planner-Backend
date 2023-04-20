@@ -21,15 +21,14 @@ class RouteViewSet(ModelViewSet):
     search_fields = ['title', 'description', 'startingPointLat', 'startingPointLon']
     ordering_fields = ['startingPointLat', 'startingPointLon']
 
-
-    # obtain the object that will be used
+    # obtain the object that will be used for verifying
     def get_object(self, pk):
         try:
             return Route.objects.get(pk=pk)
         except Route.DoesNotExist:
             raise Http404
 
-    # depending of the type of request, a specific Serializer will be used
+    # depending on the type of request, a specific Serializer will be used
     def get_serializer_class(self):
         if self.action == 'list':
             return SmallRouteSerializer
@@ -40,6 +39,7 @@ class RouteViewSet(ModelViewSet):
 
     # toggle the verify field, only the admin can do this
     # detail = True means it is applied only for an instance
+    # it will respond only to update-type requests
     @action(detail = True, methods=['PUT', 'PATCH'], permission_classes=[IsAdminUser])
     def verifiy(self, request, pk):
 
