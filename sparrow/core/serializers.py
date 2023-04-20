@@ -232,7 +232,7 @@ class GroupBelongsToSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BelongsTo
-        fields = ['member', 'groups', 'isAdmin', 'nickname']
+        fields = ['groups', 'isAdmin', 'nickname']
 
 
 class MemberBelongsToSerializer(serializers.ModelSerializer):
@@ -240,7 +240,7 @@ class MemberBelongsToSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = BelongsTo
-        fields = ['members', 'group', 'isAdmin', 'nickname']
+        fields = ['members', 'isAdmin', 'nickname']
 
 
 ##### Route #####
