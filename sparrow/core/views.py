@@ -63,7 +63,7 @@ class GroupViewSet(ModelViewSet):
 
 class MemberViewSet(ModelViewSet):
     queryset = Member.objects.prefetch_related(
-        Prefetch('ratings', queryset=Rating.objects.filter(rating > 0), to_attr='filtered_ratings'))
+        Prefetch('ratings', queryset=RatingFlag.objects.filter(rating > 0), to_attr='filtered_ratings'))
     search_fields = ['baseUser__username', 'baseUser__first_name', 'baseUser__last_name']
 
     def get_serializer_class(self):
@@ -120,7 +120,7 @@ class ChangePasswordViewSet(mixins.UpdateModelMixin, GenericViewSet):
 class AttractionViewSet(ModelViewSet):
     # prefetch only related rating instances with a rating greater than 0 (i.e. not a flag)
     queryset = Attraction.objects.prefetch_related(
-        Prefetch('ratings', queryset=Rating.objects.filter(rating > 0), to_attr='filtered_ratings'))
+        Prefetch('ratings', queryset=RatingFlag.objects.filter(rating > 0), to_attr='filtered_ratings'))
     serializer_class = LargeAttractionSerializer
 
     filterset_fields = ['tag__tagName']
