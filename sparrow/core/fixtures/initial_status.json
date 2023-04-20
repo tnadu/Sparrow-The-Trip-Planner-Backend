@@ -1,0 +1,23 @@
+[
+    {
+        "model": "core.Status",
+        "pk": 1,
+        "fields":{
+            "status": "Started"
+        }
+    },
+    {
+        "model": "core.Status",
+        "pk": 2,
+        "fields":{
+            "status": "In Progress"
+        }
+    },
+    {
+        "model": "core.Status",
+        "pk": 3,
+        "fields":{
+            "status": "Completed"
+        }
+    }   
+]
