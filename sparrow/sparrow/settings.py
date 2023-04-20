@@ -146,7 +146,3 @@ MEDIA_URL = '/media/'
 # the absolute filesystem path to the directory that holds
 # user-uploaded media files
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'static'),
-)

@@ -74,14 +74,14 @@ class ChangePasswordViewSet(mixins.UpdateModelMixin, GenericViewSet):
     serializer_class = ChangePasswordSerializer
 
 
-class AttractionViewSet(ModelViewSet):
-    # prefetch only related rating instances with a rating greater than 0 (i.e. not a flag)
-    queryset = Attraction.objects.prefetch_related(
-            Prefetch('ratings', queryset=Rating.objects.filter(rating > 0), to_attr='filtered_ratings'))
-    serializer_class = LargeAttractionSerializer
+# class AttractionViewSet(ModelViewSet):
+#     # prefetch only related rating instances with a rating greater than 0 (i.e. not a flag)
+#     queryset = Attraction.objects.prefetch_related(
+#             Prefetch('ratings', queryset=Rating.objects.filter(rating > 0), to_attr='filtered_ratings'))
+#     serializer_class = LargeAttractionSerializer
 
-    filterset_fields = ['tag__tagName']
-    search_fields = ['name', 'generalDescription']
+#     filterset_fields = ['tag__tagName']
+#     search_fields = ['name', 'generalDescription']
     
 # notebook viewset
 class NotebookViewSet(ModelViewSet):
@@ -102,12 +102,16 @@ class NotebookViewSet(ModelViewSet):
 
         return LargeNotebookSerializer
 
-class AttractionViewSet(ModelViewSet):
-    # prefetch only related rating instances with a rating greater than 0 (i.e. not a flag)
-    queryset = Attraction.objects.prefetch_related(
-            Prefetch('ratings', queryset=Rating.objects.filter(rating > 0), to_attr='filtered_ratings'))
-    serializer_class = LargeAttractionSerializer
+# class AttractionViewSet(ModelViewSet):
+#     # prefetch only related rating instances with a rating greater than 0 (i.e. not a flag)
+#     queryset = Attraction.objects.prefetch_related(
+#             Prefetch('ratings', queryset=Rating.objects.filter(rating > 0), to_attr='filtered_ratings'))
+#     serializer_class = LargeAttractionSerializer
 
-    filterset_fields = ['tag__tagName']
-    search_fields = ['name', 'generalDescription']
+#     filterset_fields = ['tag__tagName']
+#     search_fields = ['name', 'generalDescription']
+
+class ImageViewSet(ModelViewSet):
+    queryset = Image.objects.all()
     
+    serializer_class = ImageSerializer

@@ -39,16 +39,16 @@ changePassword = ChangePasswordViewSet.as_view({
     'put': 'update'
 })
 
-attractionList = AttractionViewSet.as_view({
-    'get': 'list',
-    'post': 'create'
-})
+# attractionList = AttractionViewSet.as_view({
+#     'get': 'list',
+#     'post': 'create'
+# })
 
-attractionDetail = AttractionViewSet.as_view({
-    'get': 'retrieve',
-    'put': 'update',
-    'delete': 'destroy',
-})
+# attractionDetail = AttractionViewSet.as_view({
+#     'get': 'retrieve',
+#     'put': 'update',
+#     'delete': 'destroy',
+# })
 
 notebookList = NotebookViewSet.as_view({
     'get' : 'list',
@@ -69,6 +69,10 @@ notebookDetail = NotebookViewSet.as_view({
     'delete' : 'destroy'
 })
 
+image = ImageViewSet.as_view({
+    'get' : 'list',
+    'post' : 'create',
+})
 
 urlpatterns = [
     path('auth/login/', login, name='login'),
@@ -78,8 +82,9 @@ urlpatterns = [
     path('member/change-password/<int:pk>/', changePassword, name='member-change-password'),
     path('group/list/', groupList, name='group-list'),
     path('group/detail/<int:pk>/', groupDetail, name='group-detail'),
-    path('attraction/list/', attractionList, name='attraction-list'),
-    path('attraction/detail/<int:pk>/', attractionDetail, name='attraction-detail'),
+    # path('attraction/list/', attractionList, name='attraction-list'),
+    # path('attraction/detail/<int:pk>/', attractionDetail, name='attraction-detail'),
     path('notebook/list/', notebookList, name='notebook-list'),
     path('notebook/detail/<int:pk>/', notebookDetail, name='notebook-detail'),
+    path('image/list/', image, name='image-list'),
 ]

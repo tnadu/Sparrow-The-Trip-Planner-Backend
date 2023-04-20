@@ -119,7 +119,7 @@ class Notebook(models.Model):
     # note is nullable in order to let the user create a blank notebook, that they can fill later on their trip
     note = models.CharField(max_length = 3000, null = False, blank = False, db_column = 'note', default='type a note...')
 
-    dateStarted = models.DateField(auto_now_add=True, db_column = 'dateStarted') # nullable
+    dateStarted = models.DateField(null=True, db_column = 'dateStarted') # nullable
     dateCompleted = models.DateField(null = True, db_column = 'dateCompleted') # nullable
 
     class Meta:
@@ -137,7 +137,7 @@ class Image(models.Model):
     attraction = models.ForeignKey('Attraction', on_delete=models.CASCADE, null=True, blank=True, db_column='attraction_id') # nullable
     # setting up a timestamp is useful for letting users know when an image was taken 
     # and for indicating if the information may be outdated or no longer available
-    timestamp = models.DateTimeField(null = False, db_column = 'datePosted')
+    timestamp = models.DateTimeField(auto_now_add=True, null = False, db_column = 'datePosted')
 
     class Meta:
         db_table = 'Image'
