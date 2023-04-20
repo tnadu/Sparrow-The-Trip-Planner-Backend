@@ -193,12 +193,13 @@ class WriteMemberSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
+#### Group #####
+################
 # read-only, nestable serializer
 class SmallGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ['name']
-
 
 # used for post/put/patch/delete on the Group model
 class WriteGroupSerializer(serializers.ModelSerializer):
@@ -206,6 +207,13 @@ class WriteGroupSerializer(serializers.ModelSerializer):
         model = Group
         fields = ['name', 'description']
 
+class LargeGroupSerializer(serializers.ModelSerializer):
+    members = MemberBelongsToSerializer(many=True, read_only=True)
+    routes = ExtraSmallRouteSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Group
+        fields = ['name', 'description', 'members', 'routes']
 
 ##### BelongsTo #####
 #####################
@@ -318,7 +326,6 @@ class StatusSerializer(serializers.ModelSerializer):
         model = Status
         fields = ['status']
 
-
 #used for write operations (post/put)
 class WriteRatingFlagSerializer(serializers.ModelSerializer):
     class Meta:
@@ -336,3 +343,4 @@ class WriteRatingFlagSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Either route or attraction must be specified.")
         
         return data
+        
