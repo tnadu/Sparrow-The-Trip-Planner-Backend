@@ -15,6 +15,13 @@ from rest_framework.decorators import action
 class RouteViewSet(ModelViewSet):
     queryset = Route.objects.all()
 
+    # search & options for filtering and ordering
+    filterset_fields = ['verified', 'user__baseUser__username', 'user__baseUser__first_name', 'user__baseUser__last_name',
+                        'group__name', 'isWithin__attraction__name', 'isWithin__attraction__isTagged__tag__tagName']
+    search_fields = ['title', 'description', 'startingPointLat', 'startingPointLon']
+    ordering_fields = ['startingPointLat', 'startingPointLon']
+
+
     # obtain the object that will be used
     def get_object(self, pk):
         try:
@@ -33,7 +40,7 @@ class RouteViewSet(ModelViewSet):
 
     # toggle the verify field, only the admin can do this
     # detail = True means it is applied only for an instance
-    @action(detail = True, permission_classes=[IsAdminUser])
+    @action(detail = True, methods=['PUT', 'PATCH'], permission_classes=[IsAdminUser])
     def verifiy(self, request, pk):
 
         routeObject = self.get_object(pk)
