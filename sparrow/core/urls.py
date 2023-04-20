@@ -55,23 +55,17 @@ attractionDetail = AttractionViewSet.as_view({
 #####################
 
 belongsToList = BelongsToViewSet.as_view({
-    'get': 'list',
-    'post': 'create'
+    'put': 'create'
 })
 
 belongsToDetail = BelongsToViewSet.as_view({
-    'get': 'retrieve',
     'put': 'update',
     'delete': 'destroy',
 })
 
-belongsToGroupMembers = BelongsToViewSet.as_view({
-    'get': 'get_group_members'
-})
-
-belongsToAllGroupsForMember = BelongsToViewSet.as_view({
-    'get': 'get_all_groups_for_member'
-})
+# backup plan for belongsTo
+# belongsToGroupMembers = BelongsToViewSet.as_view({ 'get': 'get_group_members'})
+# belongsToAllGroupsForMember = BelongsToViewSet.as_view({'get': 'get_all_groups_for_member'})
 
 urlpatterns = [
     path('auth/login/', login, name='login'),
@@ -88,7 +82,5 @@ urlpatterns = [
     path('attraction/detail/<int:pk>/', attractionDetail, name='attraction-detail'),
 
     path('belongsTo/list/', belongsToList, name="belongsTo-list"),
-    path('belongsTo/detail/<int:pk>/', belongsToDetail, name='belongsTo-detail'),
-    path('belongsTo/getMembers/<int:pk>/', belongsToGroupMembers, name='belongsTo-get-group-members'),
-    path('belongsTo/getGroups/<int:pk>/', belongsToAllGroupsForMember, name='belongsTo-get-all-groups-for-member')    
+    path('belongsTo/detail/<int:pk>/', belongsToDetail, name='belongsTo-detail')
 ]
