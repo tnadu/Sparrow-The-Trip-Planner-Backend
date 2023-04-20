@@ -163,7 +163,7 @@ class LargeMemberSerializer(serializers.ModelSerializer):
     baseUser = LargeUserSerializer(read_only=True)
     groups = GroupBelongsToSerializer(many=True, read_only=True)
     routes = ExtraSmallRouteSerializer(many=True, read_only=True)
-    ratings = SmallRatingSerializer(many=True, read_only=True)  
+    ratings = SmallRatingSerializer(source='filtered_ratings', many=True, read_only=True)  
     notebooks = SmallNotebookSerializer(many=True, read_only=True)
 
     class Meta:
@@ -285,18 +285,18 @@ class GroupBelongsToSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = BelongsTo
-        fields = ['groups', 'isAdmin', 'nickname']
+        fields = ['member', 'groups', 'isAdmin', 'nickname']
 
 
 class MemberBelongsToSerializer(serializers.ModelSerializer):
-    member = SmallMemberSerializer(many=True, read_only=True)
+    members = SmallMemberSerializer(many=True, read_only=True)
 
     class Meta:
         model = BelongsTo
-        fields = ['member', 'isAdmin', 'nickname']
+        fields = ['members', 'group', 'isAdmin', 'nickname']
 
-##### Status #####
-#####################
+##### Status ######
+###################
 
 class StatusSerializer(serializers.ModelSerializer):
     
