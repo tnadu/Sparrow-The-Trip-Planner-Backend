@@ -67,13 +67,13 @@ class Tag(models.Model):
         ordering = ['tagName']
         default_related_name = 'tag'
 
-class RatingFlag(models.Model):
+class RatingFlagType(models.Model):
     value = models.CharField(max_length=50, null=False, blank=False, db_column='value')
     
     class Meta:
-        db_table = 'ratingFlag'
+        db_table = 'ratingFlagType'
         ordering = ['pk']
-        default_related_name = 'ratingFlag'
+        default_related_name = 'ratingFlagType'
 
 
 # many - many between Tag & Attraction
@@ -91,14 +91,14 @@ class IsTagged(models.Model):
   
 
 # a rating can be associated with either a route or an attraction    
-class Rating(models.Model):
+class RatingFlag(models.Model):
     user = models.ForeignKey('Member', null=False, blank=False, on_delete=models.CASCADE, db_column='user_id')
-    rating = models.ForeignKey('RatingFlag', null=False, blank=False, on_delete=models.CASCADE, db_column='ratingFlag_id')
+    rating = models.ForeignKey('RatingFlagType', null=False, blank=False, on_delete=models.CASCADE, db_column='ratingFlagType_id')
     comment = models.CharField(max_length=2000, null = True, blank = True, db_column='comment')
     route = models.ForeignKey('Route', null=True, blank=True, on_delete=models.CASCADE, db_column='route_id') # nullable
     attraction = models.ForeignKey('Attraction', null=True, blank=True, on_delete=models.CASCADE, db_column='attraction_id') # nullable
     
     class Meta:
-        db_table = 'rating'
+        db_table = 'ratingFlag'
         unique_together = ('user', 'route', 'attraction')
-        default_related_name = 'rating'
+        default_related_name = 'ratingFlag'
