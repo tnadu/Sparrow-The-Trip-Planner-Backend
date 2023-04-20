@@ -321,6 +321,7 @@ class LargeAttractionSerializer(serializers.ModelSerializer):
         model = Attraction
         fields = ['name', 'generalDescription', 'latitude', 'longitude', 'images', 'tag', 'ratings']
 
+
 class StatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Status
@@ -344,3 +345,24 @@ class WriteRatingFlagSerializer(serializers.ModelSerializer):
         
         return data
         
+
+
+# will be nested in Attraction Serializers 
+class SmallTagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ['tagName']
+
+# with SmallAttractionSerializer nested   
+class LargeTagSerializer(serializers.ModelSerializer):
+    attractions = SmallAttractionSerializer(many=True, read_only=True)
+    class Meta:
+        model = Tag
+        fields = ['tagName','attractions']
+
+
+#used for write operations (post/put)      
+class WriteIsTaggedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IsTagged
+        fields = ['tag', 'attraction']
