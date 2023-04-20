@@ -4,6 +4,22 @@ from .views import *
 
 app_name = 'core'
 
+routeList = RouteViewSet.as_view({
+    'get': 'list',
+    'post': 'create'
+})
+
+# only needs to respond to write actions, patch & put
+routeVerify = RouteViewSet.as_view({
+    'patch': 'verifiy',
+    'put': 'verifiy',
+})
+routeDetail = RouteViewSet.as_view({
+    'get': 'retrieve',
+    'put': 'update',
+    'delete': 'destroy'
+})
+
 
 groupList = GroupViewSet.as_view({
     'get': 'list',
@@ -59,5 +75,8 @@ urlpatterns = [
     path('group/list/', groupList, name='group-list'),
     path('group/detail/<int:pk>/', groupDetail, name='group-detail'),
     path('attraction/list/', attractionList, name='attraction-list'),
-    path('attraction/detail/<int:pk>/', attractionDetail, name='attraction-detail')
+    path('attraction/detail/<int:pk>/', attractionDetail, name='attraction-detail'),
+    path('route/list/', routeList, name='route-list'),
+    path('route/detail/<int:pk>/', routeDetail, name='route-detail'),
+    path('route/verify/<int:pk>/', routeVerify, name='route-verify')
 ]
