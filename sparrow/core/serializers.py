@@ -163,7 +163,7 @@ class LargeMemberSerializer(serializers.ModelSerializer):
     baseUser = LargeUserSerializer(read_only=True)
     groups = GroupBelongsToSerializer(many=True, read_only=True)
     routes = ExtraSmallRouteSerializer(many=True, read_only=True)
-    ratings = SmallRatingSerializer(many=True, read_only=True)  
+    ratings = SmallRatingSerializer(source='filtered_ratings', many=True, read_only=True)  
     notebooks = SmallNotebookSerializer(many=True, read_only=True)
 
     class Meta:
