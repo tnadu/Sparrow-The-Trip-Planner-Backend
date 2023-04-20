@@ -78,6 +78,14 @@ belongsToDetail = BelongsToViewSet.as_view({
     'put': 'update',
     'delete': 'destroy',
 })
+
+# backup plan for belongsTo
+# belongsToGroupMembers = BelongsToViewSet.as_view({ 'get': 'get_group_members'})
+# belongsToAllGroupsForMember = BelongsToViewSet.as_view({'get': 'get_all_groups_for_member'})
+
+##### Notebook #####
+#####################
+
 notebookList = NotebookViewSet.as_view({
     'get' : 'list',
     'post' : 'create'
@@ -87,10 +95,6 @@ notebookDetail = NotebookViewSet.as_view({
     'put' : 'update',
     'delete' : 'destroy'
 })
-
-# backup plan for belongsTo
-# belongsToGroupMembers = BelongsToViewSet.as_view({ 'get': 'get_group_members'})
-# belongsToAllGroupsForMember = BelongsToViewSet.as_view({'get': 'get_all_groups_for_member'})
 
 urlpatterns = [
     path('auth/login/', login, name='login'),
@@ -103,8 +107,6 @@ urlpatterns = [
     path('group/list/', groupList, name='group-list'),
     path('group/detail/<int:pk>/', groupDetail, name='group-detail'),
     
-    path('notebook/list/', notebookList, name='notebook-list'),
-    path('notebook/detail/<int:pk>/', notebookDetail, name='notebook-detail'),
     path('attraction/list/', attractionList, name='attraction-list'),
     path('attraction/detail/<int:pk>/', attractionDetail, name='attraction-detail'),
     
@@ -113,5 +115,8 @@ urlpatterns = [
     path('route/verify/<int:pk>/', routeVerify, name='route-verify'),
 
     path('belongsTo/list/', belongsToList, name="belongsTo-list"),
-    path('belongsTo/detail/<int:pk>/', belongsToDetail, name='belongsTo-detail')
+    path('belongsTo/detail/<int:pk>/', belongsToDetail, name='belongsTo-detail'),
+
+    path('notebook/list/', notebookList, name='notebook-list'),
+    path('notebook/detail/<int:pk>/', notebookDetail, name='notebook-detail'),
 ]

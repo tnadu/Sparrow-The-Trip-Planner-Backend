@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.password_validation import validate_password
 from .models import *
+from datetime import date
 
 
 # used in 'LargeMemberSerializer' and 'WriteMemberSerializer'
@@ -218,13 +219,13 @@ class LargeGroupSerializer(serializers.ModelSerializer):
 ##### BelongsTo #####
 #####################
 
-# class WriteBelongsToSerializer(serializers.ModelSerializer):
-#     member = serializers.PrimaryKeyRelatedField()
-#     group = serializers.PrimaryKeyRelatedField()
+class WriteBelongsToSerializer(serializers.ModelSerializer):
+    member = serializers.PrimaryKeyRelatedField()
+    group = serializers.PrimaryKeyRelatedField()
 
-#     class Meta:
-#         model = BelongsTo
-#         fields = ['member', 'group', 'isAdmin', 'nickname']
+    class Meta:
+        model = BelongsTo
+        fields = ['member', 'group', 'isAdmin', 'nickname']
 
 
 class GroupBelongsToSerializer(serializers.ModelSerializer):
@@ -302,8 +303,8 @@ class ExtraSmallRouteSerializer(serializers.ModelSerializer):
 #         fields = ['orderNumber', 'attraction']
 
 
-# # retrieves minimal information about an attraction, for queries with
-# # minimal requirements
+# retrieves minimal information about an attraction, for queries with
+# minimal requirements
 # class SmallAttractionSerializer(serializers.ModelSerializer):
 #     tag = SmallTagSerializer()
 
@@ -323,7 +324,6 @@ class LargeAttractionSerializer(serializers.ModelSerializer):
 
 
 class StatusSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Status
         fields = ['status']
@@ -376,7 +376,7 @@ class WriteIsTaggedSerializer(serializers.ModelSerializer):
 # shows minimum of information, used when displaying all entries in a list
 class SmallNotebookSerializer(serializers.ModelSerializer):
 
-    status = StatusSerializer()
+    status = StatusSerializer(read_only=True)
     class Meta:
         model = Notebook
         fields = ['title', 'note', 'status']
@@ -384,10 +384,9 @@ class SmallNotebookSerializer(serializers.ModelSerializer):
 # shows everything it is to know about a specific notebook-entry
 class LargeNotebookSerializer(serializers.ModelSerializer):
 
-    route = SmallRouteSerializer()
-    user = SmallMemberSerializer()
-    status = StatusSerializer()
-
+    # route = SmallRouteSerializer() # add route in fields field:) there is an error in smallrouteserializer
+    user = SmallMemberSerializer(read_only=True)
+    status = StatusSerializer(read_only=True)
 
     class Meta:
         model = Notebook
@@ -402,7 +401,7 @@ class WriteNotebookSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
 
         # if the user making the request is authenticated
-        if request and request.user.is_authenticated:
+        if request:
 
             member = Member.objects.get(baseUser=request.user)
             # they become the user of the current notebook-entry, note that the member object was added
@@ -415,7 +414,7 @@ class WriteNotebookSerializer(serializers.ModelSerializer):
                 # then the Completed date also becomes today's date
                 validated_data['dateCompleted'] = date.today()
         else:
-            raise serializers.ValidationError({'user': 'You must be logged in to perform this action.'})
+            raise serializers.ValidationError({'request': 'Request related error'})
         
         # if there are no modifications made regarding: dateCompleted -> it remains null 
         # calling parent class function to perform better validation of data
@@ -425,7 +424,7 @@ class WriteNotebookSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         request = self.context.get('request')
 
-        if request and request.user.is_authenticated:
+        if request:
             member = Member.objects.get(baseUser=request.user)
             validated_data['user'] = member
             # the previous status
@@ -444,7 +443,7 @@ class WriteNotebookSerializer(serializers.ModelSerializer):
                 # the starting date is also modified
                 validated_data['dateStarted'] = date.today()
         else:
-            raise serializers.ValidationError({'user': 'You must be logged in to perform this action.'})
+            raise serializers.ValidationError({'request': 'Request related error'})
         # calling parent class function to perform better validation of data
         return super().update(instance, validated_data)
     
