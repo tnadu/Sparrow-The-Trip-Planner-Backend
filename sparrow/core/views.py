@@ -83,3 +83,43 @@ class AttractionViewSet(ModelViewSet):
     filterset_fields = ['tag__tagName']
     search_fields = ['name', 'generalDescription']
     
+class BelongsToViewSet(ModelViewSet):
+    queryset = BelongsTo.objects.all()
+
+    filterset_fields = ['member__baseUser__username', 'group__name', 'nickname']
+    search_fields = ['nickname']
+
+    def get_serializer_class(self):
+        if self.action == 'get_group_members':
+            return MemberBelongsToSerializer
+
+        if self.action == 'get_all_groups_for_member':
+            return GroupBelongsToSerializer
+        
+        return WriteBelongsToSerializer
+
+    # action that will list all the users that exist 
+    # within a specified group, specification given by
+    # the group's PK
+    @action(methods=['get'])
+    def get_group_members(self, request, pk=None):
+        try:
+            group_members = BelongsTo.objects.filter(group = pk)
+            group_members_serialized = self.get_serializer(group_members, many=True)
+            return Response(group_members_serialized.data)
+        
+        except BelongsTo.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+            
+    # action that will list all groups that a particular
+    # user is included in; identification being made with 
+    # the user's PK
+    @action(methods=['get'])
+    def get_all_groups_for_member(self, request, pk=None):
+        try: 
+            all_groups = BelongsTo.objects.filter(member = pk)
+            all_groups_serialized = self.get_serializer(all_groups, many=True)
+            return Response(all_groups_serialized.data)
+        
+        except BelongsTo.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
