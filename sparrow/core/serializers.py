@@ -285,12 +285,12 @@ class GroupBelongsToSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = BelongsTo
-        fields = ['groups', 'isAdmin', 'nickname']
+        fields = ['member', 'groups', 'isAdmin', 'nickname']
 
 
 class MemberBelongsToSerializer(serializers.ModelSerializer):
-    member = SmallMemberSerializer(many=True, read_only=True)
+    members = SmallMemberSerializer(many=True, read_only=True)
 
     class Meta:
         model = BelongsTo
-        fields = ['member', 'isAdmin', 'nickname']
+        fields = ['members', 'group', 'isAdmin', 'nickname']
