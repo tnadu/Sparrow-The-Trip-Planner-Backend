@@ -2,7 +2,7 @@ from django.core.management import call_command
 from django.db.models.signals import post_save,post_migrate
 from django.contrib.auth.models import User
 from django.dispatch import receiver
-from .models import Member, Tag, RatingFlag
+from .models import Member, Tag, RatingFlagType
 import os
 
 
@@ -26,7 +26,7 @@ def defaultValues_for_tag(sender, **kwargs):
         
 @receiver(post_migrate)
 def defaultValues_for_ratingFlag(sender, **kwargs):
-    if sender.name == 'core' and RatingFlag.objects.count() == 0:
-        fixture_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'initial_ratingFlag.json')
+    if sender.name == 'core' and RatingFlagType.objects.count() == 0:
+        fixture_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'initial_ratingFlagType.json')
         call_command('loaddata', fixture_path)
 
