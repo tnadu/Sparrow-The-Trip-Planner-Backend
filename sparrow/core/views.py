@@ -10,8 +10,6 @@ from django.http import Http404
 from rest_framework.permissions import IsAdminUser
 from rest_framework.decorators import action
 
-
-
 class RouteViewSet(ModelViewSet):
     queryset = Route.objects.all()
 
