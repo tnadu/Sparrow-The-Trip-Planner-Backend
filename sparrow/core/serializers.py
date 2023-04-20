@@ -317,3 +317,11 @@ class StatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Status
         fields = ['status']
+        
+class LargeGroupSerializer(serializers.ModelSerializer):
+    members = MemberBelongsToSerializer(many=True, read_only=True)
+    routes = ExtraSmallRouteSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Group
+        fields = ['name', 'description', 'members', 'routes']
