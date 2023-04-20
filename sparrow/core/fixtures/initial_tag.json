@@ -1,0 +1,87 @@
+[
+    {
+      "model": "core.Tag",
+      "pk": 1,
+      "fields": {
+        "tagName": "Adventure"
+      }
+    },
+    {
+      "model": "core.Tag",
+      "pk": 2,
+      "fields": {
+        "tagName": "Historic"
+      }
+    },
+    {
+      "model": "core.Tag",
+      "pk": 3,
+      "fields": {
+        "tagName": "Nature"
+      }
+    },
+    {
+      "model": "core.Tag",
+      "pk": 4,
+      "fields": {
+        "tagName": "Relaxing"
+      }
+    },
+    {
+      "model": "core.Tag",
+      "pk": 5,
+      "fields": {
+        "tagName": "Food"
+      }
+    },
+    {
+      "model": "core.Tag",
+      "pk": 6,
+      "fields": {
+        "tagName": "Family-friendly"
+      }
+    },
+    {
+      "model": "core.Tag",
+      "pk": 7,
+      "fields": {
+        "tagName": "Romantic"
+      }
+    },
+    {
+      "model": "core.Tag",
+      "pk": 8,
+      "fields": {
+        "tagName": "Art"
+      }
+    },
+    {
+        "model": "core.Tag",
+        "pk": 9,
+        "fields": {
+          "tagName": "Mountains"
+        }
+    },
+    {
+        "model": "core.Tag",
+        "pk": 10,
+        "fields": {
+          "tagName": "Music"
+        }
+    },
+    {
+        "model": "core.Tag",
+        "pk": 11,
+        "fields": {
+          "tagName": "Nightlife"
+        }
+    }, 
+    {
+        "model": "core.Tag",
+        "pk": 12,
+        "fields": {
+          "tagName": "Museum"
+        }
+    } 
+]
+  

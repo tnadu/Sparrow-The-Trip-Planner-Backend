@@ -193,12 +193,13 @@ class WriteMemberSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
+#### Group #####
+################
 # read-only, nestable serializer
 class SmallGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ['name']
-
 
 # used for post/put/patch/delete on the Group model
 class WriteGroupSerializer(serializers.ModelSerializer):
@@ -206,6 +207,13 @@ class WriteGroupSerializer(serializers.ModelSerializer):
         model = Group
         fields = ['name', 'description']
 
+class LargeGroupSerializer(serializers.ModelSerializer):
+    members = MemberBelongsToSerializer(many=True, read_only=True)
+    routes = ExtraSmallRouteSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Group
+        fields = ['name', 'description', 'members', 'routes']
 
 ##### BelongsTo #####
 #####################
@@ -221,7 +229,7 @@ class WriteBelongsToSerializer(serializers.ModelSerializer):
 
 class GroupBelongsToSerializer(serializers.ModelSerializer):
     groups = SmallGroupSerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = BelongsTo
         fields = ['member', 'groups', 'isAdmin', 'nickname']
@@ -229,7 +237,7 @@ class GroupBelongsToSerializer(serializers.ModelSerializer):
 
 class MemberBelongsToSerializer(serializers.ModelSerializer):
     members = SmallMemberSerializer(many=True, read_only=True)
-
+    
     class Meta:
         model = BelongsTo
         fields = ['members', 'group', 'isAdmin', 'nickname']
@@ -317,11 +325,22 @@ class StatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Status
         fields = ['status']
-        
-class LargeGroupSerializer(serializers.ModelSerializer):
-    members = MemberBelongsToSerializer(many=True, read_only=True)
-    routes = ExtraSmallRouteSerializer(many=True, read_only=True)
 
+#used for write operations (post/put)
+class WriteRatingFlagSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Group
-        fields = ['name', 'description', 'members', 'routes']
+        model = RatingFlag
+        fields = ['user', 'rating', 'comment', 'route', 'attraction']
+              
+    def validate(self, data):
+        route = data.get('route')
+        attraction = data.get('attraction')
+        
+        #only one and exactly one of the two nullable fields (route, attraction) can be null at a time
+        if route is not None and attraction is not None:
+            raise serializers.ValidationError("Only one of route or attraction can be specified.")
+        elif route is None and attraction is None:
+            raise serializers.ValidationError("Either route or attraction must be specified.")
+        
+        return data
+        
