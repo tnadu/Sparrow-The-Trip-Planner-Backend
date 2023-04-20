@@ -131,6 +131,52 @@ class Notebook(models.Model):
     def __str__(self):
         return self.title
 
+        
+class Tag(models.Model):
+    tagName = models.CharField(max_length=50, null=False, blank=False, db_column='tag_name')
+
+    class Meta:
+        db_table = 'tag'
+        ordering = ['tagName']
+        default_related_name = 'tag'
+
+
+class RatingFlagType(models.Model):
+    value = models.CharField(max_length=50, null=False, blank=False, db_column='value')
+    
+    class Meta:
+        db_table = 'ratingFlagType'
+        ordering = ['pk']
+        default_related_name = 'ratingFlagType'
+
+
+# many - many between Tag & Attraction
+class IsTagged(models.Model):
+    attraction = models.ForeignKey('Attraction', on_delete=models.CASCADE, db_column='attraction_id')
+    tag = models.ForeignKey('Tag', on_delete=models.CASCADE, db_column='tag_id')
+
+    class Meta:
+        db_table = 'isTagged'
+        unique_together = ('attraction', 'tag')
+        default_related_name = 'isTagged'
+        #orders the isTagged objects by the id of the Attraction, in reverse order of the id of the isTagged model itself
+        #so that the most recent tag for each Attraction appears first.
+        ordering = ['attraction', '-id']
+  
+
+# a rating can be associated with either a route or an attraction    
+class RatingFlag(models.Model):
+    user = models.ForeignKey('Member', null=False, blank=False, on_delete=models.CASCADE, db_column='user_id')
+    rating = models.ForeignKey('RatingFlagType', null=False, blank=False, on_delete=models.CASCADE, db_column='ratingFlagType_id')
+    comment = models.CharField(max_length=2000, null = True, blank = True, db_column='comment')
+    route = models.ForeignKey('Route', null=True, blank=True, on_delete=models.CASCADE, db_column='route_id') # nullable
+    attraction = models.ForeignKey('Attraction', null=True, blank=True, on_delete=models.CASCADE, db_column='attraction_id') # nullable
+    
+    class Meta:
+        db_table = 'ratingFlag'
+        unique_together = ('user', 'route', 'attraction')
+        default_related_name = 'ratingFlag'
+        
 class Image(models.Model):
     imagePath = models.CharField(max_length = 100, null = False, blank = False, db_column = 'imagePath')
     notebook = models.ForeignKey('Notebook', on_delete=models.CASCADE, null=True, blank=True, db_column='notebook_id') # nullable
