@@ -317,3 +317,22 @@ class StatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Status
         fields = ['status']
+
+
+#used for write operations (post/put)
+class WriteRatingFlagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RatingFlag
+        fields = ['user', 'rating', 'comment', 'route', 'attraction']
+              
+    def validate(self, data):
+        route = data.get('route')
+        attraction = data.get('attraction')
+        
+        #only one and exactly one of the two nullable fields (route, attraction) can be null at a time
+        if route is not None and attraction is not None:
+            raise serializers.ValidationError("Only one of route or attraction can be specified.")
+        elif route is None and attraction is None:
+            raise serializers.ValidationError("Either route or attraction must be specified.")
+        
+        return data
