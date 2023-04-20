@@ -21,13 +21,6 @@ class RouteViewSet(ModelViewSet):
     search_fields = ['title', 'description', 'startingPointLat', 'startingPointLon']
     ordering_fields = ['startingPointLat', 'startingPointLon']
 
-    # obtain the object that will be used for verifying
-    def get_object(self, pk):
-        try:
-            return Route.objects.get(pk=pk)
-        except Route.DoesNotExist:
-            raise Http404
-
     # depending on the type of request, a specific Serializer will be used
     def get_serializer_class(self):
         if self.action == 'list':
@@ -45,12 +38,14 @@ class RouteViewSet(ModelViewSet):
 
         routeObject = self.get_object(pk)
 
-        if(routeObject.verified == True):
-            routeObject.verified = False
-        else: routeObject.verified = True
-
         serializer = WriteRouteSerializer(routeObject)
         if serializer.is_valid():
+
+            if (routeObject.verified == True):
+                routeObject.verified = False
+            else:
+                routeObject.verified = True
+
             serializer.save()
             return Response(serializer.data)
         else:

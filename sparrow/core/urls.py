@@ -78,5 +78,5 @@ urlpatterns = [
     path('attraction/detail/<int:pk>/', attractionDetail, name='attraction-detail'),
     path('route/list/', routeList, name='route-list'),
     path('route/detail/<int:pk>/', routeDetail, name='route-detail'),
-    path('route/detail/<int:pk>/verify/', routeVerify, name='route-verify')
+    path('route/verify/<int:pk>/', routeVerify, name='route-verify')
 ]

@@ -258,7 +258,7 @@ class WriteRouteSerializer(serializers.ModelSerializer):
 
 # retreives ALL the information for a a route
 class LargeRouteSerializer(serializers.ModelSerializer):
-    author = SmallUserSerializer()
+    author = SmallMemberSerializer()
     is_within = IsWithinSerializer(many=True)  # one for each attraction of the route
     group = SmallGroupSerializer()
 
@@ -271,7 +271,7 @@ class LargeRouteSerializer(serializers.ModelSerializer):
 
 # retrieves partial information about a route
 class SmallRouteSerializer(serializers.ModelSerializer):
-    author = SmallUserSerializer()
+    author = SmallMemberSerializer()
     group = SmallGroupSerializer()
 
     class Meta:
