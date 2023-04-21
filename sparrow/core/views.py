@@ -198,3 +198,5 @@ class StatusViewSet(mixins.ListModelMixin,
                     GenericViewSet):
     queryset = Status.objects.all()
     serializer_class = StatusSerializer
+
+    filterset_fields = ['notebook__id']
