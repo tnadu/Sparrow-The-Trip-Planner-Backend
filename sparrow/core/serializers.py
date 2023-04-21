@@ -196,14 +196,14 @@ class WriteMemberSerializer(serializers.ModelSerializer):
 
 #### Group #####
 ################
-# read-only, nestable serializer
+
 class SmallGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ['name']
 
-# used for post/put/patch/delete on the Group model
-class WriteGroupSerializer(serializers.ModelSerializer):
+
+class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ['name', 'description']
@@ -297,14 +297,29 @@ class IsWithinSerializer(serializers.ModelSerializer):
         fields = ['route', 'attraction', 'orderNumber']
 
 
-# # retrieves minimal information about an attraction, for queries with
-# # minimal requirements
-class SmallAttractionSerializer(serializers.ModelSerializer):
-    tag = SmallTagSerializer()
+#### Attraction ####
+####################
 
+class SmallAttractionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attraction
-        fields = ['name', 'generalDescription', 'tag']
+        fields = ['name']
+
+
+class AttractionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attraction
+        fields = ['name', 'generalDescription', 'latitude', 'longitude']
+
+# # retrieves minimal information about an attraction, for queries with
+# # minimal requirements
+# class SmallAttractionSerializer(serializers.ModelSerializer):
+#     tag = SmallTagSerializer()
+
+#     class Meta:
+#         model = Attraction
+#         fields = ['name', 'generalDescription', 'tag']
+
 
 # # retrieves ALL the information about an attraction
 # class LargeAttractionSerializer(serializers.ModelSerializer):
