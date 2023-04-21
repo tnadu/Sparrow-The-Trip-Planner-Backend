@@ -294,22 +294,22 @@ class ExtraSmallRouteSerializer(serializers.ModelSerializer):
         fields = ['title', 'description']
 
 
-# class IsWithinSerializer(serializers.ModelSerializer):
-#     attraction = SmallAttractionSerializer()
+class IsWithinSerializer(serializers.ModelSerializer):
+    attraction = SmallAttractionSerializer()
 
-#     class Meta:
-#         model = isWithin
-#         fields = ['orderNumber', 'attraction']
+    class Meta:
+        model = isWithin
+        fields = ['orderNumber', 'attraction']
 
 
 # # retrieves minimal information about an attraction, for queries with
 # # minimal requirements
-# class SmallAttractionSerializer(serializers.ModelSerializer):
-#     tag = SmallTagSerializer()
+class SmallAttractionSerializer(serializers.ModelSerializer):
+    tag = SmallTagSerializer()
 
-#     class Meta:
-#         model = Attraction
-#         fields = ['name', 'generalDescription', 'tag']
+    class Meta:
+        model = Attraction
+        fields = ['name', 'generalDescription', 'tag']
 
 # retrieves ALL the information about an attraction
 class LargeAttractionSerializer(serializers.ModelSerializer):
@@ -345,8 +345,6 @@ class WriteRatingFlagSerializer(serializers.ModelSerializer):
         
         return data
         
-
-
 # will be nested in Attraction Serializers 
 class SmallTagSerializer(serializers.ModelSerializer):
     class Meta:

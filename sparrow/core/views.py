@@ -121,7 +121,19 @@ class AttractionViewSet(ModelViewSet):
     # prefetch only related rating instances with a rating greater than 0 (i.e. not a flag)
     queryset = Attraction.objects.prefetch_related(
         Prefetch('ratings', queryset=Rating.objects.filter(rating > 0), to_attr='filtered_ratings'))
-    serializer_class = LargeAttractionSerializer
+    
+    def get_serializer_class(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            # the detailed version of an attraction is requested
+            if self.action == 'retrieve':
+                return LargeAttractionSerializer
+            
+            return SmallAttractionSerializer
+        else:
+            if self.action == 'create' or self.action == 'update':
+                return WriteAttractionSerializer
+            
+            return LargeAttractionSerializer
 
     filterset_fields = ['tag__tagName']
     search_fields = ['name', 'generalDescription']
