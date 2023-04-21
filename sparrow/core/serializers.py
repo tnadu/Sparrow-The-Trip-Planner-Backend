@@ -448,3 +448,24 @@ class WriteNotebookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notebook
         fields = ['route', 'title', 'note', 'status']
+
+# small flag serializer, gives minimal information about rating
+class SmallRatingFlagSerializer(serializers.ModelSerializer):
+
+    route = ExtraSmallRouteSerializer(read_only=True)
+    attraction = SmallAtractionSerializer(read_only=True)
+
+    class Meta:
+        model = Rating
+        fields = ['rating', 'comment', 'route', 'attraction']
+
+# large flag serializer, gives detailed information about rating
+class LargeRatingFlagSerializer(serializers.ModelSerializer):
+
+    user = SmallUserSerializer(read_only=True)
+    route = ExtraSmallRouteSerializer(read_only=True)
+    attraction = SmallAtractionSerializer(read_only=True)
+
+    class Meta:
+        model = Rating
+        fields = ['user', 'rating', 'comment', 'route', 'attraction']
