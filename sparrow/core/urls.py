@@ -87,13 +87,7 @@ belongsToDetail = BelongsToViewSet.as_view({
 ##################
 
 statusList = StatusViewSet.as_view({
-    'put': 'create'
-})
-
-statusDetail = StatusViewSet.as_view({
-    'get': 'retrieve',
-    'put': 'update',
-    'deleta': 'destroy'
+    'get': 'list'
 })
 
 ##### Notebook #####
@@ -134,5 +128,4 @@ urlpatterns = [
     path('notebook/detail/<int:pk>/', notebookDetail, name='notebook-detail'),
 
     path('status/list/', statusList, name='status-list'),
-    path('status/detail/', statusDetail, name='status-detail')
 ]
