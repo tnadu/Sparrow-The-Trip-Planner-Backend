@@ -482,7 +482,7 @@ class ImageUploadSerializer(serializers.ModelSerializer):
         fields = ['image', 'imagePath']
         read_only_fields = ['imagePath']
 
-    def create(self, validated_data):
+    def create(self, validated_data, folder_name = 'miscellaneous/'):
         image = validated_data.pop('image')
         instance = super().create(validated_data)
 
@@ -494,13 +494,29 @@ class ImageUploadSerializer(serializers.ModelSerializer):
         # I am uploading the files using chunks of data as this action can consume a lot of server resources, 
         # so this aproach can help reduce memory usage and improve performance
         # 'wb+' => reading and writting a file in binary
-        file_path =  generated_unique_filename
+        file_path =  folder_name + generated_unique_filename
         with default_storage.open(settings.MEDIA_ROOT + '/' + file_path, 'wb+') as destination:
             for chunk in image.chunks():
                 destination.write(chunk)
-
-        instance.save()
         return instance
     
 class NotebookImageUpload(serializers.ModelSerializer):
-    NotImplemented
+    image = ImageUploadSerializer(write_only = True)
+    notebook = serializers.PrimaryKeyRelatedField(queryset=Notebook.objects.all())
+
+    class Meta:
+        model = Image
+        fields = ['image', 'imagePath', 'notebook']
+        read_only_fields = ['imagePath']
+
+    def create(self, validated_data):
+        image_serializer = self.fields['image']
+        folder_name = 'notebook_images/'
+
+        image = image_serializer.create(validated_data=validated_data.pop('image'), folder_name=folder_name)
+        validated_data['notebook'] = self.validated_data['notebook']
+        validated_data['imagePath'] = image.imagePath
+
+        instance = super().create(validated_data)
+        instance.save()
+        return instance

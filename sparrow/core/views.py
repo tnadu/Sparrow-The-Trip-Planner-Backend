@@ -205,4 +205,4 @@ class NotebookViewSet(ModelViewSet):
 class ImageViewSet(ModelViewSet):
     queryset = Image.objects.all()
     
-    serializer_class = ImageUploadSerializer
+    serializer_class = NotebookImageUpload
