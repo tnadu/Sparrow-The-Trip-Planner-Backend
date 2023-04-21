@@ -18,8 +18,8 @@ class isWithin (models.Model):
 class Route(models.Model):
     title = models.CharField(max_length=50, db_column='title')
     description = models.CharField(max_length=3000, db_column='description')
-    verified = models.BooleanField(default=False, db_column='verified')
-    public = models.BooleanField(default=False, db_column='public')
+    verified = models.BooleanField(db_column='verified', default=False)
+    public = models.BooleanField(db_column='public')
     startingPointLat = models.FloatField(db_column='starting_point_lat')
     startingPointLon = models.FloatField(db_column='starting_point_lon')
     publicationDate = models.DateTimeField(auto_now_add=True, db_column='routePublicationDate')
@@ -50,7 +50,7 @@ class Attraction(models.Model):
 # member model, extending the User model via a one-to-one relationship;
 class Member(models.Model):
     baseUser = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    profilePhoto = models.ImageField(upload_to='profile-photos', default='default-profile-photo.jpeg', db_column='profile_photo')
+    profilePhoto = models.ImageField(upload_to='profile-photos', db_column='profile_photo', default='default-profile-photo.jpeg')
     birthDate = models.DateField(null=True, db_column='birth_date')
 
     class Meta:
@@ -98,10 +98,10 @@ class Status(models.Model):
 class Notebook(models.Model):
     route = models.ForeignKey('Route', on_delete=models.CASCADE, db_column='route_id')
     user = models.ForeignKey('Member', on_delete=models.CASCADE, db_column='user_id')
-    status = models.ForeignKey('Status', on_delete=models.CASCADE, db_column='status_id', default=1)
+    status = models.ForeignKey('Status', on_delete=models.CASCADE, db_column='status_id')
 
-    title = models.CharField(max_length = 50, db_column='title', default='type a title...')
-    note = models.CharField(max_length = 3000, db_column = 'note', default='type a note...')
+    title = models.CharField(max_length = 50, db_column='title')
+    note = models.CharField(max_length = 3000, db_column = 'note')
     dateStarted = models.DateField(auto_now_add=True, db_column = 'date_started')
     dateCompleted = models.DateField(null = True, db_column = 'date_completed') # nullable
 
