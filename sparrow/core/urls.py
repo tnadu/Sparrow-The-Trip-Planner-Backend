@@ -96,6 +96,19 @@ statusDetail = StatusViewSet.as_view({
     'deleta': 'destroy'
 })
 
+##### Notebook #####
+#####################
+
+notebookList = NotebookViewSet.as_view({
+    'get' : 'list',
+    'post' : 'create'
+})
+notebookDetail = NotebookViewSet.as_view({
+    'get' : 'retrieve',
+    'put' : 'update',
+    'delete' : 'destroy'
+})
+
 urlpatterns = [
     path('auth/login/', login, name='login'),
     path('auth/logout/', logout, name='logout'),
@@ -116,6 +129,9 @@ urlpatterns = [
 
     path('belongsTo/list/', belongsToList, name="belongsTo-list"),
     path('belongsTo/detail/<int:pk>/', belongsToDetail, name='belongsTo-detail'),
+
+    path('notebook/list/', notebookList, name='notebook-list'),
+    path('notebook/detail/<int:pk>/', notebookDetail, name='notebook-detail'),
 
     path('status/list/', statusList, name='status-list'),
     path('status/detail/', statusDetail, name='status-detail')
