@@ -15,7 +15,8 @@ class RouteViewSet(ModelViewSet):
 
     # search & options for filtering and ordering
     filterset_fields = ['verified', 'user__baseUser__username', 'user__baseUser__first_name', 'user__baseUser__last_name',
-                        'group__name', 'isWithin__attraction__name', 'isWithin__attraction__isTagged__tag__tagName']
+                        'group__name', 'isWithin__attraction__name', 'isWithin__attraction__isTagged__tag__tagName',
+                        'notebook__id', 'user__id', 'group__id']
     search_fields = ['title', 'description', 'startingPointLat', 'startingPointLon']
     ordering_fields = ['startingPointLat', 'startingPointLon']
 
@@ -189,7 +190,8 @@ class BelongsToViewSet(ModelViewSet):
 # notebook viewset
 class NotebookViewSet(ModelViewSet):
     queryset = Notebook.objects.all()
-        
+    filterset_fields = ["user__id"]
+
     def get_serializer_class(self):
 
         if self.request.method in permissions.SAFE_METHODS: # get, head, options
