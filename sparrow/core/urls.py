@@ -74,7 +74,7 @@ attractionDetail = AttractionViewSet.as_view({
 #####################
 
 belongsToList = BelongsToViewSet.as_view({
-    'put': 'create'
+    'post': 'create'
 })
 
 belongsToDetail = BelongsToViewSet.as_view({
