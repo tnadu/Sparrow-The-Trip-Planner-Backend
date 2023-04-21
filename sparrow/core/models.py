@@ -19,8 +19,8 @@ class isWithin (models.Model):
 class Route(models.Model):
     title = models.CharField(max_length=50, db_column='title')
     description = models.CharField(max_length=3000, db_column='description')
-    verified = models.BooleanField(default=False, db_column='verified')
-    public = models.BooleanField(default=False, db_column='public')
+    verified = models.BooleanField(db_column='verified', default=False)
+    public = models.BooleanField(db_column='public')
     startingPointLat = models.FloatField(db_column='starting_point_lat')
     startingPointLon = models.FloatField(db_column='starting_point_lon')
     publicationDate = models.DateTimeField(auto_now_add=True, db_column='routePublicationDate')
@@ -29,7 +29,7 @@ class Route(models.Model):
 
     class Meta:
         db_table = 'route'
-        ordering = ['publicationDate']
+        ordering = ['-publicationDate']
         default_related_name = 'route'
 
     # update for admin triggers ModelAdmin.save_form so i need to override it
@@ -50,16 +50,13 @@ class Attraction(models.Model):
     class Meta:
         db_table = 'attraction'
         ordering = ['name']
-        default_related_name = 'attraction'
+        default_related_name = 'attraction' 
 
 
 # member model, extending the User model via a one-to-one relationship;
-# a member instance is generated whenever a user signs up, with both 
-# 'profilePhoto' and 'birthDate' fields set to null; 
-# these values can be set when updating the profile of a user;
 class Member(models.Model):
     baseUser = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    profilePhoto = models.ImageField(upload_to='profile-photos', default='default-profile-photo.jpeg', db_column='profile_photo')
+    profilePhoto = models.ImageField(upload_to='profile-photos', db_column='profile_photo', default='default-profile-photo.jpeg')
     birthDate = models.DateField(null=True, db_column='birth_date')
 
     class Meta:
@@ -94,52 +91,35 @@ class BelongsTo(models.Model):
 # status model, used to store information about the state of a journey, 
 # such as whether it is completed, finished, ongoing, etc.
 class Status(models.Model):
-    status = models.CharField(max_length=50, null = False, blank = False, db_column='status')
+    status = models.CharField(max_length=50, db_column='status')
     
     class Meta:
         db_table = 'status'
-        ordering = ['pk']
         default_related_name = 'status'
-    
-    def __str__(self):
-        return self.status
     
 
 # notebook model, used to store information about a user's experience with a particular route
 # this information includes their impressions, notes, and any photos they took during the trip
 # additionally, the model records the date and time of the journey;
-# 'route' - foreignKey, it specifies the route associated with the current entry in the notebook;
-# 'user' - foreignKey, holds the user who created the notebook;
-# 'status' - foreignKey, it specifies the current status of the trip
 class Notebook(models.Model):
-    route = models.ForeignKey('Route', null=False, blank=False, on_delete=models.CASCADE, db_column='route_id')
-    user = models.ForeignKey('Member', null=False, blank=False, on_delete=models.CASCADE, db_column='user_id')
+    route = models.ForeignKey('Route', on_delete=models.CASCADE, db_column='route_id')
+    user = models.ForeignKey('Member', on_delete=models.CASCADE, db_column='user_id')
+    status = models.ForeignKey('Status', on_delete=models.CASCADE, db_column='status_id')
 
-    # added a choices attribute to the Status model for easier access through a dropdown menu, 
-    # enabling me to select from pre-defined options and validate data
-    status = models.ForeignKey('Status', null=False, blank=False, on_delete=models.CASCADE, db_column='status_id', default=1)
-    
-    # added a title for the current notebook entry
-    title = models.CharField(max_length = 50, null=False, blank=False, db_column='title', default='type a title...')
-
-    # note is nullable in order to let the user create a blank notebook, that they can fill later on their trip
-    note = models.CharField(max_length = 3000, null = False, blank = False, db_column = 'note', default='type a note...')
-
-    dateStarted = models.DateField(auto_now_add=True, db_column = 'dateStarted') # nullable
-    dateCompleted = models.DateField(null = True, db_column = 'dateCompleted') # nullable
+    title = models.CharField(max_length = 50, db_column='title')
+    note = models.CharField(max_length = 3000, db_column = 'note')
+    dateStarted = models.DateField(auto_now_add=True, db_column = 'date_started')
+    dateCompleted = models.DateField(null = True, db_column = 'date_completed') # nullable
 
     class Meta:
         db_table = 'notebook'
         # descending order for dateStarted, dateCompleted, in order to show the most recent trips first
         ordering = ['-dateStarted', '-dateCompleted', 'title']
         default_related_name = 'notebook'
-        
-    def __str__(self):
-        return self.title
 
         
 class Tag(models.Model):
-    tagName = models.CharField(max_length=50, null=False, blank=False, db_column='tag_name')
+    tagName = models.CharField(max_length=50, db_column='tag_name')
 
     class Meta:
         db_table = 'tag'
@@ -148,11 +128,10 @@ class Tag(models.Model):
 
 
 class RatingFlagType(models.Model):
-    value = models.CharField(max_length=50, null=False, blank=False, db_column='value')
+    type = models.CharField(max_length=50, db_column='type')
     
     class Meta:
         db_table = 'ratingFlagType'
-        ordering = ['pk']
         default_related_name = 'ratingFlagType'
 
 
@@ -165,16 +144,16 @@ class IsTagged(models.Model):
         db_table = 'isTagged'
         unique_together = ('attraction', 'tag')
         default_related_name = 'isTagged'
-        #orders the isTagged objects by the id of the Attraction, in reverse order of the id of the isTagged model itself
-        #so that the most recent tag for each Attraction appears first.
+        # orders the isTagged objects by the id of the Attraction, in reverse order of the id of the isTagged model itself
+        # so that the most recent tag for each Attraction appears first.
         ordering = ['attraction', '-id']
   
 
 # a rating can be associated with either a route or an attraction    
 class RatingFlag(models.Model):
-    user = models.ForeignKey('Member', null=False, blank=False, on_delete=models.CASCADE, db_column='user_id')
-    rating = models.ForeignKey('RatingFlagType', null=False, blank=False, on_delete=models.CASCADE, db_column='ratingFlagType_id')
-    comment = models.CharField(max_length=2000, null = True, blank = True, db_column='comment')
+    user = models.ForeignKey('Member', on_delete=models.CASCADE, db_column='user_id')
+    rating = models.ForeignKey('RatingFlagType', on_delete=models.CASCADE, db_column='rating_flag_type_id')
+    comment = models.CharField(max_length=1000, null = True, blank = True, db_column='comment')
     route = models.ForeignKey('Route', null=True, blank=True, on_delete=models.CASCADE, db_column='route_id') # nullable
     attraction = models.ForeignKey('Attraction', null=True, blank=True, on_delete=models.CASCADE, db_column='attraction_id') # nullable
     
