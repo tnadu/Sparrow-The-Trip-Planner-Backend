@@ -257,4 +257,3 @@ class IsTaggedViewSet(GenericViewSet,mixins.RetrieveModelMixin, mixins.CreateMod
     queryset = IsTagged.objects.all()
     serializer_class = IsTaggedSerializer
     filterset_fields = ['attraction_id', 'tag_id']
-    
