@@ -312,16 +312,21 @@ class WriteRouteSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'user', 'group']
 
     def create(self, validated_data):
-        print('validatedData', validated_data)
         user = Member.objects.get(baseUser=validated_data.get('user'))
         validated_data['user'] = user
-        print('user', user)
         return super().create(validated_data)
 
+    #check if user passes ownership to the group
     def update(self, instance, validated_data):
-        print('inside update')
+
+        group = validated_data.get('group')
         user = Member.objects.get(baseUser=validated_data.get('user'))
-        validated_data['user'] = user
+
+        if group is not None:
+            validated_data['user'] = None
+            validated_data['group'] = group
+        else:
+            validated_data['user'] = user
         return super().update(instance, validated_data)
 
 
@@ -355,7 +360,7 @@ class SmallRouteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Route
-        fields = ['id', 'title', 'description', 'verified', 'user', 'group']
+        fields = ['id', 'title', 'description', 'verified', 'public', 'user', 'group']
 
 
 # used in 'LargeUserSerializer' and 'LargeGroupSerializer'

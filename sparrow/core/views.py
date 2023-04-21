@@ -28,14 +28,14 @@ class RouteViewSet(ModelViewSet):
         else:
             return LargeRouteSerializer
 
-    # toggle the verify field, only the admin can do this
+    # toggle the public field
     # detail = True means it is applied only for an instance
     # it will respond only to update-type requests
     @action(detail = True, methods=['PUT', 'PATCH', 'GET'])
-    def verify(self, request, pk):
+    def publicToggle(self, request, pk):
 
         routeObject = self.get_object()
-        routeObject.verified = not routeObject.verified
+        routeObject.public = not routeObject.public
         serializer = WriteRouteSerializer(routeObject)
         return Response(serializer.data)
 
@@ -117,7 +117,7 @@ class AttractionViewSet(ModelViewSet):
     # prefetch only related rating instances with a rating greater than 0 (i.e. not a flag)
     queryset = Attraction.objects.prefetch_related(
         Prefetch('ratings', queryset=RatingFlag.objects.filter(rating > 0), to_attr='filtered_ratings'))
-    
+
     def get_serializer_class(self):
         if self.request.method in permissions.SAFE_METHODS:
             # the detailed version of an attraction is requested
