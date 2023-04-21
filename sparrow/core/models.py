@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 
 # many-to-many between Route & Attraction
@@ -31,12 +32,10 @@ class Route(models.Model):
         ordering = ['publicationDate']
         default_related_name = 'route'
 
-        # update for admin triggers ModelAdmin.save_form so i need to override it
-
-    def save(self, *args, **kwargs):
+    # update for admin triggers ModelAdmin.save_form so i need to override it
+    def clean(self):
         if (self.group is None and self.user is None) or (self.group is not None and self.user is not None):
-            raise ValueError("Exactly one of group and user must be specified")
-        super().save(*args, **kwargs)
+            raise ValidationError("Exactly one of group and user must be specified")
 
     def __str__(self):
         return self.title + self.description
