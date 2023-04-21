@@ -11,10 +11,8 @@ routeList = RouteViewSet.as_view({
 
 # only needs to respond to write actions, patch & put
 routeVerify = RouteViewSet.as_view({
-    'patch': 'verify',
-    'put': 'verify',
-    'post': 'verify',
-    'get': 'verify'
+    'put': 'update',
+    'get': 'retrieve'
 })
 routeDetail = RouteViewSet.as_view({
     'get': 'retrieve',

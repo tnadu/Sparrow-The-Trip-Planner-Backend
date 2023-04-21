@@ -6,6 +6,68 @@ from django.contrib.auth.password_validation import validate_password
 from .models import *
 from datetime import date
 
+##########################################################################################################
+class IsWithinSerializer(serializers.ModelSerializer):
+    pass
+class LargeUserSerializer(serializers.ModelSerializer):
+    pass
+class SmallUserSerializer(serializers.ModelSerializer):
+    pass
+class RegisterUserSerializer(serializers.ModelSerializer):
+    pass
+class LoginSerializer(serializers.ModelSerializer):
+    pass
+class ChangePasswordSerializer(serializers.ModelSerializer):
+    pass
+class RegisterMemberSerializer(serializers.ModelSerializer):
+    pass
+class SmallMemberSerializer(serializers.ModelSerializer):
+    pass
+class WriteGroupSerializer(serializers.ModelSerializer):
+    pass
+class WriteBelongsToSerializer(serializers.ModelSerializer):
+    pass
+class GroupBelongsToSerializer(serializers.ModelSerializer):
+    pass
+class MemberBelongsToSerializer(serializers.ModelSerializer):
+    pass
+class LargeRouteSerializer(serializers.ModelSerializer):
+    pass
+class SmallRouteSerializer(serializers.ModelSerializer):
+    pass
+class WriteRouteSerializer(serializers.ModelSerializer):
+    pass
+class SmallRouteSerializer(serializers.ModelSerializer):
+    pass
+class ExtraSmallRouteSerializer(serializers.ModelSerializer):
+    pass
+class LargeAttractionSerializer(serializers.ModelSerializer):
+    pass
+class StatusSerializer(serializers.ModelSerializer):
+    pass
+
+class SmallAttractionSerializer(serializers.ModelSerializer):
+    pass
+class SmallTagSerializer(serializers.ModelSerializer):
+    pass
+class ImageSerializer(serializers.ModelSerializer):
+    pass
+class SmallRatingFlagSerializer(serializers.ModelSerializer):
+    pass
+class SmallTagSerializer(serializers.ModelSerializer):
+    pass
+class SmallTagSerializer(serializers.ModelSerializer):
+    pass
+class SmallAtractionSerializer(serializers.ModelSerializer):
+    pass
+class SmallTagSerializer(serializers.ModelSerializer):
+    pass
+class SmallTagSerializer(serializers.ModelSerializer):
+    pass
+class SmallTagSerializer(serializers.ModelSerializer):
+    pass
+##########################################################################################################
+
 
 # used in 'LargeMemberSerializer' and 'WriteMemberSerializer'
 class LargeUserSerializer(serializers.ModelSerializer):
@@ -220,9 +282,6 @@ class LargeGroupSerializer(serializers.ModelSerializer):
 #####################
 
 class WriteBelongsToSerializer(serializers.ModelSerializer):
-    member = serializers.PrimaryKeyRelatedField()
-    group = serializers.PrimaryKeyRelatedField()
-
     class Meta:
         model = BelongsTo
         fields = ['member', 'group', 'isAdmin', 'nickname']
@@ -252,13 +311,28 @@ class WriteRouteSerializer(serializers.ModelSerializer):
         model = Route
         fields = ['id', 'title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'user', 'group']
 
+    def create(self, validated_data):
+        print('validatedData', validated_data)
+        user = Member.objects.get(baseUser=validated_data.get('user'))
+        validated_data['user'] = user
+        print('user', user)
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        print('inside update')
+        user = Member.objects.get(baseUser=validated_data.get('user'))
+        validated_data['user'] = user
+        return super().update(instance, validated_data)
+
+
     # Only one and exactly one of the two nullable fields (group, user) can be null at a time.
     def validate(self, data):
-        user = data.get('user')
+        user = Member.objects.get(baseUser=data.get('user'))
         group = data.get('group')
         if (user is not None and group is not None) or (user is None and group is None):
             raise serializers.ValidationError("Only one of user and group can be specified")
         return data
+
 
 
 # retreives ALL the information for a a route
