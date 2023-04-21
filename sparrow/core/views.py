@@ -58,13 +58,12 @@ class IsWithinViewSet(GenericViewSet, mixins.CreateModelMixin, mixins.UpdateMode
 
 class GroupViewSet(ModelViewSet):
     queryset = Group.objects.all()
-    
-    # different serializers for different actions
-    def get_serializer_class(self):
-        # get, head, options methods
-        if self.request.method in permissions.SAFE_METHODS:
-            return SmallGroupSerializer
-        return WriteGroupSerializer
+    serializer_class = GroupSerializer
+
+        # # get, head, options methods
+        # if self.request.method in permissions.SAFE_METHODS:
+        #     return SmallGroupSerializer
+        # return WriteGroupSerializer
 
 
 class MemberViewSet(ModelViewSet):
@@ -213,9 +212,7 @@ class NotebookViewSet(ModelViewSet):
         # return LargeNotebookSerializer
 
 
-class StatusViewSet(mixins.ListModelMixin, 
-                    mixins.RetrieveModelMixin,
-                    GenericViewSet):
+class StatusViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
     queryset = Status.objects.all()
     serializer_class = StatusSerializer
     filterset_fields = ['notebook__id']
@@ -234,3 +231,8 @@ class RatingFlagViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateMode
         # that the query set can be limitted to ratings
         return RatingFlag.objects.get(rating_flag_type_id__lte=5)
 
+
+class RatingFlagTypeViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
+    queryset = RatingFlagType.objects.all()
+    serializer_class = RatingFlagTypeSerializer
+    filterset_fields = ['route_id', 'attraction_id']
