@@ -250,7 +250,7 @@ class RatingFlagTypeViewSet(GenericViewSet, mixins.ListModelMixin, mixins.Retrie
 class TagViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    filterset_fields = ['route_id', 'attraction_id', 'isTagged__attraction_id']
+    filterset_fields = ['isTagged__attraction']
 
 
 class IsTaggedViewSet(GenericViewSet,mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin):
