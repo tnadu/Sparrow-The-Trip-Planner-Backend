@@ -90,6 +90,10 @@ statusList = StatusViewSet.as_view({
     'get': 'list'
 })
 
+statusDetail = StatusViewSet.as_view({
+    'get': 'retrieve'
+})
+
 ##### Notebook #####
 #####################
 
@@ -128,4 +132,5 @@ urlpatterns = [
     path('notebook/detail/<int:pk>/', notebookDetail, name='notebook-detail'),
 
     path('status/list/', statusList, name='status-list'),
+    path('status/detail/<int:pk>/', statusDetail, name='status-detail')
 ]
