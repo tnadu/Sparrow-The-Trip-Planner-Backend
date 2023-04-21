@@ -211,13 +211,13 @@ class SmallAndListMemberSerializer(serializers.ModelSerializer):
 class SmallGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
-        fields = ['name']
+        fields = ['id', 'name']
 
 
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
-        fields = ['name', 'description']
+        fields = ['id', 'name', 'description']
 
 # class LargeGroupSerializer(serializers.ModelSerializer):
 #     members = MemberBelongsToSerializer(many=True, read_only=True)
@@ -233,7 +233,7 @@ class GroupSerializer(serializers.ModelSerializer):
 class BelongsToSerializer(serializers.ModelSerializer):
     class Meta:
         model = BelongsTo
-        fields = ['member', 'group', 'isAdmin', 'nickname']
+        fields = ['id', 'member', 'group', 'isAdmin', 'nickname']
 
 
 # class GroupBelongsToSerializer(serializers.ModelSerializer):
@@ -352,7 +352,7 @@ class SmallRouteSerializer(serializers.ModelSerializer):
 class IsWithinSerializer(serializers.ModelSerializer):
     class Meta:
         model = isWithin
-        fields = ['route', 'attraction', 'orderNumber']
+        fields = ['id', 'route', 'attraction', 'orderNumber']
 
 
 #### Attraction ####
@@ -361,13 +361,13 @@ class IsWithinSerializer(serializers.ModelSerializer):
 class SmallAttractionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attraction
-        fields = ['name']
+        fields = ['id', 'name']
 
 
 class AttractionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attraction
-        fields = ['name', 'generalDescription', 'latitude', 'longitude']
+        fields = ['id', 'name', 'generalDescription', 'latitude', 'longitude']
 
 # # retrieves minimal information about an attraction, for queries with
 # # minimal requirements
@@ -393,7 +393,7 @@ class AttractionSerializer(serializers.ModelSerializer):
 class StatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Status
-        fields = ['status']
+        fields = ['id', 'status']
 
 
 #### Tag ####
@@ -403,7 +403,7 @@ class StatusSerializer(serializers.ModelSerializer):
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ['tagName']
+        fields = ['id', 'tagName']
 
 # # with SmallAttractionSerializer nested   
 # class LargeTagSerializer(serializers.ModelSerializer):
@@ -419,7 +419,7 @@ class TagSerializer(serializers.ModelSerializer):
 class IsTaggedSerializer(serializers.ModelSerializer):
     class Meta:
         model = IsTagged
-        fields = ['tag', 'attraction']
+        fields = ['id', 'tag', 'attraction']
 
 
 ##### Notebook #####
@@ -432,7 +432,7 @@ class ListNotebookSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notebook
-        fields = ['title', 'status', 'route']
+        fields = ['id', 'title', 'status', 'route']
 
 
 # # shows everything it is to know about a specific notebook-entry
@@ -450,7 +450,7 @@ class ListNotebookSerializer(serializers.ModelSerializer):
 class NotebookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notebook
-        fields = ['route', 'title', 'note', 'status', 'dateStarted', 'dateCompleted']
+        fields = ['id', 'route', 'title', 'note', 'status', 'dateStarted', 'dateCompleted']
         extra_kwargs = {'dateStarted': {'read_only': True}, 'dateCompleted': {'read_only': True}}
 
     def create(self, validated_data):
@@ -511,7 +511,7 @@ class NotebookSerializer(serializers.ModelSerializer):
 class RatingFlagSerializer(serializers.ModelSerializer):
     class Meta:
         model = RatingFlag
-        fields = ['user', 'rating', 'comment', 'route', 'attraction']
+        fields = ['id', 'user', 'rating', 'comment', 'route', 'attraction']
               
     def validate(self, data):
         route = data.get('route')
@@ -568,5 +568,5 @@ class RatingFlagSerializer(serializers.ModelSerializer):
 class RatingFlagTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = RatingFlagType
-        fields = ['type']
+        fields = ['id', 'type']
         extra_kwargs = {'type': {'read_only': True}}

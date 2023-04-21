@@ -54,11 +54,13 @@ class RouteViewSet(ModelViewSet):
 class IsWithinViewSet(GenericViewSet, mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
     queryset = isWithin.objects.all()
     serializer_class = IsWithinSerializer
+    filterset_fields = ['route_id', 'attraction_id']
 
 
 class GroupViewSet(ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
+    filterset_fields = ['route__id', 'belongsTo__member_id']
 
         # # get, head, options methods
         # if self.request.method in permissions.SAFE_METHODS:
@@ -69,14 +71,16 @@ class GroupViewSet(ModelViewSet):
 class MemberViewSet(ModelViewSet):
     queryset = Member.objects.all()
     search_fields = ['baseUser__username', 'baseUser__first_name', 'baseUser__last_name']
+    filterset_fields = ['belongsTo__group_id', 'route__id', 'ratingFlag__id']
 
     def get_serializer_class(self):
         if self.action == 'list':
             return SmallAndListMemberSerializer
         
         if self.action == 'retrieve':
-            user = self.get_object()
-            if self.get_object() == self.request.user:
+            # only a member requesting to view their own profile can 
+            # access the detailed serializer containing the email field
+            if self.get_object().baseUser == self.request.user:
                 return MemberSerializer
             else:
                 return PrivateMemberSerializer
@@ -147,13 +151,14 @@ class AttractionViewSet(ModelViewSet):
         #
         #     return LargeAttractionSerializer
 
-    filterset_fields = ['tag__tagName']
+    filterset_fields = ['tag__tagName', 'ratingFlag__id', 'isWithin__route_id', 'isTagged__tag_id']
     search_fields = ['name', 'generalDescription']
     
 
 class BelongsToViewSet(GenericViewSet,mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
     queryset = BelongsTo.objects.all()
     serializer_class = BelongsToSerializer
+    filterset_fields = ['member_id', 'group_id']
 
 ### BACK-UP: for belongsTo
 # class BelongsToViewSet(ModelViewSet):
@@ -230,6 +235,7 @@ class StatusViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelM
 class RatingFlagViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin,
                                      mixins.UpdateModelMixin, mixins.DestroyModelMixin):
     serializer_class = RatingFlagSerializer
+    filterset_fields = ['route_id', 'attraction_id']
 
     def get_queryset(self):
         # users can create both ratings and flags (instances with a ratingFlagType greater than 5)
@@ -250,7 +256,7 @@ class RatingFlagTypeViewSet(GenericViewSet, mixins.ListModelMixin, mixins.Retrie
 class TagViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    filterset_fields = ['route_id', 'attraction_id', 'isTagged__attraction_id']
+    filterset_fields = ['isTagged__attraction_id']
 
 
 class IsTaggedViewSet(GenericViewSet,mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin):
