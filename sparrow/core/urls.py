@@ -110,6 +110,11 @@ notebookDetail = NotebookViewSet.as_view({
     'delete' : 'destroy'
 })
 
+isWithinList = IsWithinViewSet.as_view({
+    'get': 'list',
+    'delete': 'destroy'
+})
+
 urlpatterns = [
     path('auth/login/', login, name='login'),
     path('auth/logout/', logout, name='logout'),
@@ -135,5 +140,7 @@ urlpatterns = [
     path('notebook/detail/<int:pk>/', notebookDetail, name='notebook-detail'),
 
     path('status/list/', statusList, name='status-list'),
-    path('status/detail/<int:pk>/', statusDetail, name='status-detail')
-]
+    path('status/detail/<int:pk>/', statusDetail, name='status-detail'),
+
+    path('isWithin/delete/', isWithinList, name='ceva')
+]   
