@@ -76,12 +76,19 @@ belongsToList = BelongsToViewSet.as_view({
 
 belongsToDetail = BelongsToViewSet.as_view({
     'put': 'update',
-    'delete': 'destroy',
+    'delete': 'destroy'
 })
 
 # backup plan for belongsTo
 # belongsToGroupMembers = BelongsToViewSet.as_view({ 'get': 'get_group_members'})
 # belongsToAllGroupsForMember = BelongsToViewSet.as_view({'get': 'get_all_groups_for_member'})
+
+##### Status #####
+##################
+
+statusList = StatusViewSet.as_view({
+    'get': 'list'
+})
 
 ##### Notebook #####
 #####################
@@ -119,4 +126,6 @@ urlpatterns = [
 
     path('notebook/list/', notebookList, name='notebook-list'),
     path('notebook/detail/<int:pk>/', notebookDetail, name='notebook-detail'),
+
+    path('status/list/', statusList, name='status-list'),
 ]

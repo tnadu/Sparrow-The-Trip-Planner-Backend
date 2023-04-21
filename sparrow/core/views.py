@@ -204,3 +204,8 @@ class NotebookViewSet(ModelViewSet):
             return WriteNotebookSerializer
 
         return LargeNotebookSerializer
+
+
+class StatusViewSet(mixins.ListModelMixin, GenericViewSet):
+    queryset = Status.objects.all()
+    serializer_class = StatusSerializer
