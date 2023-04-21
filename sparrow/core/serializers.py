@@ -254,9 +254,8 @@ class BelongsToSerializer(serializers.ModelSerializer):
 
 ##### Route #####
 #####################
-
 # used for write operations (post/put)
-class RouteSerializer(serializers.ModelSerializer):
+class WriteRouteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Route
         fields = ['id', 'title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'user', 'group']
@@ -317,33 +316,33 @@ class RouteSerializer(serializers.ModelSerializer):
 
 
 # retreives ALL the information for a a route
-# class LargeRouteSerializer(serializers.ModelSerializer):
-#     user = SmallAndListMemberSerializer()
-#     is_within = IsWithinSerializer(many=True, required=False)  # one for each attraction of the route
-#     group = SmallGroupSerializer()
-
-#     class Meta:
-#         model = Route
-#         fields = ['id', 'title', 'description', 'verified', 'startingPointLat', 'startingPointLon',
-#                   'publicationDate',
-#                   'user', 'is_within', 'group']
-
-
-# retrieves partial information about a route
-class ListRouteSerializer(serializers.ModelSerializer):
-    user = SmallAndListMemberSerializer()
+class LargeRouteSerializer(serializers.ModelSerializer):
+    user = SmallMemberSerializer()
+    is_within = IsWithinSerializer(many=True, required=False)  # one for each attraction of the route
     group = SmallGroupSerializer()
 
     class Meta:
         model = Route
-        fields = ['id', 'title', 'description', 'verified', 'user', 'group']
+        fields = ['id', 'title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon',
+                  'publicationDate',
+                  'user', 'is_within', 'group']
+
+
+# retrieves partial information about a route
+class SmallRouteSerializer(serializers.ModelSerializer):
+    user = SmallMemberSerializer()
+    group = SmallGroupSerializer()
+
+    class Meta:
+        model = Route
+        fields = ['id', 'title', 'description', 'verified', 'public', 'user', 'group']
 
 
 # used in 'LargeUserSerializer' and 'LargeGroupSerializer'
-class SmallRouteSerializer(serializers.ModelSerializer):
+class ExtraSmallRouteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Route
-        fields = ['id', 'title']
+        fields = ['id', 'title', 'description']
 
 
 #### IsWithin ####

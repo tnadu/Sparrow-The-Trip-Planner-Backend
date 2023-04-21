@@ -22,9 +22,11 @@ class RouteViewSet(ModelViewSet):
     # depending on the type of request, a specific Serializer will be used
     def get_serializer_class(self):
         if self.action == 'list':
-            return ListRouteSerializer
+            return SmallRouteSerializer
+        elif self.action in ['create', 'update', 'partial_update']:
+            return WriteRouteSerializer
         else:
-            return RouteSerializer
+            return LargeRouteSerializer
 
     # toggle the public field
     # detail = True means it is applied only for an instance
@@ -34,7 +36,7 @@ class RouteViewSet(ModelViewSet):
 
         routeObject = self.get_object()
         routeObject.public = not routeObject.public
-        serializer = RouteSerializer(routeObject)
+        serializer = WriteRouteSerializer(routeObject)
         return Response(serializer.data)
 
         serializer = WriteRouteSerializer(routeObject, data=request.data, context={'request': request})
@@ -53,22 +55,22 @@ class GroupViewSet(ModelViewSet):
         # get, head, options methods
         if self.request.method in permissions.SAFE_METHODS:
             return SmallGroupSerializer
-        # return WriteGroupSerializer
+        return WriteGroupSerializer
 
 
 class MemberViewSet(ModelViewSet):
     queryset = Member.objects.prefetch_related(
-        Prefetch('ratings', queryset=RatingFlag.objects.filter(rating__gt = 0), to_attr='filtered_ratings'))
+        Prefetch('ratings', queryset=RatingFlag.objects.filter(rating > 0), to_attr='filtered_ratings'))
     search_fields = ['baseUser__username', 'baseUser__first_name', 'baseUser__last_name']
 
-    # def get_serializer_class(self):
-    #     if self.request.method in permissions.SAFE_METHODS:
-    #         return SmallMemberSerializer
+    def get_serializer_class(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            return SmallMemberSerializer
         
-    #     if self.action == 'create':
-    #         return RegisterMemberSerializer
+        if self.action == 'create':
+            return RegisterMemberSerializer
 
-    #     return WriteMemberSerializer
+        return WriteMemberSerializer
 
     # custom deletion logic
     def destroy(self, request, *args, **kwargs):
@@ -111,32 +113,30 @@ class ChangePasswordViewSet(mixins.UpdateModelMixin, GenericViewSet):
     queryset = User.objects.all()
     serializer_class = ChangePasswordSerializer
 
-class IsWithinViewSet(ModelViewSet):
-    queryset = isWithin.objects.all()
-    serializer_class = IsWithinSerializer
-    filterset_fields = ['attraction', 'route']
-
 class AttractionViewSet(ModelViewSet):
     # prefetch only related rating instances with a rating greater than 0 (i.e. not a flag)
     queryset = Attraction.objects.prefetch_related(
-        Prefetch('ratings', queryset=RatingFlag.objects.filter(rating__gt = 0), to_attr='filtered_ratings'))
+        Prefetch('ratings', queryset=RatingFlag.objects.filter(rating > 0), to_attr='filtered_ratings'))
 
     def get_serializer_class(self):
         if self.request.method in permissions.SAFE_METHODS:
             # the detailed version of an attraction is requested
             if self.action == 'retrieve':
-                return AttractionSerializer
+                return LargeAttractionSerializer
             
             return SmallAttractionSerializer
         else:
-            return AttractionSerializer
+            if self.action == 'create' or self.action == 'update':
+                return WriteAttractionSerializer
+            
+            return LargeAttractionSerializer
 
     filterset_fields = ['tag__tagName']
     search_fields = ['name', 'generalDescription']
     
 class BelongsToViewSet(ModelViewSet):
     queryset = BelongsTo.objects.all()
-    serializer_class = AttractionSerializer
+    serializer_class = WriteBelongsToSerializer
 
     filterset_fields = ['nickname']
     search_fields = ['nickname']
