@@ -245,3 +245,16 @@ class RatingFlagTypeViewSet(GenericViewSet, mixins.ListModelMixin, mixins.Retrie
     queryset = RatingFlagType.objects.all()
     serializer_class = RatingFlagTypeSerializer
     filterset_fields = ['route_id', 'attraction_id']
+
+
+class TagViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    filterset_fields = ['route_id', 'attraction_id', 'isTagged__attraction_id']
+
+
+class IsTaggedViewSet(GenericViewSet,mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin):
+    queryset = IsTagged.objects.all()
+    serializer_class = IsTaggedSerializer
+    filterset_fields = ['attraction_id', 'tag_id']
+    
