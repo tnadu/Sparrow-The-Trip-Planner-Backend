@@ -484,3 +484,13 @@ class RatingFlagSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Rating
 #         fields = ['user', 'rating', 'comment', 'route', 'attraction']
+
+
+#### RatingFlagType ####
+########################
+
+class RatingFlagTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RatingFlagType
+        fields = ['type']
+        extra_kwargs = {'type': {'read_only': True}}
