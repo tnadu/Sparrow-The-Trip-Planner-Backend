@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 
 # many-to-many between Route & Attraction
@@ -25,11 +26,16 @@ class Route(models.Model):
     publicationDate = models.DateTimeField(auto_now_add=True, db_column='routePublicationDate')
     user = models.ForeignKey('Member', on_delete=models.CASCADE, null=True, blank=True, db_column='user_id')  # nullable
     group = models.ForeignKey('Group', on_delete=models.CASCADE, null=True, blank=True, db_column='group_id')  # nullable
-    
+
     class Meta:
         db_table = 'route'
         ordering = ['publicationDate']
         default_related_name = 'route'
+
+    # update for admin triggers ModelAdmin.save_form so i need to override it
+    def clean(self):
+        if (self.group is None and self.user is None) or (self.group is not None and self.user is not None):
+            raise ValidationError("Exactly one of group and user must be specified")
 
     def __str__(self):
         return self.title + self.description
