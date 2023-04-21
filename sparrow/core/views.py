@@ -17,7 +17,7 @@ class RouteViewSet(ModelViewSet):
     # search & options for filtering and ordering
     filterset_fields = ['verified', 'user__baseUser__username', 'user__baseUser__first_name', 'user__baseUser__last_name',
                         'group__name', 'isWithin__attraction__name', 'isWithin__attraction__isTagged__tag__tagName',
-                        'notebook__id', 'user__id', 'group__id']
+                        'notebook__id', 'user', 'group__id']
     search_fields = ['title', 'description', 'startingPointLat', 'startingPointLon']
     ordering_fields = ['startingPointLat', 'startingPointLon']
 
@@ -28,7 +28,7 @@ class RouteViewSet(ModelViewSet):
         # if self.action == 'list':
         #     return SmallRouteSerializer
         # elif self.action in ['create', 'update', 'partial_update']:
-        #     return WriteRouteSerializer
+        #     return RouteSerializer
         # else:
         #     return LargeRouteSerializer
 
@@ -40,10 +40,9 @@ class RouteViewSet(ModelViewSet):
 
         routeObject = self.get_object()
         routeObject.public = not routeObject.public
-        serializer = WriteRouteSerializer(routeObject)
-        return Response(serializer.data)
+        serializer = RouteSerializer(routeObject)
 
-        serializer = WriteRouteSerializer(routeObject, data=request.data, context={'request': request})
+        serializer = RouteSerializer(routeObject, data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
