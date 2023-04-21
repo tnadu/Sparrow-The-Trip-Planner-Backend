@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.password_validation import validate_password
 from .models import *
+from datetime import date
 
 
 # used in 'LargeMemberSerializer' and 'WriteMemberSerializer'
@@ -364,3 +365,86 @@ class WriteIsTaggedSerializer(serializers.ModelSerializer):
     class Meta:
         model = IsTagged
         fields = ['tag', 'attraction']
+
+
+##### Notebook #####
+#####################
+
+# notebook serializers
+# shows minimum of information, used when displaying all entries in a list
+class SmallNotebookSerializer(serializers.ModelSerializer):
+
+    status = StatusSerializer(read_only=True)
+    class Meta:
+        model = Notebook
+        fields = ['title', 'note', 'status']
+
+# shows everything it is to know about a specific notebook-entry
+class LargeNotebookSerializer(serializers.ModelSerializer):
+
+    # route = SmallRouteSerializer() # add route in fields field:) there is an error in smallrouteserializer
+    user = SmallMemberSerializer(read_only=True)
+    status = StatusSerializer(read_only=True)
+
+    class Meta:
+        model = Notebook
+        fields = ['title', 'note', 'dateStarted', 'status', 'dateCompleted', 'user']
+
+# used to display only the fields necessary when put / post requests are made
+class WriteNotebookSerializer(serializers.ModelSerializer):
+    
+    # using a custom create function as I need to make a few modifications
+    # before saving the object in the database
+    def create(self, validated_data):
+        request = self.context.get('request')
+
+        # if the user making the request is authenticated
+        if request:
+
+            member = Member.objects.get(baseUser=request.user)
+            # they become the user of the current notebook-entry, note that the member object was added
+            validated_data['user'] = member
+            # the starting date of the current entry becomes today's date
+            validated_data['dateStarted'] = date.today()
+
+            # if the user sets the status as 'Completed' upon creation
+            if validated_data['status'].status == "Completed":
+                # then the Completed date also becomes today's date
+                validated_data['dateCompleted'] = date.today()
+        else:
+            raise serializers.ValidationError({'request': 'Request related error'})
+        
+        # if there are no modifications made regarding: dateCompleted -> it remains null 
+        # calling parent class function to perform better validation of data
+        return super().create(validated_data)
+
+    # same goes for update
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+
+        if request:
+            member = Member.objects.get(baseUser=request.user)
+            validated_data['user'] = member
+            # the previous status
+            old_status = instance.status.status
+
+            # the user wants to change the status of the trip
+            # it changes it from anything (including 'Completed') to 'Completed'
+            if validated_data['status'].status == 'Completed':
+                # then the completion date also changes
+                validated_data['dateCompleted'] = date.today()
+            
+            # it changes it from 'Completed' to anything (including 'Completed')
+            elif old_status == 'Completed':
+                # the completion date becomes null
+                validated_data['dateCompleted'] = None
+                # the starting date is also modified
+                validated_data['dateStarted'] = date.today()
+        else:
+            raise serializers.ValidationError({'request': 'Request related error'})
+        # calling parent class function to perform better validation of data
+        return super().update(instance, validated_data)
+    
+    class Meta:
+        model = Notebook
+        fields = ['route', 'title', 'note', 'status']

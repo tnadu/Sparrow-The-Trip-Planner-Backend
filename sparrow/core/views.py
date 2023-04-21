@@ -116,7 +116,6 @@ class ChangePasswordViewSet(mixins.UpdateModelMixin, GenericViewSet):
     queryset = User.objects.all()
     serializer_class = ChangePasswordSerializer
 
-
 class AttractionViewSet(ModelViewSet):
     # prefetch only related rating instances with a rating greater than 0 (i.e. not a flag)
     queryset = Attraction.objects.prefetch_related(
@@ -186,3 +185,22 @@ class BelongsToViewSet(ModelViewSet):
         
 #         except BelongsTo.DoesNotExist:
 #             return Response(status=status.HTTP_404_NOT_FOUND)
+
+# notebook viewset
+class NotebookViewSet(ModelViewSet):
+    queryset = Notebook.objects.all()
+        
+    def get_serializer_class(self):
+
+        if self.request.method in permissions.SAFE_METHODS: # get, head, options
+            # if details about a specific notebook are requested
+            if self.action == 'retrieve':
+                return LargeNotebookSerializer
+            # otherwise, general information about the notebook entry is presented
+            return SmallNotebookSerializer
+
+        # if a specific notebook entry is being modified
+        if self.action == 'create' or self.action == 'update':
+            return WriteNotebookSerializer
+
+        return LargeNotebookSerializer
