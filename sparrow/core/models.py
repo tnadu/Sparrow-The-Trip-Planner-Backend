@@ -44,7 +44,7 @@ class Attraction(models.Model):
     class Meta:
         db_table = 'attraction'
         ordering = ['name']
-        default_related_name = 'attraction'
+        default_related_name = 'attraction' 
 
 
 # member model, extending the User model via a one-to-one relationship;
