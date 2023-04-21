@@ -324,24 +324,6 @@ class StatusSerializer(serializers.ModelSerializer):
         model = Status
         fields = ['status']
 
-
-#used for write operations (post/put)
-class WriteRatingFlagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = RatingFlag
-        fields = ['user', 'rating', 'comment', 'route', 'attraction']
-              
-    def validate(self, data):
-        route = data.get('route')
-        attraction = data.get('attraction')
-        
-        #only one and exactly one of the two nullable fields (route, attraction) can be null at a time
-        if route is not None and attraction is not None:
-            raise serializers.ValidationError("Only one of route or attraction can be specified.")
-        elif route is None and attraction is None:
-            raise serializers.ValidationError("Either route or attraction must be specified.")
-        
-        return data
         
 # will be nested in Attraction Serializers 
 class SmallTagSerializer(serializers.ModelSerializer):
@@ -439,15 +421,58 @@ class NotebookSerializer(serializers.ModelSerializer):
 #### RatingFlag ####
 ####################
 
-# small flag serializer, gives minimal information about rating
-class SmallRatingFlagSerializer(serializers.ModelSerializer):
+# # small flag serializer, gives minimal information about rating
+# class SmallRatingFlagSerializer(serializers.ModelSerializer):
 
-    route = ExtraSmallRouteSerializer(read_only=True)
-    attraction = SmallAtractionSerializer(read_only=True)
+#     route = ExtraSmallRouteSerializer(read_only=True)
+#     attraction = SmallAtractionSerializer(read_only=True)
 
+#     class Meta:
+#         model = Rating
+#         fields = ['rating', 'comment', 'route', 'attraction']
+
+
+class RatingFlagSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Rating
-        fields = ['rating', 'comment', 'route', 'attraction']
+        model = RatingFlag
+        fields = ['user', 'rating', 'comment', 'route', 'attraction']
+              
+    def validate(self, data):
+        route = data.get('route')
+        attraction = data.get('attraction')
+        
+        # only one and exactly one of the two nullable fields (route, attraction) can be null at a time
+        if route is not None and attraction is not None:
+            raise serializers.ValidationError("Only one of route or attraction can be specified.")
+        elif route is None and attraction is None:
+            raise serializers.ValidationError("Either route or attraction must be specified.")
+        
+        return data
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+
+        if not request:
+            raise serializers.ValidationError({'request': 'Request related error'})
+
+        member = Member.objects.get(baseUser=request.user)
+        # the user making the request gets associated with the current RatingFlag
+        validated_data['user'] = member
+
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+
+        if not request: 
+            raise serializers.ValidationError({'request': 'Request related error'})
+
+        member = Member.objects.get(baseUser=request.user)
+        # the user making the request gets associated with the current RatingFlag
+        validated_data['user'] = member
+        
+        return super().update(instance, validated_data)
+
 
 # # large flag serializer, gives detailed information about rating
 # class LargeRatingFlagSerializer(serializers.ModelSerializer):
