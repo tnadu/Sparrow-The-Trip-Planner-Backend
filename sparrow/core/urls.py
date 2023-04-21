@@ -3,16 +3,17 @@ from .views import *
 
 
 app_name = 'core'
-
+##### Route #####
+######################
 routeList = RouteViewSet.as_view({
     'get': 'list',
     'post': 'create'
 })
 
 # only needs to respond to write actions, patch & put
-routeVerify = RouteViewSet.as_view({
-    'patch': 'verifiy',
-    'put': 'verifiy',
+routePublicToggle = RouteViewSet.as_view({
+    'put': 'update',
+    'get': 'retrieve'
 })
 routeDetail = RouteViewSet.as_view({
     'get': 'retrieve',
@@ -20,7 +21,8 @@ routeDetail = RouteViewSet.as_view({
     'delete': 'destroy'
 })
 
-
+##### Group #####
+######################
 groupList = GroupViewSet.as_view({
     'get': 'list',
     'post': 'create'
@@ -31,7 +33,8 @@ groupDetail = GroupViewSet.as_view({
     'put': 'update',
     'delete': 'destroy'
 })
-
+##### Member #####
+######################
 memberList = MemberViewSet.as_view({
     'get': 'list',
     'post': 'create'
@@ -123,7 +126,7 @@ urlpatterns = [
     
     path('route/list/', routeList, name='route-list'),
     path('route/detail/<int:pk>/', routeDetail, name='route-detail'),
-    path('route/verify/<int:pk>/', routeVerify, name='route-verify'),
+    path('route/publicToggle/<int:pk>/', routePublicToggle, name='route-public-toggle'),
 
     path('belongsTo/list/', belongsToList, name="belongsTo-list"),
     path('belongsTo/detail/<int:pk>/', belongsToDetail, name='belongsTo-detail'),
