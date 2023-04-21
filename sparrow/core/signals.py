@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.dispatch import receiver
 from .models import Member, Status, Tag, RatingFlagType
 import os
+from django.conf import settings
 
 
 # signals allow various components to notify other components
@@ -27,9 +28,9 @@ def createMember(sender, instance, created, **kwargs):
 def fillStatus_with_defaults(sender, **kwargs):
     if sender.name == 'core' and Status.objects.count() == 0:
         fixture_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'initial_status.json')
-        call_command('loaddata', fixture_path)@receiver(post_migrate)
+        call_command('loaddata', fixture_path)
 
-
+@receiver(post_migrate)
 def defaultValues_for_tag(sender, **kwargs):
     if sender.name == 'core' and Tag.objects.count() == 0:
         fixture_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'initial_tag.json')
@@ -41,3 +42,15 @@ def defaultValues_for_ratingFlag(sender, **kwargs):
     if sender.name == 'core' and RatingFlagType.objects.count() == 0:
         fixture_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'initial_ratingFlagType.json')
         call_command('loaddata', fixture_path)
+
+# this function is responsible for creating sub-directories within the "media" folder
+# the sub-directories are created based on the type of images, 
+# which could be either related to notebooks or attractions
+@receiver(post_migrate)
+def create_media_subdirectories(sender, **kwargs):
+    if sender.name == 'core':
+        images_dir = [os.path.join(settings.MEDIA_ROOT, 'notebook_images'),
+                    os.path.join(settings.MEDIA_ROOT, 'attraction_images')]
+        for path in images_dir:
+            if not os.path.exists(path):
+                os.makedirs(path)

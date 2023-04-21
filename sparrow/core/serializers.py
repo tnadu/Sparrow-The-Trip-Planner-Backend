@@ -501,3 +501,6 @@ class ImageUploadSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+    
+class NotebookImageUpload(serializers.ModelSerializer):
+    NotImplemented
