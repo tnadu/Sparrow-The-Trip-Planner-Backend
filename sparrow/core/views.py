@@ -31,12 +31,12 @@ class RouteViewSet(ModelViewSet):
     # toggle the verify field, only the admin can do this
     # detail = True means it is applied only for an instance
     # it will respond only to update-type requests
-    @action(detail = True, methods=['PUT', 'PATCH'], permission_classes=[IsAdminUser])
-    def verifiy(self, request, pk):
+    @action(detail = True, methods=['PUT', 'PATCH', 'GET', 'POST'], permission_classes=[IsAdminUser])
+    def verify(self, request, pk):
 
-        routeObject = self.get_object(pk)
+        routeObject = self.get_object()
 
-        serializer = WriteRouteSerializer(routeObject)
+        serializer = WriteRouteSerializer(routeObject, data=request.data)
         if serializer.is_valid():
 
             if (routeObject.verified == True):
