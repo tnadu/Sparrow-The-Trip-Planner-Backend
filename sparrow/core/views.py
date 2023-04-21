@@ -174,3 +174,9 @@ class BelongsToViewSet(ModelViewSet):
         
 #         except BelongsTo.DoesNotExist:
 #             return Response(status=status.HTTP_404_NOT_FOUND)
+
+class StatusViewSet(ModelViewSet):
+    queryset = Status.objects.all()
+    serializer_class = StatusSerializer
+
+    filterset_fields = ['status']

@@ -76,12 +76,25 @@ belongsToList = BelongsToViewSet.as_view({
 
 belongsToDetail = BelongsToViewSet.as_view({
     'put': 'update',
-    'delete': 'destroy',
+    'delete': 'destroy'
 })
 
 # backup plan for belongsTo
 # belongsToGroupMembers = BelongsToViewSet.as_view({ 'get': 'get_group_members'})
 # belongsToAllGroupsForMember = BelongsToViewSet.as_view({'get': 'get_all_groups_for_member'})
+
+##### Status #####
+##################
+
+statusList = StatusViewSet.as_view({
+    'put': 'create'
+})
+
+statusDetail = StatusViewSet.as_view({
+    'get': 'retrieve',
+    'put': 'update',
+    'deleta': 'destroy'
+})
 
 urlpatterns = [
     path('auth/login/', login, name='login'),
@@ -102,5 +115,8 @@ urlpatterns = [
     path('route/verify/<int:pk>/', routeVerify, name='route-verify'),
 
     path('belongsTo/list/', belongsToList, name="belongsTo-list"),
-    path('belongsTo/detail/<int:pk>/', belongsToDetail, name='belongsTo-detail')
+    path('belongsTo/detail/<int:pk>/', belongsToDetail, name='belongsTo-detail'),
+
+    path('status/list/', statusList, name='status-list'),
+    path('status/detail/', statusDetail, name='status-detail')
 ]
