@@ -20,14 +20,17 @@ class RouteViewSet(ModelViewSet):
     search_fields = ['title', 'description', 'startingPointLat', 'startingPointLon']
     ordering_fields = ['startingPointLat', 'startingPointLon']
 
-    # depending on the type of request, a specific Serializer will be used
     def get_serializer_class(self):
         if self.action == 'list':
-            return SmallRouteSerializer
-        elif self.action in ['create', 'update', 'partial_update']:
-            return WriteRouteSerializer
-        else:
-            return LargeRouteSerializer
+            return ListRouteSerializer
+        
+        return RouteSerializer
+        # if self.action == 'list':
+        #     return SmallRouteSerializer
+        # elif self.action in ['create', 'update', 'partial_update']:
+        #     return WriteRouteSerializer
+        # else:
+        #     return LargeRouteSerializer
 
     # toggle the public field
     # detail = True means it is applied only for an instance
@@ -46,6 +49,11 @@ class RouteViewSet(ModelViewSet):
             return Response(serializer.data)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class IsWithinViewSet(GenericViewSet, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+    queryset = isWithin.objects.all()
+    serializer_class = IsWithinSerializer
 
 
 class GroupViewSet(ModelViewSet):
@@ -135,12 +143,10 @@ class AttractionViewSet(ModelViewSet):
     filterset_fields = ['tag__tagName']
     search_fields = ['name', 'generalDescription']
     
-class BelongsToViewSet(ModelViewSet):
-    queryset = BelongsTo.objects.all()
-    serializer_class = WriteBelongsToSerializer
 
-    filterset_fields = ['nickname']
-    search_fields = ['nickname']
+class BelongsToViewSet(GenericViewSet, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+    queryset = BelongsTo.objects.all()
+    serializer_class = BelongsToSerializer
 
 ### BACK-UP: for belongsTo
 # class BelongsToViewSet(ModelViewSet):
@@ -213,3 +219,18 @@ class StatusViewSet(mixins.ListModelMixin,
     queryset = Status.objects.all()
     serializer_class = StatusSerializer
     filterset_fields = ['notebook__id']
+
+
+class RatingFlagViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin,
+                                     mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+    serializer_class = RatingFlagSerializer
+
+    def get_queryset(self):
+        # users can create both ratings and flags (instances with a ratingFlagType greater than 5)
+        if self.action == 'create':
+            return RatingFlag.objects.all()
+        
+        # once created, the flags can be altered, which means
+        # that the query set can be limitted to ratings
+        return RatingFlag.objects.get(rating_flag_type_id__lte=5)
+
