@@ -147,7 +147,7 @@ class AttractionViewSet(ModelViewSet):
         #
         #     return LargeAttractionSerializer
 
-    filterset_fields = ['tag__tagName']
+    filterset_fields = ['isTagged__tag__tagName']
     search_fields = ['name', 'generalDescription']
     
 

@@ -196,9 +196,6 @@ urlpatterns = [
     path('isWithin/list/', IsWithinList, name='isWithin-list'),
     path('isWithin/detail/<int:pk>/', IsWithinDetail, name='isWithin-detail'),
 
-    path('ratingFlag/list/', RatingFlagList, name='ratingFlag-list'),
-    path('ratingFlag/detail/<int:pk>/', RatingFlagDetail, name='ratingFlag-detail'),
-
     path('ratingFlagType/list/', RatingFlagTypeList, name='ratingFlagType-list'),
     path('ratingFlagType/detail/<int:pk>/', RatingFlagTypeDetail, name='ratingFlagType-detail'),
 
