@@ -8,18 +8,23 @@ from datetime import date
 
 
 # used in 'LargeMemberSerializer' and 'WriteMemberSerializer'
-class LargeUserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'email']
 
 
 # nested in 'SmallMemberSerializer'
-class SmallUserSerializer(serializers.ModelSerializer):
+class PrivateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name']
 
+# useful for Route, Rating to display the name of the creator
+class SmallUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username']
 
 class RegisterUserSerializer(serializers.ModelSerializer):
     passwordCheck = serializers.CharField(style={'input_type': 'password'}, write_only=True)
@@ -158,17 +163,9 @@ class RegisterMemberSerializer(serializers.ModelSerializer):
 #         fields = ['baseUser', 'profilePhoto', 'birthdate', 'groups', 'routes', 'ratings', 'notebooks']
 
 
-# read-only, nestable serializer
-class SmallMemberSerializer(serializers.ModelSerializer):
-    baseUser = SmallUserSerializer(read_only=True)
-
-    class Meta:
-        model = Member
-        fields = ['baseUser', 'profilePhoto', 'birthDate']
-
-# used for put/patch/delete on the Member model
-class WriteMemberSerializer(serializers.ModelSerializer):
-    baseUser = LargeUserSerializer()
+# nestable serializer
+class MemberSerializer(serializers.ModelSerializer):
+    baseUser = UserSerializer()
 
     class Meta:
         model = Member
@@ -185,7 +182,7 @@ class WriteMemberSerializer(serializers.ModelSerializer):
             # aquire instance
             currentBaseUser = instance.baseUser
             # serialize and verify the validated user data
-            currentBaseUserSerializer = LargeUserSerializer(currentBaseUser, data=extractedUserData, partial=True)
+            currentBaseUserSerializer = UserSerializer(currentBaseUser, data=extractedUserData, partial=True)
             currentBaseUserSerializer.is_valid(raise_exception=True)
             # save the changes
             currentBaseUserSerializer.save()
@@ -193,6 +190,20 @@ class WriteMemberSerializer(serializers.ModelSerializer):
         # update the member itself
         return super().update(instance, validated_data)
 
+class PrivateMemberSerializer(serializers.ModelSerializer):
+    baseUser = PrivateUserSerializer(read_only=True)
+
+    class Meta:
+        model = Member
+        fields = ['baseUser', 'profilePhoto', 'birthDate']
+
+# for Route, to display the user's profile image & username
+class SmallAndListMemberSerializer(serializers.ModelSerializer):
+    baseUser = SmallUserSerializer(read_only=True)
+
+    class Meta:
+        model = Member
+        fields = ['baseUser', 'profilePhoto']
 
 #### Group #####
 ################
