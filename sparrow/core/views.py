@@ -10,6 +10,7 @@ from django.http import Http404
 from rest_framework.permissions import IsAdminUser
 from rest_framework.decorators import action
 
+
 class RouteViewSet(ModelViewSet):
     queryset = Route.objects.all()
 
@@ -46,7 +47,7 @@ class RouteViewSet(ModelViewSet):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# rough idea of the ViewSets associated with a Member and a Group
+
 class GroupViewSet(ModelViewSet):
     queryset = Group.objects.all()
     
@@ -59,18 +60,17 @@ class GroupViewSet(ModelViewSet):
 
 
 class MemberViewSet(ModelViewSet):
-    queryset = Member.objects.prefetch_related(
-        Prefetch('ratings', queryset=RatingFlag.objects.filter(rating > 0), to_attr='filtered_ratings'))
+    queryset = Member.objects.all()
     search_fields = ['baseUser__username', 'baseUser__first_name', 'baseUser__last_name']
 
     def get_serializer_class(self):
-        if self.request.method in permissions.SAFE_METHODS:
-            return SmallMemberSerializer
+        if self.action == 'list':
+            return ListMemberSerializer
         
         if self.action == 'create':
             return RegisterMemberSerializer
 
-        return WriteMemberSerializer
+        return MemberSerializer
 
     # custom deletion logic
     def destroy(self, request, *args, **kwargs):
@@ -112,6 +112,7 @@ class LogoutView(APIView):
 class ChangePasswordViewSet(mixins.UpdateModelMixin, GenericViewSet):
     queryset = User.objects.all()
     serializer_class = ChangePasswordSerializer
+
 
 class AttractionViewSet(ModelViewSet):
     # prefetch only related rating instances with a rating greater than 0 (i.e. not a flag)
@@ -183,29 +184,32 @@ class BelongsToViewSet(ModelViewSet):
 #         except BelongsTo.DoesNotExist:
 #             return Response(status=status.HTTP_404_NOT_FOUND)
 
-# notebook viewset
+
 class NotebookViewSet(ModelViewSet):
     queryset = Notebook.objects.all()
         
     def get_serializer_class(self):
+        if self.action == 'list':
+            return ListNotebookSerializer
+        
+        return NotebookSerializer
+        # if self.request.method in permissions.SAFE_METHODS:     # get, head, options
+        #     # if details about a specific notebook are requested
+        #     if self.action == 'retrieve':
+        #         return LargeNotebookSerializer
+        #     # otherwise, general information about the notebook entry is presented
+        #     return SmallNotebookSerializer
 
-        if self.request.method in permissions.SAFE_METHODS: # get, head, options
-            # if details about a specific notebook are requested
-            if self.action == 'retrieve':
-                return LargeNotebookSerializer
-            # otherwise, general information about the notebook entry is presented
-            return SmallNotebookSerializer
+        # # if a specific notebook entry is being modified
+        # if self.action == 'create' or self.action == 'update':
+        #     return WriteNotebookSerializer
 
-        # if a specific notebook entry is being modified
-        if self.action == 'create' or self.action == 'update':
-            return WriteNotebookSerializer
+        # return LargeNotebookSerializer
 
-        return LargeNotebookSerializer
 
 class StatusViewSet(mixins.ListModelMixin, 
                     mixins.RetrieveModelMixin,
                     GenericViewSet):
     queryset = Status.objects.all()
     serializer_class = StatusSerializer
-
     filterset_fields = ['notebook__id']
