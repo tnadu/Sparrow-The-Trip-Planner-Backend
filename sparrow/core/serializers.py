@@ -484,7 +484,7 @@ class ImageUploadSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data, folder_name = 'miscellaneous/'):
         image = validated_data.pop('image')
-        instance = super().create(validated_data)
+        instance = Image(**validated_data)
 
         file_extension = image.name.split('.')[-1]
         generated_unique_filename = '{}.{}'.format(uuid.uuid4(), file_extension)
