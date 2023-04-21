@@ -511,7 +511,7 @@ class NotebookSerializer(serializers.ModelSerializer):
 class RatingFlagSerializer(serializers.ModelSerializer):
     class Meta:
         model = RatingFlag
-        fields = ['user', 'rating', 'comment', 'route', 'attraction']
+        fields = ['rating', 'comment', 'route', 'attraction']
               
     def validate(self, data):
         route = data.get('route')

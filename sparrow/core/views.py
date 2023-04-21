@@ -238,7 +238,7 @@ class RatingFlagViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateMode
         
         # once created, the flags can be altered, which means
         # that the query set can be limitted to ratings
-        return RatingFlag.objects.get(rating_flag_type_id__lte=5)
+        return RatingFlag.objects.filter(rating_id__lte=5)
 
 
 class RatingFlagTypeViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
