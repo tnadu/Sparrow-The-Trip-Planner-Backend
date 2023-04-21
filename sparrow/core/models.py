@@ -184,6 +184,7 @@ class Image(models.Model):
     # setting up a timestamp is useful for letting users know when an image was taken 
     # and for indicating if the information may be outdated or no longer available
     timestamp = models.DateTimeField(auto_now_add=True, null = False, db_column = 'datePosted')
+    owner = models.ForeignKey('Member', null=True, on_delete=models.CASCADE, db_column='owner_id')
 
     class Meta:
         db_table = 'Image'

@@ -5,7 +5,9 @@ from django.contrib.auth.hashers import check_password
 from django.contrib.auth.password_validation import validate_password
 from .models import *
 from datetime import date
-
+from django.core.files.storage import default_storage
+from django.conf import settings
+import uuid
 
 # used in 'LargeMemberSerializer' and 'WriteMemberSerializer'
 class LargeUserSerializer(serializers.ModelSerializer):
@@ -208,24 +210,24 @@ class WriteGroupSerializer(serializers.ModelSerializer):
         model = Group
         fields = ['name', 'description']
 
-class LargeGroupSerializer(serializers.ModelSerializer):
-    members = MemberBelongsToSerializer(many=True, read_only=True)
-    routes = ExtraSmallRouteSerializer(many=True, read_only=True)
+# class LargeGroupSerializer(serializers.ModelSerializer):
+#     members = MemberBelongsToSerializer(many=True, read_only=True)
+#     routes = ExtraSmallRouteSerializer(many=True, read_only=True)
 
-    class Meta:
-        model = Group
-        fields = ['name', 'description', 'members', 'routes']
+#     class Meta:
+#         model = Group
+#         fields = ['name', 'description', 'members', 'routes']
 
 ##### BelongsTo #####
 #####################
 
-class WriteBelongsToSerializer(serializers.ModelSerializer):
-    member = serializers.PrimaryKeyRelatedField()
-    group = serializers.PrimaryKeyRelatedField()
+# class WriteBelongsToSerializer(serializers.ModelSerializer):
+#     member = serializers.PrimaryKeyRelatedField()
+#     group = serializers.PrimaryKeyRelatedField()
 
-    class Meta:
-        model = BelongsTo
-        fields = ['member', 'group', 'isAdmin', 'nickname']
+#     class Meta:
+#         model = BelongsTo
+#         fields = ['member', 'group', 'isAdmin', 'nickname']
 
 
 class GroupBelongsToSerializer(serializers.ModelSerializer):
@@ -266,16 +268,16 @@ class WriteRouteSerializer(serializers.ModelSerializer):
 
 
 # retreives ALL the information for a a route
-class LargeRouteSerializer(serializers.ModelSerializer):
-    author = SmallMemberSerializer()
-    is_within = IsWithinSerializer(many=True)  # one for each attraction of the route
-    group = SmallGroupSerializer()
+# class LargeRouteSerializer(serializers.ModelSerializer):
+#     author = SmallMemberSerializer()
+#     is_within = IsWithinSerializer(many=True)  # one for each attraction of the route
+#     group = SmallGroupSerializer()
 
-    class Meta:
-        model = Route
-        fields = ['title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon',
-                  'publicationDate',
-                  'author', 'is_within', 'group']
+#     class Meta:
+#         model = Route
+#         fields = ['title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon',
+#                   'publicationDate',
+#                   'author', 'is_within', 'group']
 
 
 # retrieves partial information about a route
@@ -313,14 +315,14 @@ class ExtraSmallRouteSerializer(serializers.ModelSerializer):
 #         fields = ['name', 'generalDescription', 'tag']
 
 # retrieves ALL the information about an attraction
-class LargeAttractionSerializer(serializers.ModelSerializer):
-    images = ImageSerializer(many=True)
-    tag = SmallTagSerializer()
-    ratings = SmallRatingFlagSerializer(source='filtered_ratings', many=True)
+# class LargeAttractionSerializer(serializers.ModelSerializer):
+#     images = ImageSerializer(many=True)
+#     tag = SmallTagSerializer()
+#     ratings = SmallRatingFlagSerializer(source='filtered_ratings', many=True)
 
-    class Meta:
-        model = Attraction
-        fields = ['name', 'generalDescription', 'latitude', 'longitude', 'images', 'tag', 'ratings']
+#     class Meta:
+#         model = Attraction
+#         fields = ['name', 'generalDescription', 'latitude', 'longitude', 'images', 'tag', 'ratings']
 
 
 class StatusSerializer(serializers.ModelSerializer):
@@ -355,11 +357,11 @@ class SmallTagSerializer(serializers.ModelSerializer):
         fields = ['tagName']
 
 # with SmallAttractionSerializer nested   
-class LargeTagSerializer(serializers.ModelSerializer):
-    attractions = SmallAttractionSerializer(many=True, read_only=True)
-    class Meta:
-        model = Tag
-        fields = ['tagName','attractions']
+# class LargeTagSerializer(serializers.ModelSerializer):
+#     attractions = SmallAttractionSerializer(many=True, read_only=True)
+#     class Meta:
+#         model = Tag
+#         fields = ['tagName','attractions']
 
 
 #used for write operations (post/put)      
@@ -452,22 +454,50 @@ class WriteNotebookSerializer(serializers.ModelSerializer):
         fields = ['route', 'title', 'note', 'status']
 
 # small flag serializer, gives minimal information about rating
-class SmallRatingFlagSerializer(serializers.ModelSerializer):
+# class SmallRatingFlagSerializer(serializers.ModelSerializer):
 
-    route = ExtraSmallRouteSerializer(read_only=True)
-    attraction = SmallAtractionSerializer(read_only=True)
+#     route = ExtraSmallRouteSerializer(read_only=True)
+#     attraction = SmallAtractionSerializer(read_only=True)
 
-    class Meta:
-        model = Rating
-        fields = ['rating', 'comment', 'route', 'attraction']
+#     class Meta:
+#         model = Rating
+#         fields = ['rating', 'comment', 'route', 'attraction']
 
 # large flag serializer, gives detailed information about rating
-class LargeRatingFlagSerializer(serializers.ModelSerializer):
+# class LargeRatingFlagSerializer(serializers.ModelSerializer):
 
-    user = SmallUserSerializer(read_only=True)
-    route = ExtraSmallRouteSerializer(read_only=True)
-    attraction = SmallAtractionSerializer(read_only=True)
+#     user = SmallUserSerializer(read_only=True)
+#     route = ExtraSmallRouteSerializer(read_only=True)
+#     attraction = SmallAtractionSerializer(read_only=True)
+
+#     class Meta:
+#         model = Rating
+#         fields = ['user', 'rating', 'comment', 'route', 'attraction']
+
+class ImageUploadSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(write_only = True)
 
     class Meta:
-        model = Rating
-        fields = ['user', 'rating', 'comment', 'route', 'attraction']
+        model = Image
+        fields = ['image', 'imagePath']
+        read_only_fields = ['imagePath']
+
+    def create(self, validated_data):
+        image = validated_data.pop('image')
+        instance = super().create(validated_data)
+
+        file_extension = image.name.split('.')[-1]
+        generated_unique_filename = '{}.{}'.format(uuid.uuid4(), file_extension)
+        instance.imagePath = generated_unique_filename
+
+        # save the uploaded image file to the media directory
+        # I am uploading the files using chunks of data as this action can consume a lot of server resources, 
+        # so this aproach can help reduce memory usage and improve performance
+        # 'wb+' => reading and writting a file in binary
+        file_path =  generated_unique_filename
+        with default_storage.open(settings.MEDIA_ROOT + '/' + file_path, 'wb+') as destination:
+            for chunk in image.chunks():
+                destination.write(chunk)
+
+        instance.save()
+        return instance
