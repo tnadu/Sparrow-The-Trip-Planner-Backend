@@ -79,7 +79,8 @@ belongsToList = BelongsToViewSet.as_view({
 
 belongsToDetail = BelongsToViewSet.as_view({
     'put': 'update',
-    'delete': 'destroy'
+    'delete': 'destroy',
+    'get' : 'retrieve'
 })
 
 # backup plan for belongsTo
@@ -110,6 +111,61 @@ notebookDetail = NotebookViewSet.as_view({
     'delete' : 'destroy'
 })
 
+##### IsWithin #####
+#####################
+IsWithinList = IsWithinViewSet.as_view({
+    'post' : 'create'
+})
+IsWithinDetail = IsWithinViewSet.as_view({
+    'get' : 'retrieve',
+    'put' : 'update',
+    'delete' : 'destroy'
+})
+
+
+##### RatingFlag #####
+#####################
+
+RatingFlagList = RatingFlagViewSet.as_view({
+    'post' : 'create',
+    'get': 'list'
+})
+RatingFlagDetail = RatingFlagViewSet.as_view({
+    'put' : 'update',
+    'delete' : 'destroy'
+})
+
+##### RatingFlagType #####
+#####################
+
+RatingFlagTypeList = RatingFlagTypeViewSet.as_view({
+    'get': 'list'
+})
+RatingFlagTypeDetail = RatingFlagTypeViewSet.as_view({
+    'get' : 'retrieve',
+})
+
+##### Tag #####
+#####################
+
+TagList = TagViewSet.as_view({
+    'get': 'list'
+})
+TagDetail = TagViewSet.as_view({
+    'get' : 'retrieve',
+})
+
+##### IsTag #####
+#####################
+
+IsTaggedList = IsTaggedViewSet.as_view({
+    'post': 'create'
+})
+IsTaggedDetail = IsTaggedViewSet.as_view({
+    'get' : 'retrieve',
+    'delete': 'destroy'
+})
+
 urlpatterns = [
     path('auth/login/', login, name='login'),
     path('auth/logout/', logout, name='logout'),
@@ -135,5 +191,20 @@ urlpatterns = [
     path('notebook/detail/<int:pk>/', notebookDetail, name='notebook-detail'),
 
     path('status/list/', statusList, name='status-list'),
-    path('status/detail/<int:pk>/', statusDetail, name='status-detail')
+    path('status/detail/<int:pk>/', statusDetail, name='status-detail'),
+
+    path('isWithin/list/', IsWithinList, name='isWithin-list'),
+    path('isWithin/detail/<int:pk>/', IsWithinDetail, name='isWithin-detail'),
+
+    path('ratingFlag/list/', RatingFlagList, name='ratingFlag-list'),
+    path('ratingFlag/detail/<int:pk>/', RatingFlagDetail, name='ratingFlag-detail'),
+
+    path('ratingFlagType/list/', RatingFlagTypeList, name='ratingFlagType-list'),
+    path('ratingFlagType/detail/<int:pk>/', RatingFlagTypeDetail, name='ratingFlagType-detail'),
+
+    path('tag/list/', TagList, name='tag-list'),
+    path('tag/detail/<int:pk>/', TagDetail, name='tag-detail'),
+
+    path('isTagged/list/', IsTaggedList, name='isTagged-list'),
+    path('isTagged/detail/<int:pk>/', IsTaggedDetail, name='isTagged-detail')
 ]
