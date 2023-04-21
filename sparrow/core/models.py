@@ -174,6 +174,5 @@ class RatingFlag(models.Model):
     
     class Meta:
         db_table = 'ratingFlag'
-        unique_together = ('user', 'route', 'attraction')
         default_related_name = 'ratingFlag'
         

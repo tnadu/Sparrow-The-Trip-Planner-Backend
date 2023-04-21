@@ -337,9 +337,12 @@ class StatusSerializer(serializers.ModelSerializer):
         model = Status
         fields = ['status']
 
+
+#### Tag ####
+#############
         
 # will be nested in Attraction Serializers 
-class SmallTagSerializer(serializers.ModelSerializer):
+class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ['tagName']
@@ -352,8 +355,10 @@ class SmallTagSerializer(serializers.ModelSerializer):
 #         fields = ['tagName','attractions']
 
 
-#used for write operations (post/put)      
-class WriteIsTaggedSerializer(serializers.ModelSerializer):
+#### IsTagged ####
+##################
+
+class IsTaggedSerializer(serializers.ModelSerializer):
     class Meta:
         model = IsTagged
         fields = ['tag', 'attraction']
