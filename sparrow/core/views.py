@@ -40,7 +40,6 @@ class RouteViewSet(ModelViewSet):
 
         routeObject = self.get_object()
         routeObject.public = not routeObject.public
-        serializer = RouteSerializer(routeObject)
 
         serializer = RouteSerializer(routeObject, data=request.data, context={'request': request})
         if serializer.is_valid():
@@ -146,7 +145,7 @@ class AttractionViewSet(ModelViewSet):
         #
         #     return LargeAttractionSerializer
 
-    filterset_fields = ['tag__tagName']
+    filterset_fields = ['isTagged__tag__tagName']
     search_fields = ['name', 'generalDescription']
     
 
@@ -199,7 +198,7 @@ class BelongsToViewSet(GenericViewSet,mixins.RetrieveModelMixin, mixins.CreateMo
 
 class NotebookViewSet(ModelViewSet):
     queryset = Notebook.objects.all()
-    filterset_fields = ["user__id"]
+    filterset_fields = ["user_id"]
 
     def get_serializer_class(self):
         if self.action == 'list':
