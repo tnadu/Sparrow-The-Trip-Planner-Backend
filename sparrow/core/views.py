@@ -40,7 +40,7 @@ class RouteViewSet(ModelViewSet):
 
         routeObject = self.get_object()
         routeObject.public = not routeObject.public
-        serializer = WriteRouteSerializer(routeObject)
+        serializer = RouteSerializer(routeObject)
         return Response(serializer.data)
 
         serializer = WriteRouteSerializer(routeObject, data=request.data, context={'request': request})
@@ -200,7 +200,7 @@ class BelongsToViewSet(GenericViewSet,mixins.RetrieveModelMixin, mixins.CreateMo
 
 class NotebookViewSet(ModelViewSet):
     queryset = Notebook.objects.all()
-    filterset_fields = ["user__id"]
+    filterset_fields = ["user_id"]
 
     def get_serializer_class(self):
         if self.action == 'list':
