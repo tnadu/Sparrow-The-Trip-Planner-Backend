@@ -23,7 +23,6 @@ class RouteViewSet(ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'list':
             return ListRouteSerializer
-        
         return RouteSerializer
         # if self.action == 'list':
         #     return SmallRouteSerializer
@@ -51,7 +50,7 @@ class RouteViewSet(ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class IsWithinViewSet(GenericViewSet, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+class IsWithinViewSet(GenericViewSet, mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
     queryset = isWithin.objects.all()
     serializer_class = IsWithinSerializer
 
@@ -72,8 +71,15 @@ class MemberViewSet(ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == 'list':
-            return ListMemberSerializer
+            return SmallAndListMemberSerializer
         
+        if self.action == 'retrieve':
+            user = self.get_object()
+            if self.get_object() == self.request.user:
+                return MemberSerializer
+            else:
+                return PrivateMemberSerializer
+
         if self.action == 'create':
             return RegisterMemberSerializer
 
@@ -123,27 +129,28 @@ class ChangePasswordViewSet(mixins.UpdateModelMixin, GenericViewSet):
 
 class AttractionViewSet(ModelViewSet):
     # prefetch only related rating instances with a rating greater than 0 (i.e. not a flag)
-    queryset = Attraction.objects.prefetch_related(
-        Prefetch('ratings', queryset=RatingFlag.objects.filter(rating > 0), to_attr='filtered_ratings'))
-
-    def get_serializer_class(self):
-        if self.request.method in permissions.SAFE_METHODS:
-            # the detailed version of an attraction is requested
-            if self.action == 'retrieve':
-                return LargeAttractionSerializer
-            
-            return SmallAttractionSerializer
-        else:
-            if self.action == 'create' or self.action == 'update':
-                return WriteAttractionSerializer
-            
-            return LargeAttractionSerializer
+    # queryset = Attraction.objects.prefetch_related(
+    #     Prefetch('ratings', queryset=RatingFlag.objects.filter(rating > 0), to_attr='filtered_ratings'))
+    queryset = Attraction.objects.all()
+    serializer_class = AttractionSerializer
+    # def get_serializer_class(self):
+        # if self.request.method in permissions.SAFE_METHODS:
+        #     # the detailed version of an attraction is requested
+        #     if self.action == 'retrieve':
+        #         return LargeAttractionSerializer
+        #
+        #     return SmallAttractionSerializer
+        # else:
+        #     if self.action == 'create' or self.action == 'update':
+        #         return WriteAttractionSerializer
+        #
+        #     return LargeAttractionSerializer
 
     filterset_fields = ['tag__tagName']
     search_fields = ['name', 'generalDescription']
     
 
-class BelongsToViewSet(GenericViewSet, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+class BelongsToViewSet(GenericViewSet,mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
     queryset = BelongsTo.objects.all()
     serializer_class = BelongsToSerializer
 
