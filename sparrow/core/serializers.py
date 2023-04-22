@@ -512,7 +512,8 @@ class RatingFlagSerializer(serializers.ModelSerializer):
     class Meta:
         model = RatingFlag
         fields = ['user', 'rating', 'comment', 'route', 'attraction']
-              
+        read_only_fields = ['user']
+        
     def validate(self, data):
         route = data.get('route')
         attraction = data.get('attraction')
@@ -547,6 +548,17 @@ class RatingFlagSerializer(serializers.ModelSerializer):
         # the user making the request gets associated with the current RatingFlag
         validated_data['user'] = member
         
+        # the validation is performed on the updated rating object as if it were a new object being created, 
+        # and not taking into account any values that were previously set on the object
+        # this means that when updating a rating, there may be cases where the updated rating will have 
+        # both the route and attraction fields not equal to None
+        if validated_data.get('route') is not None and instance.route is None:
+            raise serializers.ValidationError({"non_field_errors": ["Only one of route or attraction can be specified."]})
+
+        if validated_data.get('attraction') is not None and instance.attraction is None:
+            raise serializers.ValidationError({"non_field_errors": ["Only one of route or attraction can be specified."]})
+
+
         return super().update(instance, validated_data)
 
 
