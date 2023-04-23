@@ -128,9 +128,6 @@ class ChangePasswordViewSet(mixins.UpdateModelMixin, GenericViewSet):
 
 
 class AttractionViewSet(ModelViewSet):
-    # prefetch only related rating instances with a rating greater than 0 (i.e. not a flag)
-    # queryset = Attraction.objects.prefetch_related(
-    #     Prefetch('ratings', queryset=RatingFlag.objects.filter(rating > 0), to_attr='filtered_ratings'))
     queryset = Attraction.objects.all()
     serializer_class = AttractionSerializer
     # def get_serializer_class(self):

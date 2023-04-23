@@ -193,6 +193,7 @@ class MemberSerializer(serializers.ModelSerializer):
         # update the member itself
         return super().update(instance, validated_data)
 
+
 class PrivateMemberSerializer(serializers.ModelSerializer):
     baseUser = PrivateUserSerializer(read_only=True)
 
@@ -200,13 +201,15 @@ class PrivateMemberSerializer(serializers.ModelSerializer):
         model = Member
         fields = ['baseUser', 'profilePhoto', 'birthDate']
 
-# for Route, to display the user's profile image & username
+
+# nested in related models and used for the list action
 class SmallAndListMemberSerializer(serializers.ModelSerializer):
     baseUser = SmallUserSerializer(read_only=True)
 
     class Meta:
         model = Member
         fields = ['baseUser', 'profilePhoto']
+
 
 #### Group #####
 ################
@@ -222,6 +225,7 @@ class GroupSerializer(serializers.ModelSerializer):
         model = Group
         fields = ['id', 'name', 'description']
 
+
 # class LargeGroupSerializer(serializers.ModelSerializer):
 #     members = MemberBelongsToSerializer(many=True, read_only=True)
 #     routes = ExtraSmallRouteSerializer(many=True, read_only=True)
@@ -229,6 +233,7 @@ class GroupSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Group
 #         fields = ['name', 'description', 'members', 'routes']
+
 
 ##### BelongsTo #####
 #####################
@@ -256,70 +261,29 @@ class BelongsToSerializer(serializers.ModelSerializer):
 
 
 ##### Route #####
-#####################
+#################
 
-# used for write operations (post/put)
 class RouteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Route
         fields = ['id', 'title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'user', 'group']
 
-    def create(self, validated_data):
-
-        group = None
-        user = None
-
-        try:
-            group = validated_data.get('group')
-        except: pass
-
-        try:
-            user = Member.objects.get(baseUser=validated_data.get('user'))
-        except: pass
-
-        validated_data['user'] = user
-        validated_data['group'] = group
-
-        return super().create(validated_data)
-
-    #check if user passes ownership to the group
-    def update(self, instance, validated_data):
-
-        group = None
-        user = None
-        try:
-            group = validated_data.get('group')
-        except: pass
-
-        try:
-            user = Member.objects.get(baseUser=validated_data.get('user'))
-        except: pass
-
-        validated_data['user'] = user
-        validated_data['group'] = group
-        return super().update(instance, validated_data)
-
-
-    # Only one and exactly one of the two nullable fields (group, user) can be null at a time.
+    # only one and exactly one of the two nullable fields (group, user) can be null at a time.
     def validate(self, data):
-
-        group = None
-        user = None
-        try:
-            group = data.get('group')
-        except: pass
-
-        try:
-            user = Member.objects.get(baseUser=data.get('user'))
-        except: pass
+        group = data.get('group')
+        user = data.get('user')
 
         if (user is not None and group is not None) or (user is None and group is None):
             raise serializers.ValidationError("Only one of user and group can be specified")
+        
+        # making sure that unspecified fields are set to None, instead of outright not existing
+        data['group'] = group
+        data['user'] = user
+
         return data
+    
 
-
-
-# retreives ALL the information for a a route
+# retreives ALL the information for a route
 # class LargeRouteSerializer(serializers.ModelSerializer):
 #     user = SmallAndListMemberSerializer()
 #     is_within = IsWithinSerializer(many=True, required=False)  # one for each attraction of the route
@@ -342,7 +306,6 @@ class ListRouteSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'description', 'verified', 'user', 'group']
 
 
-# used in 'LargeUserSerializer' and 'LargeGroupSerializer'
 class SmallRouteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Route
@@ -372,6 +335,7 @@ class AttractionSerializer(serializers.ModelSerializer):
         model = Attraction
         fields = ['id', 'name', 'generalDescription', 'latitude', 'longitude']
 
+
 # # retrieves minimal information about an attraction, for queries with
 # # minimal requirements
 # class SmallAttractionSerializer(serializers.ModelSerializer):
@@ -393,6 +357,9 @@ class AttractionSerializer(serializers.ModelSerializer):
 #         fields = ['name', 'generalDescription', 'latitude', 'longitude', 'images', 'tag', 'ratings']
 
 
+#### Status ####
+################
+
 class StatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Status
@@ -402,11 +369,11 @@ class StatusSerializer(serializers.ModelSerializer):
 #### Tag ####
 #############
         
-# will be nested in Attraction Serializers 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ['id', 'tagName']
+
 
 # # with SmallAttractionSerializer nested   
 # class LargeTagSerializer(serializers.ModelSerializer):
@@ -428,7 +395,6 @@ class IsTaggedSerializer(serializers.ModelSerializer):
 ##### Notebook #####
 #####################
 
-# used for the list action
 class ListNotebookSerializer(serializers.ModelSerializer):
     status = StatusSerializer(read_only=True)
     route = SmallRouteSerializer(read_only=True)
@@ -522,47 +488,57 @@ class RatingFlagSerializer(serializers.ModelSerializer):
         attraction = data.get('attraction')
         
         # only one and exactly one of the two nullable fields (route, attraction) can be null at a time
-        if route is not None and attraction is not None:
-            raise serializers.ValidationError("Only one of route or attraction can be specified.")
-        elif route is None and attraction is None:
-            raise serializers.ValidationError("Either route or attraction must be specified.")
-        
+        if (route is not None and attraction is not None) or (route is None and attraction is None):
+            raise serializers.ValidationError("Either 'route' or 'attraction' must be specified.")
+
+        # making sure that unspecified fields are set to None, instead of outright not existing
+        data['route'] = route
+        data['attraction'] = attraction
+
         return data
+    
+    def save(self, **kwargs):
+        assert hasattr(self, '_errors'), (
+            'You must call `.is_valid()` before calling `.save()`.'
+        )
 
-    def create(self, validated_data):
-        request = self.context.get('request')
+        assert not self.errors, (
+            'You cannot call `.save()` on a serializer with invalid data.'
+        )
 
-        if not request:
-            raise serializers.ValidationError({'request': 'Request related error'})
+        # Guard against incorrect use of `serializer.save(commit=False)`
+        assert 'commit' not in kwargs, (
+            "'commit' is not a valid keyword argument to the 'save()' method. "
+            "If you need to access data before committing to the database then "
+            "inspect 'serializer.validated_data' instead. "
+            "You can also pass additional keyword arguments to 'save()' if you "
+            "need to set extra attributes on the saved model instance. "
+            "For example: 'serializer.save(owner=request.user)'.'"
+        )
 
-        member = Member.objects.get(baseUser=request.user)
-        # the user making the request gets associated with the current RatingFlag
-        validated_data['user'] = member
+        assert not hasattr(self, '_data'), (
+            "You cannot call `.save()` after accessing `serializer.data`."
+            "If you need to access data before committing to the database then "
+            "inspect 'serializer.validated_data' instead. "
+        )
 
-        return super().create(validated_data)
+        validated_data = {**self.validated_data, **kwargs}
 
-    def update(self, instance, validated_data):
-        request = self.context.get('request')
+        currentUser = self.context['request'].user
+        validated_data['user'] = Member.objects.get(baseUser=currentUser)
 
-        if not request: 
-            raise serializers.ValidationError({'request': 'Request related error'})
+        if self.instance is not None:
+            self.instance = self.update(self.instance, validated_data)
+            assert self.instance is not None, (
+                '`update()` did not return an object instance.'
+            )
+        else:
+            self.instance = self.create(validated_data)
+            assert self.instance is not None, (
+                '`create()` did not return an object instance.'
+            )
 
-        member = Member.objects.get(baseUser=request.user)
-        # the user making the request gets associated with the current RatingFlag
-        validated_data['user'] = member
-        
-        # the validation is performed on the updated rating object as if it were a new object being created, 
-        # and not taking into account any values that were previously set on the object
-        # this means that when updating a rating, there may be cases where the updated rating will have 
-        # both the route and attraction fields not equal to None
-        if validated_data.get('route') is not None and instance.route is None:
-            raise serializers.ValidationError({"non_field_errors": ["Only one of route or attraction can be specified."]})
-
-        if validated_data.get('attraction') is not None and instance.attraction is None:
-            raise serializers.ValidationError({"non_field_errors": ["Only one of route or attraction can be specified."]})
-
-
-        return super().update(instance, validated_data)
+        return self.instance
 
 
 # # large flag serializer, gives detailed information about rating
