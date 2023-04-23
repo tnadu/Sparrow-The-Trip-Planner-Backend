@@ -9,8 +9,6 @@ from .models import *
 from datetime import date
 import uuid
 
-
-
 # includes the email field and is, therefore, accessible
 # only to users making requests on their own instance
 class UserSerializer(serializers.ModelSerializer):
@@ -553,7 +551,6 @@ class RatingFlagTypeSerializer(serializers.ModelSerializer):
         fields = ['id', 'type']
         extra_kwargs = {'type': {'read_only': True}}
 
-
 class ImageUploadSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(write_only = True)
 
@@ -584,3 +581,19 @@ class NotebookImageUpload(serializers.ModelSerializer):
     image = ImageUploadSerializer(write_only = True)
     notebook = serializers.PrimaryKeyRelatedField(queryset=Notebook.objects.all())
 
+    class Meta:
+        model = Image
+        fields = ['image', 'imagePath', 'notebook']
+        read_only_fields = ['imagePath']
+
+    def create(self, validated_data):
+        image_serializer = self.fields['image']
+        folder_name = 'notebook_images/'
+
+        image = image_serializer.create(validated_data=validated_data.pop('image'), folder_name=folder_name)
+        validated_data['notebook'] = self.validated_data['notebook']
+        validated_data['imagePath'] = image.imagePath
+
+        instance = super().create(validated_data)
+        instance.save()
+        return instance
