@@ -7,32 +7,37 @@ from .models import *
 from datetime import date
 
 
-# used in 'LargeMemberSerializer' and 'WriteMemberSerializer'
+# includes the email field and is, therefore, accessible
+# only to users making requests on their own instance
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'email']
 
 
-# nested in 'SmallMemberSerializer'
+# accessible to all authenticated users
 class PrivateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name']
 
-# useful for Route, Rating to display the name of the creator
+
+# nested in the corresponding member serializer and used within related list serializers
 class SmallUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username']
 
+
 class RegisterUserSerializer(serializers.ModelSerializer):
+    # field used for a double check of the provided password
     passwordCheck = serializers.CharField(style={'input_type': 'password'}, write_only=True)
 
     class Meta:
         model = User
         fields = ['username', 'password', 'passwordCheck', 'first_name', 'last_name', 'email']
-        extra_kwargs = {'passwordCheck': {'write_only': True}}
+        # the password hashes should not be viewed, nor returned after creation
+        extra_kwargs = {'passwordCheck': {'write_only': True}, 'password': {'write_only': True}}
 
     # custom save method logic, to accommodate password 
     # matching and properly setting the validated password
@@ -62,7 +67,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
 
 # a regular Serializer is used, so that no 'create'-related validations or
-# any other default behaviour of a ModelSerializer pollute the POST request
+# any other default behaviour of a ModelSerializer pollutes the POST request
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(label='Username', write_only=True)
     password = serializers.CharField(label='Password', style={'input_type': 'password'}, trim_whitespace=False, write_only=True)
@@ -92,6 +97,7 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['password', 'newPassword']
+        extra_kwargs = {'password': {'write_only': True}}
 
     # custom update method for password checking and newPassword validation
     def update(self, instance, validated_data):
@@ -139,8 +145,6 @@ class RegisterMemberSerializer(serializers.ModelSerializer):
                 profilePhoto=self.validated_data.pop('profilePhoto'),
                 birthDate=self.validated_data['birthDate']
             )
-
-            # member.save()
         else:
             member = Member(
                 baseUser=baseUser,
@@ -163,7 +167,6 @@ class RegisterMemberSerializer(serializers.ModelSerializer):
 #         fields = ['baseUser', 'profilePhoto', 'birthdate', 'groups', 'routes', 'ratings', 'notebooks']
 
 
-# nestable serializer
 class MemberSerializer(serializers.ModelSerializer):
     baseUser = UserSerializer()
 
@@ -512,7 +515,8 @@ class RatingFlagSerializer(serializers.ModelSerializer):
     class Meta:
         model = RatingFlag
         fields = ['id', 'user', 'rating', 'comment', 'route', 'attraction']
-              
+        read_only_fields = ['user']
+        
     def validate(self, data):
         route = data.get('route')
         attraction = data.get('attraction')
@@ -547,6 +551,17 @@ class RatingFlagSerializer(serializers.ModelSerializer):
         # the user making the request gets associated with the current RatingFlag
         validated_data['user'] = member
         
+        # the validation is performed on the updated rating object as if it were a new object being created, 
+        # and not taking into account any values that were previously set on the object
+        # this means that when updating a rating, there may be cases where the updated rating will have 
+        # both the route and attraction fields not equal to None
+        if validated_data.get('route') is not None and instance.route is None:
+            raise serializers.ValidationError({"non_field_errors": ["Only one of route or attraction can be specified."]})
+
+        if validated_data.get('attraction') is not None and instance.attraction is None:
+            raise serializers.ValidationError({"non_field_errors": ["Only one of route or attraction can be specified."]})
+
+
         return super().update(instance, validated_data)
 
 

@@ -17,7 +17,7 @@ class RouteViewSet(ModelViewSet):
     # search & options for filtering and ordering
     filterset_fields = ['verified', 'user__baseUser__username', 'user__baseUser__first_name', 'user__baseUser__last_name',
                         'group__name', 'isWithin__attraction__name', 'isWithin__attraction__isTagged__tag__tagName',
-                        'notebook__id', 'user__id', 'group__id']
+                        'notebook__id', 'user', 'group__id']
     search_fields = ['title', 'description', 'startingPointLat', 'startingPointLon']
     ordering_fields = ['startingPointLat', 'startingPointLon']
 
@@ -28,7 +28,7 @@ class RouteViewSet(ModelViewSet):
         # if self.action == 'list':
         #     return SmallRouteSerializer
         # elif self.action in ['create', 'update', 'partial_update']:
-        #     return WriteRouteSerializer
+        #     return RouteSerializer
         # else:
         #     return LargeRouteSerializer
 
@@ -40,15 +40,10 @@ class RouteViewSet(ModelViewSet):
 
         routeObject = self.get_object()
         routeObject.public = not routeObject.public
-        serializer = WriteRouteSerializer(routeObject)
-        return Response(serializer.data)
 
-        serializer = WriteRouteSerializer(routeObject, data=request.data, context={'request': request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = RouteSerializer(routeObject, data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
 
 class IsWithinViewSet(GenericViewSet, mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
@@ -151,7 +146,7 @@ class AttractionViewSet(ModelViewSet):
         #
         #     return LargeAttractionSerializer
 
-    filterset_fields = ['tag__tagName', 'ratingFlag__id', 'isWithin__route_id', 'isTagged__tag_id']
+    filterset_fields = ['ratingFlag__id', 'isWithin__route_id', 'isTagged__tag__tagName']
     search_fields = ['name', 'generalDescription']
     
 
@@ -205,7 +200,7 @@ class BelongsToViewSet(GenericViewSet,mixins.RetrieveModelMixin, mixins.CreateMo
 
 class NotebookViewSet(ModelViewSet):
     queryset = Notebook.objects.all()
-    filterset_fields = ["user__id"]
+    filterset_fields = ["user_id"]
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -244,7 +239,7 @@ class RatingFlagViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateMode
         
         # once created, the flags can be altered, which means
         # that the query set can be limitted to ratings
-        return RatingFlag.objects.get(rating_flag_type_id__lte=5)
+        return RatingFlag.objects.filter(rating_id__lte=5)
 
 
 class RatingFlagTypeViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
@@ -263,4 +258,3 @@ class IsTaggedViewSet(GenericViewSet,mixins.RetrieveModelMixin, mixins.CreateMod
     queryset = IsTagged.objects.all()
     serializer_class = IsTaggedSerializer
     filterset_fields = ['attraction_id', 'tag_id']
-    
