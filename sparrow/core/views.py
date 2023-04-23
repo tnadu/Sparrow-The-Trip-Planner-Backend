@@ -1,87 +1,88 @@
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.decorators import action
 from rest_framework import status, permissions, mixins
 from django.contrib.auth import login, logout
-from django.db.models import Prefetch
 from .models import *
 from .serializers import *
-from django.http import Http404
-from rest_framework.permissions import IsAdminUser
-from rest_framework.decorators import action
 
-# class RouteViewSet(ModelViewSet):
-#     queryset = Route.objects.all()
 
-#     # search & options for filtering and ordering
-#     filterset_fields = ['verified', 'user__baseUser__username', 'user__baseUser__first_name', 'user__baseUser__last_name',
-#                         'group__name', 'isWithin__attraction__name', 'isWithin__attraction__isTagged__tag__tagName']
-#     search_fields = ['title', 'description', 'startingPointLat', 'startingPointLon']
-#     ordering_fields = ['startingPointLat', 'startingPointLon']
+class RouteViewSet(ModelViewSet):
+    queryset = Route.objects.all()
 
-#     # depending on the type of request, a specific Serializer will be used
-#     def get_serializer_class(self):
-#         if self.action == 'list':
-#             return SmallRouteSerializer
-#         elif self.action in ['create', 'update', 'partial_update']:
-#             return WriteRouteSerializer
-#         else:
-#             return LargeRouteSerializer
+    # search & options for filtering and ordering
+    filterset_fields = ['verified', 'user__baseUser__username', 'user__baseUser__first_name', 'user__baseUser__last_name',
+                        'group__name', 'isWithin__attraction__name', 'isWithin__attraction__isTagged__tag__tagName',
+                        'notebook__id', 'user', 'group', 'ratingFlag__id']
+    search_fields = ['title', 'description', 'startingPointLat', 'startingPointLon']
 
-#     # toggle the verify field, only the admin can do this
-#     # detail = True means it is applied only for an instance
-#     # it will respond only to update-type requests
-#     @action(detail = True, methods=['PUT', 'PATCH'], permission_classes=[IsAdminUser])
-#     def verifiy(self, request, pk):
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return ListRouteSerializer
+        return RouteSerializer
+        # if self.action == 'list':
+        #     return SmallRouteSerializer
+        # elif self.action in ['create', 'update', 'partial_update']:
+        #     return RouteSerializer
+        # else:
+        #     return LargeRouteSerializer
 
-#         routeObject = self.get_object(pk)
+    # # toggle the public field
+    # # detail = True means it is applied only for an instance
+    # # it will respond only to update-type requests
+    # @action(detail = True, methods=['PUT', 'PATCH', 'GET'])
+    # def publicToggle(self, request, pk):
 
-#         serializer = WriteRouteSerializer(routeObject)
-#         if serializer.is_valid():
+    #     routeObject = self.get_object()
+    #     routeObject.public = not routeObject.public
 
-#             if (routeObject.verified == True):
-#                 routeObject.verified = False
-#             else:
-#                 routeObject.verified = True
+    #     serializer = RouteSerializer(routeObject, data=request.data, context={'request': request})
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
 
-#             serializer.save()
-#             return Response(serializer.data)
-#         else:
-#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# rough idea of the ViewSets associated with a Member and a Group
+class IsWithinViewSet(GenericViewSet, mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+    queryset = isWithin.objects.all()
+    serializer_class = IsWithinSerializer
+    filterset_fields = ['route_id', 'attraction_id']
+
+
 class GroupViewSet(ModelViewSet):
     queryset = Group.objects.all()
-    
-    # different serializers for different actions
+    serializer_class = GroupSerializer
+    filterset_fields = ['route__id', 'belongsTo__member_id']
+
+
+class MemberViewSet(ModelViewSet):
+    queryset = Member.objects.all()
+    search_fields = ['baseUser__username', 'baseUser__first_name', 'baseUser__last_name']
+    filterset_fields = ['belongsTo__group_id', 'route__id', 'ratingFlag__id']
+
     def get_serializer_class(self):
-        # get, head, options methods
-        if self.request.method in permissions.SAFE_METHODS:
-            return SmallGroupSerializer
-        return WriteGroupSerializer
-
-
-# class MemberViewSet(ModelViewSet):
-#     queryset = Member.objects.prefetch_related(
-#         Prefetch('ratings', queryset=Rating.objects.filter(rating > 0), to_attr='filtered_ratings'))
-#     search_fields = ['baseUser__username', 'baseUser__first_name', 'baseUser__last_name']
-
-#     def get_serializer_class(self):
-#         if self.request.method in permissions.SAFE_METHODS:
-#             return SmallMemberSerializer
+        if self.action == 'list':
+            return SmallAndListMemberSerializer
         
-#         if self.action == 'create':
-#             return RegisterMemberSerializer
+        if self.action == 'retrieve':
+            # only a member requesting to view their own profile can 
+            # access the detailed serializer containing the email field
+            if self.get_object().baseUser == self.request.user:
+                return MemberSerializer
+            else:
+                return PrivateMemberSerializer
 
-#         return WriteMemberSerializer
+        if self.action == 'create':
+            return RegisterMemberSerializer
+
+        return MemberSerializer
 
 #     # custom deletion logic
-#     def destroy(self, request, *args, **kwargs):
-#         member = self.get_object()
-#         # delete the associated baseUser first,
-#         # which will delete the member in cascade
-#         member.baseUser.delete()
-#         return Response(status=status.HTTP_204_NO_CONTENT)
+    def destroy(self, request, *args, **kwargs):
+        member = self.get_object()
+        # delete the associated baseUser first,
+        # which will delete the member in cascade
+        member.baseUser.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
 
 # none of the default actions will be performed using
@@ -116,21 +117,20 @@ class ChangePasswordViewSet(mixins.UpdateModelMixin, GenericViewSet):
     queryset = User.objects.all()
     serializer_class = ChangePasswordSerializer
 
-# class AttractionViewSet(ModelViewSet):
-#     # prefetch only related rating instances with a rating greater than 0 (i.e. not a flag)
-#     queryset = Attraction.objects.prefetch_related(
-#         Prefetch('ratings', queryset=Rating.objects.filter(rating > 0), to_attr='filtered_ratings'))
-#     serializer_class = LargeAttractionSerializer
 
-#     filterset_fields = ['tag__tagName']
-#     search_fields = ['name', 'generalDescription']
+class AttractionViewSet(ModelViewSet):
+    queryset = Attraction.objects.all()
+    serializer_class = AttractionSerializer
+
+    filterset_fields = ['ratingFlag__id', 'isWithin__route_id', 'isTagged__tag__tagName']
+    search_fields = ['name', 'generalDescription']
     
-# class BelongsToViewSet(ModelViewSet):
-#     queryset = BelongsTo.objects.all()
-#     serializer_class = WriteBelongsToSerializer
 
-#     filterset_fields = ['nickname']
-#     search_fields = ['nickname']
+class BelongsToViewSet(GenericViewSet, mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+    queryset = BelongsTo.objects.all()
+    serializer_class = BelongsToSerializer
+    filterset_fields = ['member_id', 'group_id']
+
 
 ### BACK-UP: for belongsTo
 # class BelongsToViewSet(ModelViewSet):
@@ -174,33 +174,67 @@ class ChangePasswordViewSet(mixins.UpdateModelMixin, GenericViewSet):
 #         except BelongsTo.DoesNotExist:
 #             return Response(status=status.HTTP_404_NOT_FOUND)
 
-# notebook viewset
+
 class NotebookViewSet(ModelViewSet):
     queryset = Notebook.objects.all()
-        
+    filterset_fields = ["user_id"]
+
     def get_serializer_class(self):
+        if self.action == 'list':
+            return ListNotebookSerializer
+        
+        return NotebookSerializer
+        # if self.request.method in permissions.SAFE_METHODS:     # get, head, options
+        #     # if details about a specific notebook are requested
+        #     if self.action == 'retrieve':
+        #         return LargeNotebookSerializer
+        #     # otherwise, general information about the notebook entry is presented
+        #     return SmallNotebookSerializer
 
-        if self.request.method in permissions.SAFE_METHODS: # get, head, options
-            # if details about a specific notebook are requested
-            if self.action == 'retrieve':
-                return LargeNotebookSerializer
-            # otherwise, general information about the notebook entry is presented
-            return SmallNotebookSerializer
+        # # if a specific notebook entry is being modified
+        # if self.action == 'create' or self.action == 'update':
+        #     return WriteNotebookSerializer
 
-        # if a specific notebook entry is being modified
-        if self.action == 'create' or self.action == 'update':
-            return WriteNotebookSerializer
+        # return LargeNotebookSerializer
 
-        return LargeNotebookSerializer
 
-# class AttractionViewSet(ModelViewSet):
-#     # prefetch only related rating instances with a rating greater than 0 (i.e. not a flag)
-#     queryset = Attraction.objects.prefetch_related(
-#             Prefetch('ratings', queryset=Rating.objects.filter(rating > 0), to_attr='filtered_ratings'))
-#     serializer_class = LargeAttractionSerializer
+class StatusViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
+    queryset = Status.objects.all()
+    serializer_class = StatusSerializer
+    filterset_fields = ['notebook__id']
 
-#     filterset_fields = ['tag__tagName']
-#     search_fields = ['name', 'generalDescription']
+
+class RatingFlagViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin,
+                                     mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+    serializer_class = RatingFlagSerializer
+    filterset_fields = ['route_id', 'attraction_id']
+
+    def get_queryset(self):
+        # users can create both ratings and flags (instances with a ratingFlagType greater than 5)
+        if self.action == 'create':
+            return RatingFlag.objects.all()
+        
+        # once created, the flags can be altered, which means
+        # that the query set can be limitted to ratings
+        return RatingFlag.objects.filter(rating_id__lte=5)
+
+
+class RatingFlagTypeViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
+    queryset = RatingFlagType.objects.all()
+    serializer_class = RatingFlagTypeSerializer
+    filterset_fields = ['route_id', 'attraction_id']
+
+
+class TagViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    filterset_fields = ['isTagged__attraction_id']
+
+
+class IsTaggedViewSet(GenericViewSet,mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin):
+    queryset = IsTagged.objects.all()
+    serializer_class = IsTaggedSerializer
+    filterset_fields = ['attraction_id', 'tag_id']
 
 class ImageViewSet(ModelViewSet):
     queryset = Image.objects.all()

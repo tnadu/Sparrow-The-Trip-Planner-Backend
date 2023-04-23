@@ -1,80 +1,72 @@
 [
     {
-      "model": "core.RatingFlagType",
-      "pk": 1,
-      "fields": {
-        "value": "Not rated"
-      }
+        "model":"core.RatingFlagType",
+        "pk":1,
+        "fields":{
+            "type":"One star"
+        }
     },
     {
-      "model": "core.RatingFlagType",
-      "pk": 2,
-      "fields": {
-        "value": "One star"
-      }
+        "model":"core.RatingFlagType",
+        "pk":2,
+        "fields":{
+            "type":"Two stars"
+        }
     },
     {
-      "model": "core.RatingFlagType",
-      "pk": 3,
-      "fields": {
-        "value": "Two stars"
-      }
+        "model":"core.RatingFlagType",
+        "pk":3,
+        "fields":{
+            "type":"Three stars"
+        }
     },
     {
-      "model": "core.RatingFlagType",
-      "pk": 4,
-      "fields": {
-        "value": "Three stars"
-      }
+        "model":"core.RatingFlagType",
+        "pk":4,
+        "fields":{
+            "type":"Four stars"
+        }
     },
     {
-      "model": "core.RatingFlagType",
-      "pk": 5,
-      "fields": {
-        "value": "Four stars"
-      }
+        "model":"core.RatingFlagType",
+        "pk":5,
+        "fields":{
+            "type":"Five stars"
+        }
     },
     {
-      "model": "core.RatingFlagType",
-      "pk": 6,
-      "fields": {
-        "value": "Five stars"
-      }
+        "model":"core.RatingFlagType",
+        "pk":6,
+        "fields":{
+            "type":"Inaccurate information"
+        }
     },
     {
-      "model": "core.RatingFlagType",
-      "pk": 7,
-      "fields": {
-        "value": "Inaccurate information"
-      }
+        "model":"core.RatingFlagType",
+        "pk":7,
+        "fields":{
+            "type":"Not accessible for disabled persons"
+        }
     },
     {
-      "model": "core.RatingFlagType",
-      "pk": 8,
-      "fields": {
-        "value": "Not accessible for disabled persons"
-      }
+        "model":"core.RatingFlagType",
+        "pk":8,
+        "fields":{
+            "type":"Inappropriate"
+        }
     },
     {
-      "model": "core.RatingFlagType",
-      "pk": 9,
-      "fields": {
-        "value": "Inappropriate"
-      }
+        "model":"core.RatingFlagType",
+        "pk":9,
+        "fields":{
+            "type":"Closed"
+        }
     },
     {
-      "model": "core.RatingFlagType",
-      "pk": 10,
-      "fields": {
-        "value": "Closed"
-      }
-    },
-    {
-      "model": "core.RatingFlagType",
-      "pk": 11,
-      "fields": {
-        "value": "Wrong tag"
-      }
+        "model":"core.RatingFlagType",
+        "pk":10,
+        "fields":{
+            "type":"Wrong tag"
+        }
     }
-  ]
-  
+]

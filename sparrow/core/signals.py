@@ -7,9 +7,6 @@ import os
 from django.conf import settings
 
 
-# signals allow various components to notify other components
-# whenever some action is completed;
-
 # whenever 'post_save' (used to save instances to the database)
 # is issued on the User model and gets executed successfully,
 # the function bellow will be called;
@@ -19,26 +16,28 @@ def createMember(sender, instance, created, **kwargs):
     # on said User will also be created and saved;
     if created:
         Member.objects.create(baseUser=instance)
-        
+
+
 # 'post_migrate' (used to commit modifications made to the database structure)
 # this function is called whenever the 'post_migrate' signal is triggered by the core app;
 # its purpose is to check whether the 'Status' table has been populated with default values
 # for the 'status' field, and to fill in any missing values if necessary.
 @receiver(post_migrate)
-def fillStatus_with_defaults(sender, **kwargs):
+def statusSeed(sender, **kwargs):
     if sender.name == 'core' and Status.objects.count() == 0:
         fixture_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'initial_status.json')
         call_command('loaddata', fixture_path)
 
+
 @receiver(post_migrate)
-def defaultValues_for_tag(sender, **kwargs):
+def tagSeed(sender, **kwargs):
     if sender.name == 'core' and Tag.objects.count() == 0:
         fixture_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'initial_tag.json')
         call_command('loaddata', fixture_path)
         
 
 @receiver(post_migrate)
-def defaultValues_for_ratingFlag(sender, **kwargs):
+def ratingFlagTypeSeed(sender, **kwargs):
     if sender.name == 'core' and RatingFlagType.objects.count() == 0:
         fixture_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'initial_ratingFlagType.json')
         call_command('loaddata', fixture_path)
