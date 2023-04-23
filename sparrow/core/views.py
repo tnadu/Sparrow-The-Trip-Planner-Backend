@@ -1,14 +1,11 @@
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.decorators import action
 from rest_framework import status, permissions, mixins
 from django.contrib.auth import login, logout
-from django.db.models import Prefetch
 from .models import *
 from .serializers import *
-from django.http import Http404
-from rest_framework.permissions import IsAdminUser
-from rest_framework.decorators import action
 
 
 class RouteViewSet(ModelViewSet):
@@ -17,9 +14,8 @@ class RouteViewSet(ModelViewSet):
     # search & options for filtering and ordering
     filterset_fields = ['verified', 'user__baseUser__username', 'user__baseUser__first_name', 'user__baseUser__last_name',
                         'group__name', 'isWithin__attraction__name', 'isWithin__attraction__isTagged__tag__tagName',
-                        'notebook__id', 'user', 'group__id']
+                        'notebook__id', 'user', 'group', 'ratingFlag__id']
     search_fields = ['title', 'description', 'startingPointLat', 'startingPointLon']
-    ordering_fields = ['startingPointLat', 'startingPointLon']
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -32,18 +28,18 @@ class RouteViewSet(ModelViewSet):
         # else:
         #     return LargeRouteSerializer
 
-    # toggle the public field
-    # detail = True means it is applied only for an instance
-    # it will respond only to update-type requests
-    @action(detail = True, methods=['PUT', 'PATCH', 'GET'])
-    def publicToggle(self, request, pk):
+    # # toggle the public field
+    # # detail = True means it is applied only for an instance
+    # # it will respond only to update-type requests
+    # @action(detail = True, methods=['PUT', 'PATCH', 'GET'])
+    # def publicToggle(self, request, pk):
 
-        routeObject = self.get_object()
-        routeObject.public = not routeObject.public
+    #     routeObject = self.get_object()
+    #     routeObject.public = not routeObject.public
 
-        serializer = RouteSerializer(routeObject, data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+    #     serializer = RouteSerializer(routeObject, data=request.data, context={'request': request})
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
 
 
 class IsWithinViewSet(GenericViewSet, mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
@@ -56,11 +52,6 @@ class GroupViewSet(ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     filterset_fields = ['route__id', 'belongsTo__member_id']
-
-        # # get, head, options methods
-        # if self.request.method in permissions.SAFE_METHODS:
-        #     return SmallGroupSerializer
-        # return WriteGroupSerializer
 
 
 class MemberViewSet(ModelViewSet):
@@ -130,27 +121,16 @@ class ChangePasswordViewSet(mixins.UpdateModelMixin, GenericViewSet):
 class AttractionViewSet(ModelViewSet):
     queryset = Attraction.objects.all()
     serializer_class = AttractionSerializer
-    # def get_serializer_class(self):
-        # if self.request.method in permissions.SAFE_METHODS:
-        #     # the detailed version of an attraction is requested
-        #     if self.action == 'retrieve':
-        #         return LargeAttractionSerializer
-        #
-        #     return SmallAttractionSerializer
-        # else:
-        #     if self.action == 'create' or self.action == 'update':
-        #         return WriteAttractionSerializer
-        #
-        #     return LargeAttractionSerializer
 
     filterset_fields = ['ratingFlag__id', 'isWithin__route_id', 'isTagged__tag__tagName']
     search_fields = ['name', 'generalDescription']
     
 
-class BelongsToViewSet(GenericViewSet,mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+class BelongsToViewSet(GenericViewSet, mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
     queryset = BelongsTo.objects.all()
     serializer_class = BelongsToSerializer
     filterset_fields = ['member_id', 'group_id']
+
 
 ### BACK-UP: for belongsTo
 # class BelongsToViewSet(ModelViewSet):
