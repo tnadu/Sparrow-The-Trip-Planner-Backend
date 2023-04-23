@@ -31,6 +31,7 @@ groupList = GroupViewSet.as_view({
 groupDetail = GroupViewSet.as_view({
     'get': 'retrieve',
     'put': 'update',
+    'patch': 'partial_update',
     'delete': 'destroy'
 })
 ##### Member #####
@@ -43,6 +44,7 @@ memberList = MemberViewSet.as_view({
 memberDetail = MemberViewSet.as_view({
     'get': 'retrieve',
     'put': 'update',
+    'patch': 'partial_update',
     'delete': 'destroy'
 })
 

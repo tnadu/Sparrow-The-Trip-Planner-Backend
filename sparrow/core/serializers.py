@@ -7,32 +7,37 @@ from .models import *
 from datetime import date
 
 
-# used in 'LargeMemberSerializer' and 'WriteMemberSerializer'
+# includes the email field and is, therefore, accessible
+# only to users making requests on their own instance
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'email']
 
 
-# nested in 'SmallMemberSerializer'
+# accessible to all authenticated users
 class PrivateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name']
 
-# useful for Route, Rating to display the name of the creator
+
+# nested in the corresponding member serializer and used within related list serializers
 class SmallUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username']
 
+
 class RegisterUserSerializer(serializers.ModelSerializer):
+    # field used for a double check of the provided password
     passwordCheck = serializers.CharField(style={'input_type': 'password'}, write_only=True)
 
     class Meta:
         model = User
         fields = ['username', 'password', 'passwordCheck', 'first_name', 'last_name', 'email']
-        extra_kwargs = {'passwordCheck': {'write_only': True}}
+        # the password hashes should not be viewed, nor returned after creation
+        extra_kwargs = {'passwordCheck': {'write_only': True}, 'password': {'write_only': True}}
 
     # custom save method logic, to accommodate password 
     # matching and properly setting the validated password
@@ -62,7 +67,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
 
 # a regular Serializer is used, so that no 'create'-related validations or
-# any other default behaviour of a ModelSerializer pollute the POST request
+# any other default behaviour of a ModelSerializer pollutes the POST request
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(label='Username', write_only=True)
     password = serializers.CharField(label='Password', style={'input_type': 'password'}, trim_whitespace=False, write_only=True)
@@ -92,6 +97,7 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['password', 'newPassword']
+        extra_kwargs = {'password': {'write_only': True}}
 
     # custom update method for password checking and newPassword validation
     def update(self, instance, validated_data):
@@ -139,8 +145,6 @@ class RegisterMemberSerializer(serializers.ModelSerializer):
                 profilePhoto=self.validated_data.pop('profilePhoto'),
                 birthDate=self.validated_data['birthDate']
             )
-
-            # member.save()
         else:
             member = Member(
                 baseUser=baseUser,
@@ -163,7 +167,6 @@ class RegisterMemberSerializer(serializers.ModelSerializer):
 #         fields = ['baseUser', 'profilePhoto', 'birthdate', 'groups', 'routes', 'ratings', 'notebooks']
 
 
-# nestable serializer
 class MemberSerializer(serializers.ModelSerializer):
     baseUser = UserSerializer()
 
@@ -211,13 +214,13 @@ class SmallAndListMemberSerializer(serializers.ModelSerializer):
 class SmallGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
-        fields = ['name']
+        fields = ['id', 'name']
 
 
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
-        fields = ['name', 'description']
+        fields = ['id', 'name', 'description']
 
 # class LargeGroupSerializer(serializers.ModelSerializer):
 #     members = MemberBelongsToSerializer(many=True, read_only=True)
@@ -233,7 +236,7 @@ class GroupSerializer(serializers.ModelSerializer):
 class BelongsToSerializer(serializers.ModelSerializer):
     class Meta:
         model = BelongsTo
-        fields = ['member', 'group', 'isAdmin', 'nickname']
+        fields = ['id', 'member', 'group', 'isAdmin', 'nickname']
 
 
 # class GroupBelongsToSerializer(serializers.ModelSerializer):
@@ -352,7 +355,7 @@ class SmallRouteSerializer(serializers.ModelSerializer):
 class IsWithinSerializer(serializers.ModelSerializer):
     class Meta:
         model = isWithin
-        fields = ['route', 'attraction', 'orderNumber']
+        fields = ['id', 'route', 'attraction', 'orderNumber']
 
 
 #### Attraction ####
@@ -361,13 +364,13 @@ class IsWithinSerializer(serializers.ModelSerializer):
 class SmallAttractionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attraction
-        fields = ['name']
+        fields = ['id', 'name']
 
 
 class AttractionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attraction
-        fields = ['name', 'generalDescription', 'latitude', 'longitude']
+        fields = ['id', 'name', 'generalDescription', 'latitude', 'longitude']
 
 # # retrieves minimal information about an attraction, for queries with
 # # minimal requirements
@@ -393,7 +396,7 @@ class AttractionSerializer(serializers.ModelSerializer):
 class StatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Status
-        fields = ['status']
+        fields = ['id', 'status']
 
 
 #### Tag ####
@@ -403,7 +406,7 @@ class StatusSerializer(serializers.ModelSerializer):
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ['tagName']
+        fields = ['id', 'tagName']
 
 # # with SmallAttractionSerializer nested   
 # class LargeTagSerializer(serializers.ModelSerializer):
@@ -419,7 +422,7 @@ class TagSerializer(serializers.ModelSerializer):
 class IsTaggedSerializer(serializers.ModelSerializer):
     class Meta:
         model = IsTagged
-        fields = ['tag', 'attraction']
+        fields = ['id', 'tag', 'attraction']
 
 
 ##### Notebook #####
@@ -432,7 +435,7 @@ class ListNotebookSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notebook
-        fields = ['title', 'status', 'route']
+        fields = ['id', 'title', 'status', 'route']
 
 
 # # shows everything it is to know about a specific notebook-entry
@@ -450,7 +453,7 @@ class ListNotebookSerializer(serializers.ModelSerializer):
 class NotebookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notebook
-        fields = ['route', 'title', 'note', 'status', 'dateStarted', 'dateCompleted']
+        fields = ['id', 'route', 'title', 'note', 'status', 'dateStarted', 'dateCompleted']
         extra_kwargs = {'dateStarted': {'read_only': True}, 'dateCompleted': {'read_only': True}}
 
     def create(self, validated_data):
@@ -511,7 +514,7 @@ class NotebookSerializer(serializers.ModelSerializer):
 class RatingFlagSerializer(serializers.ModelSerializer):
     class Meta:
         model = RatingFlag
-        fields = ['user', 'rating', 'comment', 'route', 'attraction']
+        fields = ['id', 'user', 'rating', 'comment', 'route', 'attraction']
         read_only_fields = ['user']
         
     def validate(self, data):
@@ -580,5 +583,5 @@ class RatingFlagSerializer(serializers.ModelSerializer):
 class RatingFlagTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = RatingFlagType
-        fields = ['type']
+        fields = ['id', 'type']
         extra_kwargs = {'type': {'read_only': True}}
