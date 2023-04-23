@@ -1,28 +1,28 @@
 from django.urls import path
 from .views import *
 
-
 app_name = 'core'
+
+
 ##### Route #####
-######################
+#################
+
 routeList = RouteViewSet.as_view({
     'get': 'list',
     'post': 'create'
 })
 
-# only needs to respond to write actions, patch & put
-routePublicToggle = RouteViewSet.as_view({
-    'put': 'update',
-    'get': 'retrieve'
-})
 routeDetail = RouteViewSet.as_view({
     'get': 'retrieve',
     'put': 'update',
+    'patch': 'partial_update',
     'delete': 'destroy'
 })
 
+
 ##### Group #####
-######################
+#################
+
 groupList = GroupViewSet.as_view({
     'get': 'list',
     'post': 'create'
@@ -34,8 +34,11 @@ groupDetail = GroupViewSet.as_view({
     'patch': 'partial_update',
     'delete': 'destroy'
 })
+
+
 ##### Member #####
-######################
+##################
+
 memberList = MemberViewSet.as_view({
     'get': 'list',
     'post': 'create'
@@ -48,15 +51,16 @@ memberDetail = MemberViewSet.as_view({
     'delete': 'destroy'
 })
 
+changePassword = ChangePasswordViewSet.as_view({
+    'put': 'update'
+})
+
 login = LoginViewSet.as_view({
     'post': 'post'
 })
 
 logout = LogoutView.as_view()
 
-changePassword = ChangePasswordViewSet.as_view({
-    'put': 'update'
-})
 
 ##### Attraction #####
 ######################
@@ -69,8 +73,10 @@ attractionList = AttractionViewSet.as_view({
 attractionDetail = AttractionViewSet.as_view({
     'get': 'retrieve',
     'put': 'update',
+    'patch': 'partial_update',
     'delete': 'destroy',
 })
+
 
 ##### BelongsTo #####
 #####################
@@ -80,14 +86,12 @@ belongsToList = BelongsToViewSet.as_view({
 })
 
 belongsToDetail = BelongsToViewSet.as_view({
+    'get' : 'retrieve',
     'put': 'update',
-    'delete': 'destroy',
-    'get' : 'retrieve'
+    'patch': 'partial_update',
+    'delete': 'destroy'
 })
 
-# backup plan for belongsTo
-# belongsToGroupMembers = BelongsToViewSet.as_view({ 'get': 'get_group_members'})
-# belongsToAllGroupsForMember = BelongsToViewSet.as_view({'get': 'get_all_groups_for_member'})
 
 ##### Status #####
 ##################
@@ -100,6 +104,7 @@ statusDetail = StatusViewSet.as_view({
     'get': 'retrieve'
 })
 
+
 ##### Notebook #####
 #####################
 
@@ -107,35 +112,43 @@ notebookList = NotebookViewSet.as_view({
     'get' : 'list',
     'post' : 'create'
 })
+
 notebookDetail = NotebookViewSet.as_view({
     'get' : 'retrieve',
     'put' : 'update',
+    'patch': 'partial_update',
     'delete' : 'destroy'
 })
 
 ##### IsWithin #####
 #####################
+
 IsWithinList = IsWithinViewSet.as_view({
     'post' : 'create'
 })
+
 IsWithinDetail = IsWithinViewSet.as_view({
     'get' : 'retrieve',
     'put' : 'update',
+    'patch': 'partial_update',
     'delete' : 'destroy'
 })
 
 
 ##### RatingFlag #####
-#####################
+######################
 
 RatingFlagList = RatingFlagViewSet.as_view({
-    'post' : 'create',
-    'get': 'list'
+    'get': 'list',
+    'post' : 'create'
 })
+
 RatingFlagDetail = RatingFlagViewSet.as_view({
     'put' : 'update',
+    'patch': 'partial_update',
     'delete' : 'destroy'
 })
+
 
 ##### RatingFlagType #####
 #####################
@@ -147,15 +160,18 @@ RatingFlagTypeDetail = RatingFlagTypeViewSet.as_view({
     'get' : 'retrieve',
 })
 
+
 ##### Tag #####
 #####################
 
 TagList = TagViewSet.as_view({
     'get': 'list'
 })
+
 TagDetail = TagViewSet.as_view({
     'get' : 'retrieve',
 })
+
 
 ##### IsTag #####
 #####################
@@ -163,10 +179,13 @@ TagDetail = TagViewSet.as_view({
 IsTaggedList = IsTaggedViewSet.as_view({
     'post': 'create'
 })
+
 IsTaggedDetail = IsTaggedViewSet.as_view({
     'get' : 'retrieve',
     'delete': 'destroy'
 })
+
+
 
 urlpatterns = [
     path('auth/login/', login, name='login'),
@@ -184,7 +203,6 @@ urlpatterns = [
     
     path('route/list/', routeList, name='route-list'),
     path('route/detail/<int:pk>/', routeDetail, name='route-detail'),
-    path('route/publicToggle/<int:pk>/', routePublicToggle, name='route-public-toggle'),
 
     path('belongsTo/list/', belongsToList, name="belongsTo-list"),
     path('belongsTo/detail/<int:pk>/', belongsToDetail, name='belongsTo-detail'),
