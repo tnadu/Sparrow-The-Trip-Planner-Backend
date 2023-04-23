@@ -70,8 +70,7 @@ class MemberViewSet(ModelViewSet):
             return SmallAndListMemberSerializer
         
         if self.action == 'retrieve':
-            user = self.get_object()
-            if self.get_object() == self.request.user:
+            if self.get_object().baseUser == self.request.user:
                 return MemberSerializer
             else:
                 return PrivateMemberSerializer

@@ -32,10 +32,9 @@ class Route(models.Model):
         ordering = ['-publicationDate']
         default_related_name = 'route'
 
-    # update for admin triggers ModelAdmin.save_form so i need to override it
     def clean(self):
         if (self.group is None and self.user is None) or (self.group is not None and self.user is not None):
-            raise ValidationError("Exactly one of group and user must be specified")
+            raise ValidationError("Either a group or a member must be specified!")
 
     def __str__(self):
         return self.title + self.description
