@@ -231,7 +231,7 @@ class RatingFlagViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateMode
         if self.action == 'create':
             return RatingFlag.objects.all()
         
-        # once created, the flags can be altered, which means
+        # once created, the flags can't be altered, which means
         # that the query set can be limitted to ratings
         return RatingFlag.objects.filter(rating_id__lte=5)
 
