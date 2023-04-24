@@ -214,7 +214,7 @@ class RatingFlagViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateMode
         if self.action == 'create':
             return RatingFlag.objects.all()
         
-        # once created, the flags can be altered, which means
+        # once created, the flags can't be altered, which means
         # that the query set can be limitted to ratings
         return RatingFlag.objects.filter(rating_id__lte=5)
 
@@ -222,7 +222,7 @@ class RatingFlagViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateMode
 class RatingFlagTypeViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
     queryset = RatingFlagType.objects.all()
     serializer_class = RatingFlagTypeSerializer
-    filterset_fields = ['route_id', 'attraction_id']
+    filterset_fields = ['ratingFlag__id']
 
 
 class TagViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
