@@ -8,7 +8,6 @@ from .models import *
 from .serializers import *
 from .permissions import *
 
-
 class RouteViewSet(ModelViewSet):
     queryset = Route.objects.all()
 
@@ -52,6 +51,7 @@ class IsWithinViewSet(GenericViewSet, mixins.RetrieveModelMixin, mixins.CreateMo
 class GroupViewSet(ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
+    # permission_classes = [IsAdminOfGroup]
     filterset_fields = ['route__id', 'belongsTo__member_id']
 
 
