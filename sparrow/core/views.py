@@ -195,6 +195,7 @@ class BelongsToViewSet(GenericViewSet, mixins.RetrieveModelMixin, mixins.CreateM
 class NotebookViewSet(ModelViewSet):
     queryset = Notebook.objects.all()
     filterset_fields = ["user_id"]
+    permission_classes = [IsOwnedByTheUserMakingTheRequest]
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -214,6 +215,12 @@ class NotebookViewSet(ModelViewSet):
 
         # return LargeNotebookSerializer
 
+    def get_permissions(self):
+        # let anyone create a notebook
+        if self.action == 'create':
+            return [permissions.AllowAny()]
+        
+        return [IsOwnedByTheUserMakingTheRequest()]
 
 class StatusViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
     queryset = Status.objects.all()
