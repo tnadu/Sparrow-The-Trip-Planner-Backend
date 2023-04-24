@@ -118,7 +118,7 @@ class ChangePasswordViewSet(mixins.UpdateModelMixin, GenericViewSet):
     serializer_class = ChangePasswordSerializer
 
 
-class AttractionViewSet(ModelViewSet):
+class AttractionViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin):
     queryset = Attraction.objects.all()
     serializer_class = AttractionSerializer
 
