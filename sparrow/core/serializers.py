@@ -266,7 +266,8 @@ class BelongsToSerializer(serializers.ModelSerializer):
 class RouteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Route
-        fields = ['id', 'title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'user', 'group']
+        fields = ['id', 'title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'publicationDate', 'user', 'group']
+        extra_kwargs = {'verified': {'read_only': True}, 'publicationDate': {'read_only': True}}
 
     # only one and exactly one of the two nullable fields (group, user) can be null at a time.
     def validate(self, data):
@@ -303,7 +304,8 @@ class ListRouteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Route
-        fields = ['id', 'title', 'description', 'verified', 'user', 'group']
+        fields = ['id', 'title', 'description', 'verified', 'publicationDate', 'user', 'group']
+        extra_kwargs = {'publicationDate': {'read_only': True}}
 
 
 class SmallRouteSerializer(serializers.ModelSerializer):
