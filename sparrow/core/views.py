@@ -239,6 +239,7 @@ class RatingFlagViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateMode
 class RatingFlagTypeViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
     queryset = RatingFlagType.objects.all()
     serializer_class = RatingFlagTypeSerializer
+    filterset_fields = ['ratingFlag__id']
 
 
 class TagViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
