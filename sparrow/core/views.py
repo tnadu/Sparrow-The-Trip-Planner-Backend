@@ -84,6 +84,12 @@ class MemberViewSet(ModelViewSet):
         member.baseUser.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
+    def removeProfilePhoto(self, request, **kwargs):
+        member = self.get_object()
+        member.profilePhoto = defaultProfilePhoto
+        member.save()
+        return Response(status=status.HTTP_200_OK)
+    
 
 # none of the default actions will be performed using
 # this ViewSet, so a GenericViewSet is better suited

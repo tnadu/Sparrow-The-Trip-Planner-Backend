@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
+defaultProfilePhoto = 'default-profile-photo.jpeg'
+
 
 # many-to-many between Route & Attraction
 class isWithin (models.Model):
@@ -55,7 +57,7 @@ class Attraction(models.Model):
 # member model, extending the User model via a one-to-one relationship;
 class Member(models.Model):
     baseUser = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    profilePhoto = models.ImageField(upload_to='profile-photos', db_column='profile_photo', default='default-profile-photo.jpeg')
+    profilePhoto = models.ImageField(upload_to='profile-photos', db_column='profile_photo', default=defaultProfilePhoto)
     birthDate = models.DateField(null=True, db_column='birth_date')
 
     class Meta:
