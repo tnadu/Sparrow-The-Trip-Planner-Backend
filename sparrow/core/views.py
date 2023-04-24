@@ -6,6 +6,7 @@ from rest_framework import status, permissions, mixins
 from django.contrib.auth import login, logout
 from .models import *
 from .serializers import *
+from .permissions import *
 
 
 class RouteViewSet(ModelViewSet):
@@ -75,6 +76,15 @@ class MemberViewSet(ModelViewSet):
             return RegisterMemberSerializer
 
         return MemberSerializer
+
+    def get_permissions(self):
+        # condition for list, retrieve goes here (IsAuthenticated)
+
+        # anyone can register
+        if self.action == 'create':
+            return [permissions.AllowAny()]
+        
+        return [IsTheUserMakingTheRequest()]
 
     # custom deletion logic
     def destroy(self, request, *args, **kwargs):
