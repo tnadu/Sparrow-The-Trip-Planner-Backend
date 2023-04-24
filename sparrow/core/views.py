@@ -130,6 +130,7 @@ class AttractionViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveMo
 
     filterset_fields = ['ratingFlag__id', 'isWithin__route_id', 'isTagged__tag__tagName']
     search_fields = ['name', 'generalDescription']
+    ordering_fields = ['isWithin__orderNumber']
     
 
 class BelongsToViewSet(GenericViewSet, mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
