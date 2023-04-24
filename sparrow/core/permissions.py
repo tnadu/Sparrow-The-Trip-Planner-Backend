@@ -7,6 +7,11 @@ class IsTheUserMakingTheRequest(permissions.BasePermission):
         return request.user == obj.baseUser
 
 
+class IsOwnedByTheUserMakingTheRequest(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return request.user == obj.user
+
+
 class IsInGroup(permissions.BasePermission):    
     def has_object_permission(self, request, view, obj):
         mebmer_id = request.user.id
