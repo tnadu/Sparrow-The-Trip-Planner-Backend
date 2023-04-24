@@ -1,6 +1,10 @@
 from rest_framework import permissions
 from .models import *
 
+class IsTheUserMakingTheRequest(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return request.user == obj.baseUser
+
 class IsAdminOfGroup(permissions.BasePermission):    
     def has_object_permission(self, request, view, obj):
         # when the user is trying to perform action on a group
@@ -19,3 +23,4 @@ class IsAdminOfGroup(permissions.BasePermission):
 
         # if he tries other actions, they will be denied, only
         return False
+

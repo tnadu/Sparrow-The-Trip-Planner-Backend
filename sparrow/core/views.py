@@ -51,7 +51,7 @@ class IsWithinViewSet(GenericViewSet, mixins.RetrieveModelMixin, mixins.CreateMo
 class GroupViewSet(ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    permission_classes = [IsAdminOfGroup]
+    # permission_classes = [IsAdminOfGroup]
     filterset_fields = ['route__id', 'belongsTo__member_id']
 
 
@@ -76,6 +76,15 @@ class MemberViewSet(ModelViewSet):
             return RegisterMemberSerializer
 
         return MemberSerializer
+
+    def get_permissions(self):
+        # condition for list, retrieve goes here (IsAuthenticated)
+
+        # anyone can register
+        if self.action == 'create':
+            return [permissions.AllowAny()]
+        
+        return [IsTheUserMakingTheRequest()]
 
     # custom deletion logic
     def destroy(self, request, *args, **kwargs):
