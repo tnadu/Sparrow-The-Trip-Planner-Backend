@@ -55,6 +55,20 @@ class GroupViewSet(ModelViewSet):
     # permission_classes = [IsAdminOfGroup]
     filterset_fields = ['route__id', 'belongsTo__member_id']
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer, request)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer, request):
+        group = serializer.save()
+        member = Member.objects.get(pk=request.user.id)
+
+        instance = BelongsTo(member=member, group=group, isAdmin=True)
+        instance.save()
+
 
 class MemberViewSet(ModelViewSet):
     queryset = Member.objects.all()
