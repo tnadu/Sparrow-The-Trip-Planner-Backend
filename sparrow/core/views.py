@@ -148,6 +148,7 @@ class BelongsToViewSet(GenericViewSet, mixins.RetrieveModelMixin, mixins.CreateM
     queryset = BelongsTo.objects.all()
     serializer_class = BelongsToSerializer
     filterset_fields = ['member_id', 'group_id']
+    permission_classes = [BelongsToAuthorization]
 
 
 ### BACK-UP: for belongsTo

@@ -1,4 +1,5 @@
 from rest_framework import permissions
+from .serializers import BelongsToSerializer
 from .models import *
 
 
@@ -40,10 +41,21 @@ class IsAdminOfGroup(permissions.BasePermission):
 
 class BelongsToAuthorization(permissions.BasePermission):
     def has_permission(self, request, view):
-        validatedBelongsToData = view.get_serializer().context.get('data')
+        # allows all other actions, since they will be checked
+        # individually in the has_object_permission method
+        if view.action != 'create':
+            return True
 
-        group_id = validatedBelongsToData['group_id']
-        nickname = validatedBelongsToData.get('nickname')
+        # the request data is not validated against the corresponding
+        # serializer before the permission checking, and since whether
+        # or not the user is allowed to use this action depends upon
+        # the validity of the data, it is serialized on the fly
+        serializer = BelongsToSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        group = data['group']
+        nickname = data.get('nickname')
 
         # since the provided data passed the serializer validation,
         # it is guaranteed that when a group admin creates a new entry
@@ -56,19 +68,18 @@ class BelongsToAuthorization(permissions.BasePermission):
             return False
 
         # a request is authorized only if it is issued by a group admin
-        group = Group.objects.get(pk=group_id)
-        return IsAdminOfGroup().check_object_permissions(request, group)
+        return IsAdminOfGroup().has_object_permission(request, view, group)
     
     def has_object_permission(self, request, view, obj):
         group = Group.objects.get(pk=obj.group_id)
         
         if view.action == 'retrieve':
-            return IsInGroup().check_object_permissions(request, group)
+            return IsInGroup().has_object_permission(request, view, group)
         
         if view.action == 'destroy':
-            isAdmin = IsAdminOfGroup().check_object_permissions(request, group)
-            userToBeModified = Member.objects.get(pk=obj.user_id)
-            theirOwnEntry = IsTheUserMakingTheRequest().check_object_permissions(request, userToBeModified)
+            isAdmin = IsAdminOfGroup().has_object_permission(request, view, group)
+            userToBeModified = Member.objects.get(pk=obj.member_id)
+            theirOwnEntry = IsTheUserMakingTheRequest().has_object_permission(request, view, userToBeModified)
 
             return isAdmin or theirOwnEntry
         
@@ -86,11 +97,11 @@ class BelongsToAuthorization(permissions.BasePermission):
             return False
 
         # only admins can change the admin status of other group members
-        if isAdmin and not IsAdminOfGroup().check_object_permissions(request, group):
+        if isAdmin and not IsAdminOfGroup().check_object_permission(request, group):
             return False
 
         # any group member can change their nickname, as long as it's theirs
-        if nickname and not IsTheUserMakingTheRequest().check_object_permissions(request, modifiedUser):
+        if nickname and not IsTheUserMakingTheRequest().check_object_permission(request, modifiedUser):
             return False
 
         return True
