@@ -8,6 +8,7 @@ from .models import *
 from .serializers import *
 from .permissions import *
 
+
 class RouteViewSet(ModelViewSet):
     queryset = Route.objects.all()
 
