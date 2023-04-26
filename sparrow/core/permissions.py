@@ -15,11 +15,11 @@ class IsOwnedByTheUserMakingTheRequest(permissions.BasePermission):
 
 class IsInGroup(permissions.BasePermission):    
     def has_object_permission(self, request, view, obj):
-        member_id = request.user.id
+        user_id = request.user.id
         group_id = obj.id
 
         try:
-            is_in_group = BelongsTo.objects.get(user_id = member_id, group_id = group_id)
+            is_in_group = BelongsTo.objects.get(user_id = user_id, group_id = group_id)
             return True
         except BelongsTo.DoesNotExist:
             return False
@@ -27,11 +27,11 @@ class IsInGroup(permissions.BasePermission):
 
 class IsAdminOfGroup(permissions.BasePermission):    
     def has_object_permission(self, request, view, obj):
-        mebmer_id = request.user.id
+        user_id = request.user.id
         group_id = obj.id
 
         try:
-            is_in_group = BelongsTo.objects.get(member_id = mebmer_id, group_id = group_id)
+            is_in_group = BelongsTo.objects.get(user_id = user_id, group_id = group_id)
             # if the user is an admin, the instance should have isAdmin set to true
             return is_in_group.isAdmin
         
@@ -73,35 +73,32 @@ class BelongsToAuthorization(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         group = Group.objects.get(pk=obj.group_id)
         
-        if view.action == 'retrieve':
-            return IsInGroup().has_object_permission(request, view, group)
-        
         if view.action == 'destroy':
             isAdmin = IsAdminOfGroup().has_object_permission(request, view, group)
-            userToBeModified = Member.objects.get(pk=obj.member_id)
+            userToBeModified = Member.objects.get(pk=obj.user_id)
             theirOwnEntry = IsTheUserMakingTheRequest().has_object_permission(request, view, userToBeModified)
 
             return isAdmin or theirOwnEntry
         
         # 'update' and 'partial_update' action section
-        user_id = request.data.get('user_id')
-        group_id = request.data.get('group_id')
+        user = request.data.get('user')
+        groupInRequest = request.data.get('group')
         nickname = request.data.get('nickname')
         isAdmin = request.data.get('isAdmin')
         
-        modifiedUser = User.objects.get(pk=obj.user_id)
+        modifiedUser = Member.objects.get(pk=obj.user_id)
 
         # in order to replace a user in a group or move a user in another
         # group, the 'create' and 'delete' actions will be used instead
-        if user_id or group_id:
+        if user or groupInRequest:
             return False
 
         # only admins can change the admin status of other group members
-        if isAdmin and not IsAdminOfGroup().check_object_permission(request, group):
+        if isAdmin and not IsAdminOfGroup().has_object_permission(request, view, group):
             return False
 
         # any group member can change their nickname, as long as it's theirs
-        if nickname and not IsTheUserMakingTheRequest().check_object_permission(request, modifiedUser):
+        if nickname and not IsTheUserMakingTheRequest().has_object_permission(request, view, modifiedUser):
             return False
 
         return True
