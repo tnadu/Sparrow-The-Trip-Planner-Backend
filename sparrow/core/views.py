@@ -51,9 +51,16 @@ class IsWithinViewSet(GenericViewSet, mixins.RetrieveModelMixin, mixins.CreateMo
 class GroupViewSet(ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    # permission_classes = [IsAdminOfGroup]
     filterset_fields = ['route__id', 'belongsTo__member_id']
 
+    def get_permissions(self):
+        # if the use tries to see a group/ list of groups, check if 
+        # he/she appears in the group
+        if self.action == 'list' or self.action == 'retrieve':
+            return [IsInGroup]
+
+        # other actions should only be taken by admins
+        return [IsAdminOfGroup]
 
 class MemberViewSet(ModelViewSet):
     queryset = Member.objects.all()
