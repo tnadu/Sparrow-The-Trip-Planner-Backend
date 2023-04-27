@@ -266,27 +266,27 @@ class BelongsToSerializer(serializers.ModelSerializer):
 class RouteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Route
-        fields = ['id', 'title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'publicationDate', 'user', 'group']
+        fields = ['id', 'title', 'description', 'verified', 'public', 'startingPointLat', 'startingPointLon', 'publicationDate', 'member', 'group']
         extra_kwargs = {'verified': {'read_only': True}, 'publicationDate': {'read_only': True}}
 
     # only one and exactly one of the two nullable fields (group, user) can be null at a time.
     def validate(self, data):
         group = data.get('group')
-        user = data.get('user')
+        member = data.get('member')
 
-        if (user is not None and group is not None) or (user is None and group is None):
-            raise serializers.ValidationError("Only one of user and group can be specified")
+        if (member is not None and group is not None) or (member is None and group is None):
+            raise serializers.ValidationError("Only one of member and group can be specified")
         
         # making sure that unspecified fields are set to None, instead of outright not existing
         data['group'] = group
-        data['user'] = user
+        data['member'] = member
 
         return data
     
 
 # retreives ALL the information for a route
 # class LargeRouteSerializer(serializers.ModelSerializer):
-#     user = SmallAndListMemberSerializer()
+#     member = SmallAndListMemberSerializer()
 #     is_within = IsWithinSerializer(many=True, required=False)  # one for each attraction of the route
 #     group = SmallGroupSerializer()
 
@@ -294,17 +294,17 @@ class RouteSerializer(serializers.ModelSerializer):
 #         model = Route
 #         fields = ['id', 'title', 'description', 'verified', 'startingPointLat', 'startingPointLon',
 #                   'publicationDate',
-#                   'user', 'is_within', 'group']
+#                   'member', 'is_within', 'group']
 
 
 # retrieves partial information about a route
 class ListRouteSerializer(serializers.ModelSerializer):
-    user = SmallAndListMemberSerializer()
+    member = SmallAndListMemberSerializer()
     group = SmallGroupSerializer()
 
     class Meta:
         model = Route
-        fields = ['id', 'title', 'description', 'verified', 'publicationDate', 'user', 'group']
+        fields = ['id', 'title', 'description', 'verified', 'publicationDate', 'member', 'group']
         extra_kwargs = {'publicationDate': {'read_only': True}}
 
 

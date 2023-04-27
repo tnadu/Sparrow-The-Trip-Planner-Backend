@@ -57,7 +57,7 @@ class GroupViewSet(ModelViewSet):
         # if the use tries to see a group/ list of groups, check if 
         # he/she appears in the group
         if self.action == 'list' or self.action == 'retrieve':
-            return [IsInGroup]
+            return [IsInGroup, IsAuthenticated]
 
         # other actions should only be taken by admins
         return [IsAdminOfGroup]
@@ -86,7 +86,8 @@ class MemberViewSet(ModelViewSet):
 
     def get_permissions(self):
         # condition for list, retrieve goes here (IsAuthenticated)
-
+        if self.action == 'list' or self.action == 'retrieve':
+            return [IsAuthenticated]
         # anyone can register
         if self.action == 'create':
             return [permissions.AllowAny()]
@@ -225,7 +226,7 @@ class NotebookViewSet(ModelViewSet):
     def get_permissions(self):
         # let anyone create a notebook
         if self.action == 'create':
-            return [permissions.AllowAny()]
+            return [IsAuthenticated]
         
         return [IsOwnedByTheUserMakingTheRequest()]
 

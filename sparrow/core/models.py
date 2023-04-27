@@ -26,7 +26,7 @@ class Route(models.Model):
     startingPointLat = models.FloatField(db_column='starting_point_lat')
     startingPointLon = models.FloatField(db_column='starting_point_lon')
     publicationDate = models.DateTimeField(auto_now_add=True, db_column='routePublicationDate')
-    user = models.ForeignKey('Member', on_delete=models.CASCADE, null=True, blank=True, db_column='user_id')  # nullable
+    member = models.ForeignKey('Member', on_delete=models.CASCADE, null=True, blank=True, db_column='user_id')  # nullable
     group = models.ForeignKey('Group', on_delete=models.CASCADE, null=True, blank=True, db_column='group_id')  # nullable
 
     class Meta:
@@ -35,7 +35,7 @@ class Route(models.Model):
         default_related_name = 'route'
 
     def clean(self):
-        if (self.group is None and self.user is None) or (self.group is not None and self.user is not None):
+        if (self.group is None and self.member is None) or (self.group is not None and self.member is not None):
             raise ValidationError("Either a group or a member must be specified!")
 
     def __str__(self):
