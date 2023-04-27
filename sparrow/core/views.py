@@ -22,14 +22,14 @@ class RouteViewSet(ModelViewSet):
             return ListRouteSerializer
         return RouteSerializer
     
-    def get_permissions(self):
-        # route can be accessed only if it is public
-        if self.action == 'list' or self.action == 'retrieve':
-            return[RouteIsPublic]
+    # def get_permissions(self):
+    #     # route can be accessed only if it is public
+    #     if self.action == 'list' or self.action == 'retrieve':
+    #         return[RouteIsPublic]
         
-        # edited or deleted only if admin or admin of the group
-        if self.action == 'update' or self.action == 'patch' or self.action == 'delete':
-            return [RouteIsAuthorizedToMakeChanges]
+    #     # edited or deleted only if admin or admin of the group
+    #     if self.action == 'update' or self.action == 'patch' or self.action == 'delete':
+    #         return [RouteIsAuthorizedToMakeChanges]
 
         # if self.action == 'list':
         #     return SmallRouteSerializer
@@ -67,7 +67,7 @@ class GroupViewSet(ModelViewSet):
         # if the use tries to see a group/ list of groups, check if 
         # he/she appears in the group
         if self.action == 'list' or self.action == 'retrieve':
-            return [IsInGroup, IsAuthenticated]
+            return [IsInGroup, permissions.IsAuthenticated()]
 
         # other actions should only be taken by admins
         return [IsAdminOfGroup]
@@ -97,7 +97,7 @@ class MemberViewSet(ModelViewSet):
     def get_permissions(self):
         # condition for list, retrieve goes here (IsAuthenticated)
         if self.action == 'list' or self.action == 'retrieve':
-            return [IsAuthenticated]
+            return [permissions.IsAuthenticated()]
         # anyone can register
         if self.action == 'create':
             return [permissions.AllowAny()]
@@ -236,7 +236,7 @@ class NotebookViewSet(ModelViewSet):
     def get_permissions(self):
         # let anyone create a notebook
         if self.action == 'create':
-            return [IsAuthenticated]
+            return [permissions.IsAuthenticated()]
         
         return [IsOwnedByTheUserMakingTheRequest()]
 
