@@ -150,9 +150,9 @@ RatingFlagDetail = RatingFlagViewSet.as_view({
     'patch': 'partial_update',
     'delete' : 'destroy'
 })
-image = ImageViewSet.as_view({
-    'get' : 'list',
-    'post' : 'create',
+
+ImageDetail = ImageViewSet.as_view({
+    'delete':'destroy'
 })
 
 
@@ -215,7 +215,7 @@ urlpatterns = [
 
     path('notebook/list/', notebookList, name='notebook-list'),
     path('notebook/detail/<int:pk>/', notebookDetail, name='notebook-detail'),
-    path('image/list/', image, name='image-list'),
+    path('image/detail/<int:pk>/', image, name='image-detail'),
 
     path('status/list/', statusList, name='status-list'),
     path('status/detail/<int:pk>/', statusDetail, name='status-detail'),
