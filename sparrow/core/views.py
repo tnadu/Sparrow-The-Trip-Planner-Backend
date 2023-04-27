@@ -239,4 +239,4 @@ class IsTaggedViewSet(GenericViewSet,mixins.RetrieveModelMixin, mixins.CreateMod
 class ImageViewSet(ModelViewSet):
     queryset = Image.objects.all()
     
-    serializer_class = NotebookImageUpload
+    serializer_class = ImageUploadSerializer

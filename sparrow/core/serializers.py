@@ -416,13 +416,56 @@ class ListNotebookSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Notebook
 #         fields = ['title', 'note', 'dateStarted', 'status', 'dateCompleted', 'user']
+###################################################################################################################
+
+class ImageUploadSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(write_only=True)
+
+    def __init__(self, folder_name=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.folder_name = folder_name
+
+    class Meta:
+        model = Image
+        fields = ['id', 'image', 'imagePath']
+        read_only_fields=['imagePath']
+
+    def create(self, validated_data):
+        print(validated_data)
+        image = validated_data.pop('image')
+
+        file_extension = image.name.split('.')[-1]
+        generated_unique_filename = '{}.{}'.format(uuid.uuid4(), file_extension)
+
+        # save the uploaded image file to the media directory
+        # I am uploading the files using chunks of data as this action can consume a lot of server resources, 
+        # so this aproach can help reduce memory usage and improve performance
+        # 'wb+' => reading and writting a file in binary
+        self.file_path =  self.folder_name + generated_unique_filename
+
+        validated_data['imagePath'] = self.file_path
+
+        with default_storage.open(settings.MEDIA_ROOT + '/' + self.file_path, 'wb+') as destination:
+            for chunk in image.chunks():
+                destination.write(chunk)
+
+        instance = super().create(validated_data)
+        instance.save()
+        return instance
 
 
 class NotebookSerializer(serializers.ModelSerializer):
+    images =  serializers.ListField(write_only=True)
+    images_list = ImageUploadSerializer(source='images', many=True, read_only=True)
+
     class Meta:
         model = Notebook
-        fields = ['id', 'route', 'title', 'note', 'status', 'dateStarted', 'dateCompleted']
+        fields = ['id', 'route', 'title', 'note', 'status', 'dateStarted', 'dateCompleted', 'images', 'images_list']
         extra_kwargs = {'dateStarted': {'read_only': True}, 'dateCompleted': {'read_only': True}}
+
+    def get_images_list(self, obj):
+        images = Image.objects.all(notebook=self.fields['id'])
+        return images
 
     def create(self, validated_data):
         request = self.context.get('request')
@@ -439,7 +482,18 @@ class NotebookSerializer(serializers.ModelSerializer):
             # then the Completed date also becomes today's date
             validated_data['dateCompleted'] = date.today()
 
-        return super().create(validated_data)
+        images_data = validated_data.pop('images', [])
+        images = []
+
+        for image_data in images_data:
+            image_serializer = ImageUploadSerializer(folder_name='notebook_images/', data={'image': image_data})
+            if image_serializer.is_valid(raise_exception=True):
+                image = image_serializer.save()
+                images.append(image)
+
+        notebook = Notebook.objects.create(**validated_data)
+        return notebook
+    
 
     def update(self, instance, validated_data):
         request = self.context.get('request')
@@ -551,57 +605,3 @@ class RatingFlagTypeSerializer(serializers.ModelSerializer):
         fields = ['id', 'type']
         extra_kwargs = {'type': {'read_only': True}}
 
-class ImageUploadSerializer(serializers.Serializer):
-    image = serializers.ImageField()
-
-    def __init__(self, folder_name=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.folder_name = folder_name
-
-    def create(self, validated_data):
-        print(validated_data)
-        image = validated_data.pop('image')
-        instance = Image(**validated_data)
-
-        file_extension = image.name.split('.')[-1]
-        generated_unique_filename = '{}.{}'.format(uuid.uuid4(), file_extension)
-        instance.imagePath = generated_unique_filename
-
-        # save the uploaded image file to the media directory
-        # I am uploading the files using chunks of data as this action can consume a lot of server resources, 
-        # so this aproach can help reduce memory usage and improve performance
-        # 'wb+' => reading and writting a file in binary
-        file_path =  self.folder_name + generated_unique_filename
-        self.imagePath = file_path
-        with default_storage.open(settings.MEDIA_ROOT + '/' + file_path, 'wb+') as destination:
-            for chunk in image.chunks():
-                destination.write(chunk)
-        
-        return instance
-    
-class NotebookImageUpload(serializers.ModelSerializer):
-    images = serializers.ListField(write_only=True)
-    notebook = serializers.PrimaryKeyRelatedField(queryset=Notebook.objects.all())
-    
-    class Meta:
-        model = Image
-        fields = ['images', 'notebook', 'imagePath']
-        read_only_fields = ['imagePath']
-
-    def create(self, validated_data):
-        images_data = validated_data.pop('images')
-        instances = []
-
-        for image_data in images_data:
-            image_serializer = ImageUploadSerializer(folder_name='notebook_images/', data={'image':image_data})
-            if image_serializer.is_valid(raise_exception=True):
-                image = image_serializer.create({'image':image_data}) # db
-                instances.append(image)        
-        
-        validated_data['notebook'] = validated_data['notebook']
-        validated_data['imagePath'] = [instance.imagePath for instance in instances]
-
-        instance = super().create(validated_data)
-        instance.save()
-
-        return instance

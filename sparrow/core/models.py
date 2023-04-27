@@ -109,7 +109,7 @@ class Notebook(models.Model):
     note = models.CharField(max_length = 3000, db_column = 'note')
     dateStarted = models.DateField(auto_now_add=True, db_column = 'date_started')
     dateCompleted = models.DateField(null = True, db_column = 'date_completed') # nullable
-
+    
     class Meta:
         db_table = 'notebook'
         # descending order for dateStarted, dateCompleted, in order to show the most recent trips first
@@ -161,7 +161,7 @@ class RatingFlag(models.Model):
         default_related_name = 'ratingFlag'
         
 class Image(models.Model):
-    imagePath = models.JSONField(null = False, blank = False, db_column = 'imagePath', db_index=True)
+    imagePath = models.CharField(max_length=300, null = False, blank = False, db_column = 'imagePath', db_index=True)
     notebook = models.ForeignKey('Notebook', on_delete=models.CASCADE, null=True, blank=True, db_column='notebook_id') # nullable
     attraction = models.ForeignKey('Attraction', on_delete=models.CASCADE, null=True, blank=True, db_column='attraction_id') # nullable
     # setting up a timestamp is useful for letting users know when an image was taken 
