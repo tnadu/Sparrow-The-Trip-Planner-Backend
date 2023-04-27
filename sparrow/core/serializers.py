@@ -457,6 +457,14 @@ class ImageUploadSerializer(serializers.ModelSerializer):
         instance = super().create(validated_data)
         instance.save()
         return instance
+    
+    def delete(self, instance):
+        try:
+            default_storage.delete(instance.imagePath)
+        except Exception as e:
+            pass
+
+        instance.delete()
 
 
 class NotebookSerializer(serializers.ModelSerializer):

@@ -238,5 +238,8 @@ class IsTaggedViewSet(GenericViewSet,mixins.RetrieveModelMixin, mixins.CreateMod
 
 class ImageViewSet(ModelViewSet):
     queryset = Image.objects.all()
-    
     serializer_class = ImageUploadSerializer
+
+    def perform_destroy(self, instance):
+        serializer = self.get_serializer(instance)
+        serializer.delete(instance)

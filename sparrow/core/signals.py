@@ -1,10 +1,12 @@
 from django.core.management import call_command
-from django.db.models.signals import post_save,post_migrate
+from django.db.models.signals import post_save,post_migrate,pre_delete
+from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.dispatch import receiver
-from .models import Member, Status, Tag, RatingFlagType
+from .models import Member, Status, Tag, RatingFlagType, Notebook, Image
 import os
 from django.conf import settings
+from django.core.exceptions import ValidationError
 
 
 # whenever 'post_save' (used to save instances to the database)
@@ -53,3 +55,13 @@ def create_media_subdirectories(sender, **kwargs):
         for path in images_dir:
             if not os.path.exists(path):
                 os.makedirs(path)
+
+# cron job
+@receiver(pre_delete, sender=Notebook)
+def sweep_notebook_associated_images(sender, instance, **kwargs):
+    images = Image.objects.filter(notebook=instance)
+    for image in images:
+        try:
+            os.remove(settings.MEDIA_ROOT + '/' + image.imagePath)
+        except OSError:
+            raise ValidationError('Failed to delete image {}'.format(image.imagePath))
