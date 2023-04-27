@@ -418,7 +418,6 @@ class ListNotebookSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Notebook
 #         fields = ['title', 'note', 'dateStarted', 'status', 'dateCompleted', 'user']
-###################################################################################################################
 
 # this serializer is designed to handle image objects, 
 # including saving newly uploaded images both in the 
