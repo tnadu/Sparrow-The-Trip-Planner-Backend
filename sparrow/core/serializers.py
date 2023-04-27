@@ -421,9 +421,11 @@ class ListNotebookSerializer(serializers.ModelSerializer):
 class ImageUploadSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(write_only=True)
 
-    def __init__(self, folder_name=None, *args, **kwargs):
+    def __init__(self, folder_name=None, notebook=None, attraction=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.folder_name = folder_name
+        self.notebook = notebook
+        self.attraction = attraction
 
     class Meta:
         model = Image
@@ -444,6 +446,8 @@ class ImageUploadSerializer(serializers.ModelSerializer):
         self.file_path =  self.folder_name + generated_unique_filename
 
         validated_data['imagePath'] = self.file_path
+        validated_data['notebook'] = self.notebook
+        validated_data['attraction'] = self.attraction
 
         with default_storage.open(settings.MEDIA_ROOT + '/' + self.file_path, 'wb+') as destination:
             for chunk in image.chunks():
@@ -455,8 +459,8 @@ class ImageUploadSerializer(serializers.ModelSerializer):
 
 
 class NotebookSerializer(serializers.ModelSerializer):
-    images =  serializers.ListField(write_only=True)
-    images_list = ImageUploadSerializer(source='images', many=True, read_only=True)
+    images =  serializers.ListField(required=False)
+    images_list = serializers.SerializerMethodField()
 
     class Meta:
         model = Notebook
@@ -464,8 +468,8 @@ class NotebookSerializer(serializers.ModelSerializer):
         extra_kwargs = {'dateStarted': {'read_only': True}, 'dateCompleted': {'read_only': True}}
 
     def get_images_list(self, obj):
-        images = Image.objects.all(notebook=self.fields['id'])
-        return images
+        images = Image.objects.filter(notebook=obj)
+        return [image.imagePath for image in images]
 
     def create(self, validated_data):
         request = self.context.get('request')
@@ -483,15 +487,15 @@ class NotebookSerializer(serializers.ModelSerializer):
             validated_data['dateCompleted'] = date.today()
 
         images_data = validated_data.pop('images', [])
+        notebook = Notebook.objects.create(**validated_data)
         images = []
 
         for image_data in images_data:
-            image_serializer = ImageUploadSerializer(folder_name='notebook_images/', data={'image': image_data})
+            image_serializer = ImageUploadSerializer(folder_name='notebook_images/', notebook=notebook, data={'image': image_data})
             if image_serializer.is_valid(raise_exception=True):
                 image = image_serializer.save()
                 images.append(image)
 
-        notebook = Notebook.objects.create(**validated_data)
         return notebook
     
 
