@@ -551,17 +551,17 @@ class RatingFlagTypeSerializer(serializers.ModelSerializer):
         fields = ['id', 'type']
         extra_kwargs = {'type': {'read_only': True}}
 
-class ImageUploadSerializer(serializers.ModelSerializer):
-    image = serializers.ImageField(write_only = True)
+class ImageUploadSerializer(serializers.Serializer):
+    image = serializers.ImageField()
 
-    class Meta:
-        model = Image
-        fields = ['image', 'imagePath']
-        read_only_fields = ['imagePath']
+    def __init__(self, folder_name=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.folder_name = folder_name
 
-    def create(self, validated_data, folder_name = 'miscellaneous/'):
+    def create(self, validated_data):
+        print(validated_data)
         image = validated_data.pop('image')
-        instance = Image(**validated_data)
+        instance = Image.objects.create(**validated_data)
 
         file_extension = image.name.split('.')[-1]
         generated_unique_filename = '{}.{}'.format(uuid.uuid4(), file_extension)
@@ -571,29 +571,42 @@ class ImageUploadSerializer(serializers.ModelSerializer):
         # I am uploading the files using chunks of data as this action can consume a lot of server resources, 
         # so this aproach can help reduce memory usage and improve performance
         # 'wb+' => reading and writting a file in binary
-        file_path =  folder_name + generated_unique_filename
+        file_path =  self.folder_name + generated_unique_filename
+        self.imagePath = file_path
         with default_storage.open(settings.MEDIA_ROOT + '/' + file_path, 'wb+') as destination:
             for chunk in image.chunks():
                 destination.write(chunk)
+        
         return instance
     
 class NotebookImageUpload(serializers.ModelSerializer):
-    image = ImageUploadSerializer(write_only = True)
+    images = serializers.ListField(write_only=True)
     notebook = serializers.PrimaryKeyRelatedField(queryset=Notebook.objects.all())
+
+    def to_internal_value(self, data):
+        if isinstance(data, list):
+            return [self.child.to_internal_value(item) for item in data]
+        return super().to_internal_value(data)
 
     class Meta:
         model = Image
-        fields = ['image', 'imagePath', 'notebook']
+        fields = ['images', 'notebook']
         read_only_fields = ['imagePath']
 
     def create(self, validated_data):
-        image_serializer = self.fields['image']
-        folder_name = 'notebook_images/'
+        images_data = validated_data.pop('images')
+        instances = []
 
-        image = image_serializer.create(validated_data=validated_data.pop('image'), folder_name=folder_name)
-        validated_data['notebook'] = self.validated_data['notebook']
-        validated_data['imagePath'] = image.imagePath
+        for image_data in images_data:
+            image_serializer = ImageUploadSerializer(folder_name='notebook_images/', data={'image': image_data})
+            if image_serializer.is_valid(raise_exception=True):
+                # image = image_serializer.save() # db
+                instances.append(image_serializer)        
+        
+        validated_data['notebook'] = validated_data['notebook']
+        validated_data['imagePath'] = [instance.imagePath for instance in instances]
 
         instance = super().create(validated_data)
         instance.save()
+
         return instance
