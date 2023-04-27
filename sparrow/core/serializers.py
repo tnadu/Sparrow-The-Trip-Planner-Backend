@@ -529,6 +529,13 @@ class NotebookSerializer(serializers.ModelSerializer):
             validated_data['dateStarted'] = date.today()
             validated_data['dateCompleted'] = None
 
+        images_data = validated_data.pop('images', [])
+
+        for image_data in images_data:
+            image_serializer = ImageUploadSerializer(folder_name='notebook_images/', notebook=instance, data={'image': image_data})
+            if image_serializer.is_valid(raise_exception=True):
+                image = image_serializer.save()
+
         return super().update(instance, validated_data)
 
 
@@ -617,4 +624,3 @@ class RatingFlagTypeSerializer(serializers.ModelSerializer):
         model = RatingFlagType
         fields = ['id', 'type']
         extra_kwargs = {'type': {'read_only': True}}
-
