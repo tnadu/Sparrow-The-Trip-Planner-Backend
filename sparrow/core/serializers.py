@@ -552,7 +552,7 @@ class NotebookSerializer(serializers.ModelSerializer):
         images_data = validated_data.pop('images', [])
 
         for image_data in images_data:
-            image_serializer = ImageUploadSerializer(folder_name='notebook_images/', notebook=instance, data={'image': image_data})
+            image_serializer = ImageUploadSerializer(folder_name='notebook_images/', notebook=instance, owner=member, data={'image': image_data})
             if image_serializer.is_valid(raise_exception=True):
                 image = image_serializer.save()
 
