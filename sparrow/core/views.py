@@ -240,6 +240,7 @@ class ImageViewSet(ModelViewSet):
     queryset = Image.objects.all()
     serializer_class = ImageUploadSerializer
 
+    # this viewset is designed specifically for deleting instances of images
     def perform_destroy(self, instance):
         serializer = self.get_serializer(instance)
         serializer.delete(instance)

@@ -56,7 +56,11 @@ def create_media_subdirectories(sender, **kwargs):
             if not os.path.exists(path):
                 os.makedirs(path)
 
-# cron job
+# this is a "cron job" implemented as a signal receiver, which is triggered when a Notebook instance is about to be deleted
+# it deletes all associated Image instances for the Notebook by iterating through them 
+# and removing their corresponding files from the media directory
+# if an error occurs while attempting to delete an image file, it raises a validation error with a message 
+# indicating the file that failed to delete
 @receiver(pre_delete, sender=Notebook)
 def sweep_notebook_associated_images(sender, instance, **kwargs):
     images = Image.objects.filter(notebook=instance)
