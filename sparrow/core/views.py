@@ -22,11 +22,14 @@ class RouteViewSet(ModelViewSet):
             return ListRouteSerializer
         return RouteSerializer
     
-    # route can be accessed only if it is public
     def get_permissions(self):
+        # route can be accessed only if it is public
         if self.action == 'list' or self.action == 'retrieve':
             return[RouteIsPublic]
-
+        
+        # edited or deleted only if admin or admin of the group
+        if self.action == 'update' or self.action == 'patch' or self.action == 'delete':
+            return [RouteIsAuthorizedToMakeChanges]
 
         # if self.action == 'list':
         #     return SmallRouteSerializer
