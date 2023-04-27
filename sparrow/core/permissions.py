@@ -36,3 +36,10 @@ class IsAdminOfGroup(permissions.BasePermission):
         
         except BelongsTo.DoesNotExist:
             return False
+
+
+class RouteIsAuthorizedToMakeChanges(permissions.BasePermissions):
+    def has_object_permission(self, request, view, obj):
+        is_owner = IsOwnedByTheUserMakingTheRequest().has_object_permission(request, view, obj)
+        is_admin = IsAdminOfGroup().has_object_permission(request, view, obj)
+        return is_owner or is_admin
