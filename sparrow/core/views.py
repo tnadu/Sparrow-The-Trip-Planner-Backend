@@ -21,6 +21,13 @@ class RouteViewSet(ModelViewSet):
         if self.action == 'list':
             return ListRouteSerializer
         return RouteSerializer
+    
+    # route can be accessed only if it is public
+    def get_permissions(self):
+        if self.action == 'list' or self.action == 'retrieve':
+            return[RouteIsPublic]
+
+
         # if self.action == 'list':
         #     return SmallRouteSerializer
         # elif self.action in ['create', 'update', 'partial_update']:
