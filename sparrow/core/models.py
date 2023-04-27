@@ -161,7 +161,7 @@ class RatingFlag(models.Model):
         default_related_name = 'ratingFlag'
         
 class Image(models.Model):
-    imagePath = models.CharField(max_length = 100, null = False, blank = False, db_column = 'imagePath')
+    imagePath = models.JSONField(null = False, blank = False, db_column = 'imagePath', db_index=True)
     notebook = models.ForeignKey('Notebook', on_delete=models.CASCADE, null=True, blank=True, db_column='notebook_id') # nullable
     attraction = models.ForeignKey('Attraction', on_delete=models.CASCADE, null=True, blank=True, db_column='attraction_id') # nullable
     # setting up a timestamp is useful for letting users know when an image was taken 

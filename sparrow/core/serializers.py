@@ -585,7 +585,7 @@ class NotebookImageUpload(serializers.ModelSerializer):
     
     class Meta:
         model = Image
-        fields = ['images', 'notebook']
+        fields = ['images', 'notebook', 'imagePath']
         read_only_fields = ['imagePath']
 
     def create(self, validated_data):
