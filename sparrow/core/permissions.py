@@ -41,4 +41,4 @@ class IsAdminOfGroup(permissions.BasePermission):
 class RouteIsPublic(permissions.BasePermissions):
     def has_object_permission(self, request, view, obj):
         # if public anyone, if not, only allows access to the owner or a member of the group
-        return (obj.public == True and IsAuthenticated.has_object_permission()) or (obj.public == False and (IsOwnedByTheUserMakingTheRequest.has_object_permission() or IsInGroup.has_object_permission()) )
+        return (obj.public == True and IsAuthenticated.has_object_permission(request, view, obj)) or (obj.public == False and (IsOwnedByTheUserMakingTheRequest.has_object_permission(request, view, obj) or IsInGroup.has_object_permission(request, view, obj)) )
