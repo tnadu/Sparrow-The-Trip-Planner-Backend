@@ -6,7 +6,7 @@ from rest_framework import status, permissions, mixins
 from django.contrib.auth import login, logout
 from .models import *
 from .serializers import *
-
+from .permissions import *
 
 class RouteViewSet(ModelViewSet):
     queryset = Route.objects.all()
@@ -53,6 +53,14 @@ class GroupViewSet(ModelViewSet):
     serializer_class = GroupSerializer
     filterset_fields = ['route__id', 'belongsTo__member_id']
 
+    def get_permissions(self):
+        # if the use tries to see a group/ list of groups, check if 
+        # he/she appears in the group
+        if self.action == 'list' or self.action == 'retrieve':
+            return [IsInGroup]
+
+        # other actions should only be taken by admins
+        return [IsAdminOfGroup]
 
 class MemberViewSet(ModelViewSet):
     queryset = Member.objects.all()
@@ -76,13 +84,28 @@ class MemberViewSet(ModelViewSet):
 
         return MemberSerializer
 
-#     # custom deletion logic
+    def get_permissions(self):
+        # condition for list, retrieve goes here (IsAuthenticated)
+
+        # anyone can register
+        if self.action == 'create':
+            return [permissions.AllowAny()]
+        
+        return [IsTheUserMakingTheRequest()]
+
+    # custom deletion logic
     def destroy(self, request, *args, **kwargs):
         member = self.get_object()
         # delete the associated baseUser first,
         # which will delete the member in cascade
         member.baseUser.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    def removeProfilePhoto(self, request, **kwargs):
+        member = self.get_object()
+        member.profilePhoto = defaultProfilePhoto
+        member.save()
+        return Response(status=status.HTTP_200_OK)
     
 
 # none of the default actions will be performed using
@@ -118,12 +141,13 @@ class ChangePasswordViewSet(mixins.UpdateModelMixin, GenericViewSet):
     serializer_class = ChangePasswordSerializer
 
 
-class AttractionViewSet(ModelViewSet):
+class AttractionViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin):
     queryset = Attraction.objects.all()
     serializer_class = AttractionSerializer
 
     filterset_fields = ['ratingFlag__id', 'isWithin__route_id', 'isTagged__tag__tagName']
     search_fields = ['name', 'generalDescription']
+    ordering_fields = ['isWithin__orderNumber']
     
 
 class BelongsToViewSet(GenericViewSet, mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
@@ -178,6 +202,7 @@ class BelongsToViewSet(GenericViewSet, mixins.RetrieveModelMixin, mixins.CreateM
 class NotebookViewSet(ModelViewSet):
     queryset = Notebook.objects.all()
     filterset_fields = ["user_id"]
+    permission_classes = [IsOwnedByTheUserMakingTheRequest]
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -197,6 +222,12 @@ class NotebookViewSet(ModelViewSet):
 
         # return LargeNotebookSerializer
 
+    def get_permissions(self):
+        # let anyone create a notebook
+        if self.action == 'create':
+            return [permissions.AllowAny()]
+        
+        return [IsOwnedByTheUserMakingTheRequest()]
 
 class StatusViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
     queryset = Status.objects.all()
@@ -214,7 +245,7 @@ class RatingFlagViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateMode
         if self.action == 'create':
             return RatingFlag.objects.all()
         
-        # once created, the flags can be altered, which means
+        # once created, the flags can't be altered, which means
         # that the query set can be limitted to ratings
         return RatingFlag.objects.filter(rating_id__lte=5)
 
@@ -222,7 +253,7 @@ class RatingFlagViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateMode
 class RatingFlagTypeViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
     queryset = RatingFlagType.objects.all()
     serializer_class = RatingFlagTypeSerializer
-    filterset_fields = ['route_id', 'attraction_id']
+    filterset_fields = ['ratingFlag__id']
 
 
 class TagViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):

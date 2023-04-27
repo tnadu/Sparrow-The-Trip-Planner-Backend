@@ -53,6 +53,10 @@ memberDetail = MemberViewSet.as_view({
     'delete': 'destroy'
 })
 
+removeProfilePhoto = MemberViewSet.as_view({
+    'post': 'removeProfilePhoto'
+})
+
 changePassword = ChangePasswordViewSet.as_view({
     'put': 'update'
 })
@@ -200,6 +204,7 @@ urlpatterns = [
     path('member/list/', memberList, name='member-list'),
     path('member/detail/<int:pk>/', memberDetail, name='member-detail'),
     path('member/change-password/<int:pk>/', changePassword, name='member-change-password'),
+    path('member/remove-profile-photo/<int:pk>/', removeProfilePhoto, name='member-remove-profile-photo'),
     
     path('group/list/', groupList, name='group-list'),
     path('group/detail/<int:pk>/', groupDetail, name='group-detail'),
