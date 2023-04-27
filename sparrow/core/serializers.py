@@ -561,7 +561,7 @@ class ImageUploadSerializer(serializers.Serializer):
     def create(self, validated_data):
         print(validated_data)
         image = validated_data.pop('image')
-        instance = Image.objects.create(**validated_data)
+        instance = Image(**validated_data)
 
         file_extension = image.name.split('.')[-1]
         generated_unique_filename = '{}.{}'.format(uuid.uuid4(), file_extension)
@@ -582,12 +582,7 @@ class ImageUploadSerializer(serializers.Serializer):
 class NotebookImageUpload(serializers.ModelSerializer):
     images = serializers.ListField(write_only=True)
     notebook = serializers.PrimaryKeyRelatedField(queryset=Notebook.objects.all())
-
-    def to_internal_value(self, data):
-        if isinstance(data, list):
-            return [self.child.to_internal_value(item) for item in data]
-        return super().to_internal_value(data)
-
+    
     class Meta:
         model = Image
         fields = ['images', 'notebook']
@@ -598,10 +593,10 @@ class NotebookImageUpload(serializers.ModelSerializer):
         instances = []
 
         for image_data in images_data:
-            image_serializer = ImageUploadSerializer(folder_name='notebook_images/', data={'image': image_data})
+            image_serializer = ImageUploadSerializer(folder_name='notebook_images/', data={'image':image_data})
             if image_serializer.is_valid(raise_exception=True):
-                # image = image_serializer.save() # db
-                instances.append(image_serializer)        
+                image = image_serializer.create({'image':image_data}) # db
+                instances.append(image)        
         
         validated_data['notebook'] = validated_data['notebook']
         validated_data['imagePath'] = [instance.imagePath for instance in instances]
