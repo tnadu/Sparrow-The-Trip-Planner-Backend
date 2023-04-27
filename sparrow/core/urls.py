@@ -215,7 +215,7 @@ urlpatterns = [
 
     path('notebook/list/', notebookList, name='notebook-list'),
     path('notebook/detail/<int:pk>/', notebookDetail, name='notebook-detail'),
-    path('image/detail/<int:pk>/', image, name='image-detail'),
+    path('image/detail/<int:pk>/', ImageDetail, name='image-detail'),
 
     path('status/list/', statusList, name='status-list'),
     path('status/detail/<int:pk>/', statusDetail, name='status-detail'),
