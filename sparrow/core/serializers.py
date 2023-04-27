@@ -421,11 +421,12 @@ class ListNotebookSerializer(serializers.ModelSerializer):
 class ImageUploadSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(write_only=True)
 
-    def __init__(self, folder_name=None, notebook=None, attraction=None, *args, **kwargs):
+    def __init__(self, folder_name=None, notebook=None, attraction=None, owner=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.folder_name = folder_name
         self.notebook = notebook
         self.attraction = attraction
+        self.owner = owner
 
     class Meta:
         model = Image
@@ -433,7 +434,6 @@ class ImageUploadSerializer(serializers.ModelSerializer):
         read_only_fields=['imagePath']
 
     def create(self, validated_data):
-        print(validated_data)
         image = validated_data.pop('image')
 
         file_extension = image.name.split('.')[-1]
@@ -448,6 +448,7 @@ class ImageUploadSerializer(serializers.ModelSerializer):
         validated_data['imagePath'] = self.file_path
         validated_data['notebook'] = self.notebook
         validated_data['attraction'] = self.attraction
+        validated_data['owner'] = self.owner
 
         with default_storage.open(settings.MEDIA_ROOT + '/' + self.file_path, 'wb+') as destination:
             for chunk in image.chunks():
@@ -491,7 +492,7 @@ class NotebookSerializer(serializers.ModelSerializer):
         images = []
 
         for image_data in images_data:
-            image_serializer = ImageUploadSerializer(folder_name='notebook_images/', notebook=notebook, data={'image': image_data})
+            image_serializer = ImageUploadSerializer(folder_name='notebook_images/', notebook=notebook, owner = member, data={'image': image_data})
             if image_serializer.is_valid(raise_exception=True):
                 image = image_serializer.save()
                 images.append(image)
