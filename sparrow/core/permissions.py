@@ -43,7 +43,7 @@ class RatingFlagAuthorization(permissions.BasePermission):
         
         # if it's a rating on an attraction, check if the user is authenticated
         # else if it's a rating on a route, check the permission for that route (public/private)
-        if view.action in ['list','create','retrieve']:
+        if view.action in ['list','create']:
             if rating_flag.attraction:
                 return request.user.is_authenticated
             else:
