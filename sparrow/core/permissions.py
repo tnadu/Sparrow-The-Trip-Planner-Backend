@@ -10,7 +10,7 @@ class IsTheUserMakingTheRequest(permissions.BasePermission):
 
 class IsOwnedByTheUserMakingTheRequest(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return request.user == obj.user
+        return request.user == obj.user.baseUser
 
 
 class IsInGroup(permissions.BasePermission):    
@@ -117,6 +117,5 @@ class RouteIsAuthorizedToMakeChanges(permissions.BasePermission):
 class RouteIsPublic(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         publicCondition = obj.public and permissions.IsAuthenticated().has_permission(request, view)
-        privateCondition = not obj.public and RouteIsAuthorizedToMakeChanges().has_object_permission(request, view, obj)
 
-        return publicCondition or privateCondition
+        return publicCondition or RouteIsAuthorizedToMakeChanges().has_object_permission(request, view, obj)

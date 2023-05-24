@@ -5,19 +5,25 @@ from rest_framework.decorators import action
 from rest_framework import status, mixins
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import login, logout
-from .models import *
 from .serializers import *
 from .permissions import *
 
 
 class RouteViewSet(ModelViewSet):
-    queryset = Route.objects.all()
-
     # search & options for filtering and ordering
     filterset_fields = ['verified', 'user__baseUser__username', 'user__baseUser__first_name', 'user__baseUser__last_name',
                         'group__name', 'isWithin__attraction__name', 'isWithin__attraction__isTagged__tag__tagName',
                         'notebook__id', 'user', 'group', 'ratingFlag__id']
     search_fields = ['title', 'description', 'startingPointLat', 'startingPointLon']
+
+    def get_queryset(self):
+        if self.action == 'list':
+            filteredIds = [route.id for route in Route.objects.all() if RouteIsPublic().has_object_permission(self.request, self, route)]
+            queryset = Route.objects.filter(id__in=filteredIds)
+
+            return queryset
+
+        return Route.objects.all()
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -33,11 +39,11 @@ class RouteViewSet(ModelViewSet):
 
     def get_permissions(self):
         # route can be accessed only if it is public
-        if self.action == 'list' or self.action == 'retrieve':
-            return[RouteIsPublic()]
+        if self.action == 'retrieve':
+            return [RouteIsPublic()]
 
         # edited or deleted only if admin or admin of the group
-        if self.action == 'update' or self.action == 'patch' or self.action == 'delete':
+        if self.action == 'update' or self.action == 'partial_update' or self.action == 'delete':
             return [RouteIsAuthorizedToMakeChanges()]
 
         # any authenticated user can create routes
