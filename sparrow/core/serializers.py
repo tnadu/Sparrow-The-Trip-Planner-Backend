@@ -241,7 +241,7 @@ class GroupSerializer(serializers.ModelSerializer):
 class BelongsToSerializer(serializers.ModelSerializer):
     class Meta:
         model = BelongsTo
-        fields = ['id', 'member', 'group', 'isAdmin', 'nickname']
+        fields = ['id', 'user', 'group', 'isAdmin', 'nickname']
 
 
 # class GroupBelongsToSerializer(serializers.ModelSerializer):
