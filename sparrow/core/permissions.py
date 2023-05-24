@@ -1,5 +1,5 @@
 from rest_framework import permissions
-from .serializers import BelongsToSerializer
+from .serializers import BelongsToSerializer, RatingFlagSerializer
 from .models import *
 
 
@@ -119,3 +119,38 @@ class RouteIsPublic(permissions.BasePermission):
         publicCondition = obj.public and permissions.IsAuthenticated().has_permission(request, view)
 
         return publicCondition or RouteIsAuthorizedToMakeChanges().has_object_permission(request, view, obj)
+
+
+class RatingFlagAuthorization(permissions.BasePermission):
+    # necessary for the 'create' action
+    def has_permission(self, request, view):
+        if view.action != 'create':
+            return True
+
+        serializer = RatingFlagSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        # the rating is associated with an attraction
+        if data.get('attraction'):
+            return permissions.IsAuthenticated().has_permission(request, view)
+
+        # the rating is associated with a route
+        return RouteIsPublic().has_object_permission(request, view, data['route'])
+
+
+    def has_object_permission(self, request, view, obj):
+        # a user can interact with the ratings associated with a given route only if the route is public
+        if obj.route and not RouteIsPublic().has_object_permission(request, view, obj.route):
+            return False
+
+        if view.action == 'list':
+            if obj.attraction:
+                return permissions.IsAuthenticated().has_permission(request, view)
+
+            # the rating is associated with a route which is
+            # visible to the user, which makes it visible too
+            return True
+
+        # only the user who posted a rating is allowed to modify/delete it
+        return IsTheUserMakingTheRequest().has_object_permission(request, view, obj.user)

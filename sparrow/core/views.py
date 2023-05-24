@@ -296,6 +296,7 @@ class RatingFlagViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateMode
                                      mixins.UpdateModelMixin, mixins.DestroyModelMixin):
     serializer_class = RatingFlagSerializer
     filterset_fields = ['route_id', 'attraction_id']
+    permission_classes = [RatingFlagAuthorization]
 
     def get_queryset(self):
         # users can create both ratings and flags (instances with a ratingFlagType greater than 5)
