@@ -86,11 +86,11 @@ attractionDetail = AttractionViewSet.as_view({
 #####################
 
 belongsToList = BelongsToViewSet.as_view({
-    'post': 'create'
+    'post': 'create',
+    'get': 'list'
 })
 
 belongsToDetail = BelongsToViewSet.as_view({
-    'get' : 'retrieve',
     'put': 'update',
     'patch': 'partial_update',
     'delete': 'destroy'
@@ -128,11 +128,11 @@ notebookDetail = NotebookViewSet.as_view({
 #####################
 
 IsWithinList = IsWithinViewSet.as_view({
-    'post' : 'create'
+    'get': 'list',
+    'post': 'create',
 })
 
 IsWithinDetail = IsWithinViewSet.as_view({
-    'get' : 'retrieve',
     'put' : 'update',
     'patch': 'partial_update',
     'delete' : 'destroy'
@@ -172,20 +172,16 @@ TagList = TagViewSet.as_view({
     'get': 'list'
 })
 
-TagDetail = TagViewSet.as_view({
-    'get' : 'retrieve',
-})
-
 
 ##### IsTag #####
 #####################
 
 IsTaggedList = IsTaggedViewSet.as_view({
+    'get': 'list',
     'post': 'create'
 })
 
 IsTaggedDetail = IsTaggedViewSet.as_view({
-    'get' : 'retrieve',
     'delete': 'destroy'
 })
 
@@ -228,7 +224,6 @@ urlpatterns = [
     path('ratingFlagType/detail/<int:pk>/', RatingFlagTypeDetail, name='ratingFlagType-detail'),
 
     path('tag/list/', TagList, name='tag-list'),
-    path('tag/detail/<int:pk>/', TagDetail, name='tag-detail'),
 
     path('isTagged/list/', IsTaggedList, name='isTagged-list'),
     path('isTagged/detail/<int:pk>/', IsTaggedDetail, name='isTagged-detail')
