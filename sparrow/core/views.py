@@ -71,6 +71,14 @@ class GroupViewSet(ModelViewSet):
         instance = BelongsTo(user=member, group=group, isAdmin=True)
         instance.save()
 
+    def get_permissions(self):
+        # if the use tries to see a group/ list of groups, check if
+        # he/she appears in the group
+        if self.action == 'list' or self.action == 'retrieve':
+            return [IsInGroup]
+
+        # other actions should only be taken by admins
+        return [IsAdminOfGroup]
 
 class MemberViewSet(ModelViewSet):
     queryset = Member.objects.all()
@@ -172,7 +180,7 @@ class BelongsToViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateModel
             queryset = BelongsTo.objects.filter(group=groupsOfMemberMakingTheRequest[0])
 
             for group in groupsOfMemberMakingTheRequest:
-                queryset |= BelongsTo.objects.filter(group=group) 
+                queryset |= BelongsTo.objects.filter(group=group)
 
             return queryset
 
