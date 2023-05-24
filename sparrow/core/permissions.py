@@ -38,8 +38,19 @@ class IsAdminOfGroup(permissions.BasePermission):
             return False
 
 
-class RouteIsAuthorizedToMakeChanges(permissions.BasePermissions):
+class RouteIsAuthorizedToMakeChanges(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        is_owner = IsOwnedByTheUserMakingTheRequest().has_object_permission(request, view, obj)
-        is_admin = IsAdminOfGroup().has_object_permission(request, view, obj)
-        return is_owner or is_admin
+        # current route is owned be the user making the request
+        userCondition = obj.user and IsOwnedByTheUserMakingTheRequest().has_object_permission(request, view, obj)
+        # current route is owned by a group to which the user making the request belongs
+        groupCondition = obj.group and IsInGroup().has_object_permission(request, view, obj.group)
+
+        return userCondition or groupCondition
+
+
+class RouteIsPublic(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        publicCondition = obj.public and permissions.IsAuthenticated().has_permission(request, view)
+        privateCondition = not obj.public and RouteIsAuthorizedToMakeChanges().has_object_permission(request, view, obj)
+
+        return publicCondition or privateCondition
