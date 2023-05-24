@@ -52,7 +52,6 @@ class IsWithinViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateModelM
 class GroupViewSet(ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    # permission_classes = [IsAdminOfGroup]
     filterset_fields = ['route__id', 'belongsTo__user_id']
 
     # overridden to pass the request object to the perform_create method
@@ -79,6 +78,7 @@ class GroupViewSet(ModelViewSet):
 
         # other actions should only be taken by admins
         return [IsAdminOfGroup]
+
 
 class MemberViewSet(ModelViewSet):
     queryset = Member.objects.all()
