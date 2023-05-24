@@ -172,17 +172,13 @@ TagList = TagViewSet.as_view({
     'get': 'list'
 })
 
-TagDetail = TagViewSet.as_view({
-    'get' : 'retrieve',
-})
-
 
 ##### IsTag #####
 #####################
 
 IsTaggedList = IsTaggedViewSet.as_view({
-    'post': 'create',
-    'get': 'list'
+    'get': 'list',
+    'post': 'create'
 })
 
 IsTaggedDetail = IsTaggedViewSet.as_view({
@@ -228,7 +224,6 @@ urlpatterns = [
     path('ratingFlagType/detail/<int:pk>/', RatingFlagTypeDetail, name='ratingFlagType-detail'),
 
     path('tag/list/', TagList, name='tag-list'),
-    path('tag/detail/<int:pk>/', TagDetail, name='tag-detail'),
 
     path('isTagged/list/', IsTaggedList, name='isTagged-list'),
     path('isTagged/detail/<int:pk>/', IsTaggedDetail, name='isTagged-detail')
