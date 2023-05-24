@@ -86,11 +86,11 @@ attractionDetail = AttractionViewSet.as_view({
 #####################
 
 belongsToList = BelongsToViewSet.as_view({
-    'post': 'create'
+    'post': 'create',
+    'get': 'list'
 })
 
 belongsToDetail = BelongsToViewSet.as_view({
-    'get' : 'retrieve',
     'put': 'update',
     'patch': 'partial_update',
     'delete': 'destroy'
@@ -128,11 +128,11 @@ notebookDetail = NotebookViewSet.as_view({
 #####################
 
 IsWithinList = IsWithinViewSet.as_view({
-    'post' : 'create'
+    'get': 'list',
+    'post': 'create',
 })
 
 IsWithinDetail = IsWithinViewSet.as_view({
-    'get' : 'retrieve',
     'put' : 'update',
     'patch': 'partial_update',
     'delete' : 'destroy'
