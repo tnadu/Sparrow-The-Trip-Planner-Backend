@@ -8,6 +8,7 @@ from .models import *
 from .serializers import *
 from .permissions import *
 
+
 class RouteViewSet(ModelViewSet):
     queryset = Route.objects.all()
 
@@ -42,7 +43,7 @@ class RouteViewSet(ModelViewSet):
     #     serializer.save()
 
 
-class IsWithinViewSet(GenericViewSet, mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+class IsWithinViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
     queryset = isWithin.objects.all()
     serializer_class = IsWithinSerializer
     filterset_fields = ['route_id', 'attraction_id']
@@ -51,16 +52,33 @@ class IsWithinViewSet(GenericViewSet, mixins.RetrieveModelMixin, mixins.CreateMo
 class GroupViewSet(ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    filterset_fields = ['route__id', 'belongsTo__member_id']
+    filterset_fields = ['route__id', 'belongsTo__user_id']
+
+    # overridden to pass the request object to the perform_create method
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer, request)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    # creates a belongsTo entity, adding the user creating the group as an admin
+    def perform_create(self, serializer, request):
+        group = serializer.save()
+        member = Member.objects.get(pk=request.user.id)
+
+        instance = BelongsTo(user=member, group=group, isAdmin=True)
+        instance.save()
 
     def get_permissions(self):
-        # if the use tries to see a group/ list of groups, check if 
+        # if the use tries to see a group/ list of groups, check if
         # he/she appears in the group
         if self.action == 'list' or self.action == 'retrieve':
             return [IsInGroup]
 
         # other actions should only be taken by admins
         return [IsAdminOfGroup]
+
 
 class MemberViewSet(ModelViewSet):
     queryset = Member.objects.all()
@@ -150,10 +168,24 @@ class AttractionViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveMo
     ordering_fields = ['isWithin__orderNumber']
     
 
-class BelongsToViewSet(GenericViewSet, mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
-    queryset = BelongsTo.objects.all()
+class BelongsToViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
     serializer_class = BelongsToSerializer
-    filterset_fields = ['member_id', 'group_id']
+    filterset_fields = ['user_id', 'group_id']
+    permission_classes = [BelongsToAuthorization]
+
+    def get_queryset(self):
+        if self.action == 'list':
+            memberMakingTheRequest = Member.objects.get(pk=self.request.user.id)
+            groupsOfMemberMakingTheRequest = Group.objects.filter(belongsTo__user=memberMakingTheRequest)
+            queryset = BelongsTo.objects.filter(group=groupsOfMemberMakingTheRequest[0])
+
+            for group in groupsOfMemberMakingTheRequest:
+                queryset |= BelongsTo.objects.filter(group=group)
+
+            return queryset
+
+        return BelongsTo.objects.all()
+
 
 
 ### BACK-UP: for belongsTo
@@ -256,13 +288,13 @@ class RatingFlagTypeViewSet(GenericViewSet, mixins.ListModelMixin, mixins.Retrie
     filterset_fields = ['ratingFlag__id']
 
 
-class TagViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
+class TagViewSet(GenericViewSet, mixins.ListModelMixin):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     filterset_fields = ['isTagged__attraction_id']
 
 
-class IsTaggedViewSet(GenericViewSet,mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin):
+class IsTaggedViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin):
     queryset = IsTagged.objects.all()
     serializer_class = IsTaggedSerializer
     filterset_fields = ['attraction_id', 'tag_id']
