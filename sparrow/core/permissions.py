@@ -37,7 +37,7 @@ class IsAdminOfGroup(permissions.BasePermission):
         
         except BelongsTo.DoesNotExist:
             return False
-        
+
 
 class BelongsToAuthorization(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -63,29 +63,29 @@ class BelongsToAuthorization(permissions.BasePermission):
         # would be violated if they tried to enter their own id in the
         # user field;
         # this means that whenever a nickname is provided, it is related
-        # to another user, which is forbidden; 
+        # to another user, which is forbidden;
         if nickname:
             return False
 
         # a request is authorized only if it is issued by a group admin
         return IsAdminOfGroup().has_object_permission(request, view, group)
-    
+
     def has_object_permission(self, request, view, obj):
         group = Group.objects.get(pk=obj.group_id)
-        
+
         if view.action == 'destroy':
             isAdmin = IsAdminOfGroup().has_object_permission(request, view, group)
             userToBeModified = Member.objects.get(pk=obj.user_id)
             theirOwnEntry = IsTheUserMakingTheRequest().has_object_permission(request, view, userToBeModified)
 
             return isAdmin or theirOwnEntry
-        
+
         # 'update' and 'partial_update' action section
         user = request.data.get('user')
         groupInRequest = request.data.get('group')
         nickname = request.data.get('nickname')
         isAdmin = request.data.get('isAdmin')
-        
+
         modifiedUser = Member.objects.get(pk=obj.user_id)
 
         # in order to replace a user in a group or move a user in another
@@ -102,4 +102,16 @@ class BelongsToAuthorization(permissions.BasePermission):
             return False
 
         return True
-    
+
+
+class RouteIsPublic(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        publicCondition = obj.public and permissions.IsAuthenticated().has_permission(request, view)
+
+        # current route is owned be the user making the request
+        userCondition = obj.user and IsOwnedByTheUserMakingTheRequest().has_object_permission(request, view, obj)
+        # current route is owned by a group to which the user making the request belongs
+        groupCondition = obj.group and IsInGroup().has_object_permission(request, view, obj.group)
+        privateCondition = not obj.public and (userCondition or groupCondition)
+
+        return publicCondition or privateCondition
