@@ -1,6 +1,5 @@
 from rest_framework import permissions
 from .models import *
-from rest_framework.permissions import BasePermission, IsAuthenticated
 
 
 class IsTheUserMakingTheRequest(permissions.BasePermission):
@@ -39,7 +38,14 @@ class IsAdminOfGroup(permissions.BasePermission):
             return False
 
 
-class RouteIsPublic(permissions.BasePermissions):
+class RouteIsPublic(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        # if public anyone, if not, only allows access to the owner or a member of the group
-        return (obj.public == True and IsAuthenticated().has_permission(request, view)) or (obj.public == False and (IsOwnedByTheUserMakingTheRequest.has_object_permission(request, view, obj) or IsInGroup.has_object_permission(request, view, obj)) )
+        publicCondition = obj.public and permissions.IsAuthenticated().has_permission(request, view)
+
+        # current route is owned be the user making the request
+        userCondition = obj.user and IsOwnedByTheUserMakingTheRequest().has_object_permission(request, view, obj)
+        # current route is owned by a group to which the user making the request belongs
+        groupCondition = obj.group and IsInGroup().has_object_permission(request, view, obj.group)
+        privateCondition = not obj.public and (userCondition or groupCondition)
+
+        return publicCondition or privateCondition
