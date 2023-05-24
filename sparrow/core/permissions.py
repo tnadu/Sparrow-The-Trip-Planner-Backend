@@ -1,4 +1,5 @@
 from rest_framework import permissions
+from .serializers import RatingFlagSerializer
 from .models import *
 
 
@@ -37,19 +38,36 @@ class IsAdminOfGroup(permissions.BasePermission):
         except BelongsTo.DoesNotExist:
             return False
 
-class RatingFlagAuthorization(permissions.BasePermission):    
+class RatingFlagAuthorization(permissions.BasePermission):
+    # necessary for the 'create' action
+    def has_permission(self, request, view):
+        if view.action != 'create':
+            return True
+
+        serializer = RatingFlagSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        # the rating is associated with an attraction
+        if data.get('attraction'):
+            return permissions.IsAuthenticated().has_permission(request, view)
+
+        # the rating is associated with a route
+        return RouteIsPublic().has_object_permission(request, view, data['route'])
+
+
     def has_object_permission(self, request, view, obj):
-        rating_flag = RatingFlag.objects.get(pk = obj.id)
+        # a user can interact with the ratings associated with a given route only if the route is public
+        if obj.route and not RouteIsPublic().has_object_permission(request, view, obj.route):
+            return False
+
+        if view.action == 'list':
+            if obj.attraction:
+                return permissions.IsAuthenticated().has_permission(request, view)
+
+            # the rating is associated with a route which is
+            # visible to the user, which makes it visible too
+            return True
         
-        # if it's a rating on an attraction, check if the user is authenticated
-        # else if it's a rating on a route, check the permission for that route (public/private)
-        if view.action in ['list','create']:
-            if rating_flag.attraction:
-                return request.user.is_authenticated
-            else:
-                return (RouteIsPublic().has_object_permission(request, view, rating_flag.route))
-        
-        # only the user who rated the object is allowed to update/delete  
-        if view.action in ['update','partial_update','destroy']:
-            if rating_flag.attraction or rating_flag.route:
-                return (IsOwnedByTheUserMakingTheRequest().has_object_permission(request, view, rating_flag))
+        # only the user who posted a rating is allowed to modify/delete it
+        return IsTheUserMakingTheRequest().has_object_permission(request, view, obj.user)
