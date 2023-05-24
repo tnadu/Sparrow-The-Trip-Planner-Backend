@@ -181,11 +181,11 @@ TagDetail = TagViewSet.as_view({
 #####################
 
 IsTaggedList = IsTaggedViewSet.as_view({
-    'post': 'create'
+    'post': 'create',
+    'get': 'list'
 })
 
 IsTaggedDetail = IsTaggedViewSet.as_view({
-    'get' : 'retrieve',
     'delete': 'destroy'
 })
 
