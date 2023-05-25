@@ -128,11 +128,11 @@ notebookDetail = NotebookViewSet.as_view({
 #####################
 
 IsWithinList = IsWithinViewSet.as_view({
-    'post' : 'create'
+    'post' : 'create',
+    'get': 'list'
 })
 
 IsWithinDetail = IsWithinViewSet.as_view({
-    'get' : 'retrieve',
     'put' : 'update',
     'patch': 'partial_update',
     'delete' : 'destroy'

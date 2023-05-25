@@ -42,10 +42,19 @@ class RouteViewSet(ModelViewSet):
     #     serializer.save()
 
 
-class IsWithinViewSet(GenericViewSet, mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
-    queryset = isWithin.objects.all()
+class IsWithinViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
     serializer_class = IsWithinSerializer
     filterset_fields = ['route_id', 'attraction_id']
+
+    def get_queryset(self):
+        if self.action == 'list':
+            initialQuerySet = isWithin.object.all()
+            filteredIds = [IsWithin.id for IsWithin in initialQuerySet if RouteIsAuthorizedToMakeChanges().has_object_permission(self.request, self, IsWithin.route)]
+            querySet = initialQuerySet.filter(id__in=filteredIds)
+
+            return querySet
+
+        return isWithin.objects.all()
 
 
 class GroupViewSet(ModelViewSet):
