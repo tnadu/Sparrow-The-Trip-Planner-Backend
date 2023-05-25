@@ -1,5 +1,5 @@
 from rest_framework import permissions
-from .serializers import BelongsToSerializer, RatingFlagSerializer
+from .serializers import BelongsToSerializer, RatingFlagSerializer, IsWithinSerializer
 from .models import *
 
 
@@ -13,7 +13,7 @@ class IsOwnedByTheUserMakingTheRequest(permissions.BasePermission):
         return request.user == obj.user.baseUser
 
 
-class IsInGroup(permissions.BasePermission):    
+class IsInGroup(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         user_id = request.user.id
         group_id = obj.id
@@ -25,7 +25,7 @@ class IsInGroup(permissions.BasePermission):
             return False
 
 
-class IsAdminOfGroup(permissions.BasePermission):    
+class IsAdminOfGroup(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         user_id = request.user.id
         group_id = obj.id
@@ -34,7 +34,7 @@ class IsAdminOfGroup(permissions.BasePermission):
             is_in_group = BelongsTo.objects.get(user_id = user_id, group_id = group_id)
             # if the user is an admin, the instance should have isAdmin set to true
             return is_in_group.isAdmin
-        
+
         except BelongsTo.DoesNotExist:
             return False
 
@@ -154,3 +154,24 @@ class RatingFlagAuthorization(permissions.BasePermission):
 
         # only the user who posted a rating is allowed to modify/delete it
         return IsTheUserMakingTheRequest().has_object_permission(request, view, obj.user)
+
+
+class IsWithinAuthorization(permissions.BasePermission):
+    # will validate 'create' requests
+    def has_permission(self, request, view):
+        if view.action != 'create':
+            return True
+
+        serializer = IsWithinSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        route = Route.objects.get(pk=data['route'])
+
+        return RouteIsAuthorizedToMakeChanges().has_object_permission(request, view, route)
+
+    # validates all other allowed actions
+    def has_object_permission(self, request, view, obj):
+        route = Route.objects.get(pk=obj.route_id)
+
+        return RouteIsAuthorizedToMakeChanges().has_object_permission(request, view, route)
