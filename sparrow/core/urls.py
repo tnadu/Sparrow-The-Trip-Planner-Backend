@@ -1,5 +1,7 @@
 from django.urls import path
 from .views import *
+from django.conf import settings
+from django.conf.urls.static import static
 
 app_name = 'core'
 
@@ -153,6 +155,10 @@ RatingFlagDetail = RatingFlagViewSet.as_view({
     'delete' : 'destroy'
 })
 
+ImageDetail = ImageViewSet.as_view({
+    'delete':'destroy'
+})
+
 
 ##### RatingFlagType #####
 #####################
@@ -210,6 +216,7 @@ urlpatterns = [
 
     path('notebook/list/', notebookList, name='notebook-list'),
     path('notebook/detail/<int:pk>/', notebookDetail, name='notebook-detail'),
+    path('image/detail/<int:pk>/', ImageDetail, name='image-detail'),
 
     path('status/list/', statusList, name='status-list'),
     path('status/detail/<int:pk>/', statusDetail, name='status-detail'),

@@ -1,9 +1,12 @@
 from django.core.management import call_command
-from django.db.models.signals import post_save,post_migrate
+from django.db.models.signals import post_save,post_migrate,pre_delete
+from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.dispatch import receiver
-from .models import Member, Status, Tag, RatingFlagType
+from .models import Member, Status, Tag, RatingFlagType, Notebook, Image
 import os
+from django.conf import settings
+from django.core.exceptions import ValidationError
 
 
 # whenever 'post_save' (used to save instances to the database)
@@ -40,3 +43,29 @@ def ratingFlagTypeSeed(sender, **kwargs):
     if sender.name == 'core' and RatingFlagType.objects.count() == 0:
         fixture_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'initial_ratingFlagType.json')
         call_command('loaddata', fixture_path)
+
+# this function is responsible for creating sub-directories within the "media" folder
+# the sub-directories are created based on the type of images, 
+# which could be either related to notebooks or attractions
+@receiver(post_migrate)
+def create_media_subdirectories(sender, **kwargs):
+    if sender.name == 'core':
+        images_dir = [os.path.join(settings.MEDIA_ROOT, 'notebook_images'),
+                    os.path.join(settings.MEDIA_ROOT, 'attraction_images')]
+        for path in images_dir:
+            if not os.path.exists(path):
+                os.makedirs(path)
+
+# this is a "cron job" implemented as a signal receiver, which is triggered when a Notebook instance is about to be deleted
+# it deletes all associated Image instances for the Notebook by iterating through them 
+# and removing their corresponding files from the media directory
+# if an error occurs while attempting to delete an image file, it raises a validation error with a message 
+# indicating the file that failed to delete
+@receiver(pre_delete, sender=Notebook)
+def sweep_notebook_associated_images(sender, instance, **kwargs):
+    images = Image.objects.filter(notebook=instance)
+    for image in images:
+        try:
+            os.remove(settings.MEDIA_ROOT + '/' + image.imagePath)
+        except OSError:
+            raise ValidationError('Failed to delete image {}'.format(image.imagePath))
