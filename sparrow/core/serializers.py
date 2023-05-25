@@ -3,9 +3,11 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.password_validation import validate_password
+from django.core.files.storage import default_storage
+from django.conf import settings
 from .models import *
 from datetime import date
-
+import uuid
 
 # includes the email field and is, therefore, accessible
 # only to users making requests on their own instance
@@ -241,7 +243,7 @@ class GroupSerializer(serializers.ModelSerializer):
 class BelongsToSerializer(serializers.ModelSerializer):
     class Meta:
         model = BelongsTo
-        fields = ['id', 'member', 'group', 'isAdmin', 'nickname']
+        fields = ['id', 'user', 'group', 'isAdmin', 'nickname']
 
 
 # class GroupBelongsToSerializer(serializers.ModelSerializer):
@@ -417,12 +419,80 @@ class ListNotebookSerializer(serializers.ModelSerializer):
 #         model = Notebook
 #         fields = ['title', 'note', 'dateStarted', 'status', 'dateCompleted', 'user']
 
+# this serializer is designed to handle image objects, 
+# including saving newly uploaded images both in the 
+# db and on disk, and also deleting images when needed
+class ImageUploadSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(write_only=True)
+
+    # the class constructor of this serializer stores the values of folder_name, notebook, attraction, 
+    # and owner attributes for each image that is being created
+    # these values are used later during the image creation process
+    def __init__(self, folder_name=None, notebook=None, attraction=None, owner=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.folder_name = folder_name
+        self.notebook = notebook
+        self.attraction = attraction
+        self.owner = owner
+
+    class Meta:
+        model = Image
+        fields = ['id', 'image', 'imagePath']
+        read_only_fields=['imagePath']
+
+    def create(self, validated_data):
+        image = validated_data.pop('image')
+
+        # I am retrieving the extension of the file and generating a unique file name for the current file
+        file_extension = image.name.split('.')[-1]
+        generated_unique_filename = '{}.{}'.format(uuid.uuid4(), file_extension)
+
+        # the file_path variable is set to the merging of the destination folder_name 
+        # and the newly generated unique filename for the current file
+        self.file_path =  self.folder_name + generated_unique_filename
+
+        validated_data['imagePath'] = self.file_path
+        validated_data['notebook'] = self.notebook
+        validated_data['attraction'] = self.attraction
+        validated_data['owner'] = self.owner
+
+        # save the uploaded image file to the media directory
+        # I am uploading the files using chunks of data as this action can consume a lot of server resources, 
+        # so this aproach can help reduce memory usage and improve performance
+        # 'wb+' => reading and writting a file in binary
+        with default_storage.open(settings.MEDIA_ROOT + '/' + self.file_path, 'wb+') as destination:
+            for chunk in image.chunks():
+                destination.write(chunk)
+
+        instance = super().create(validated_data)
+        instance.save()
+        return instance
+    
+    # the delete method of the serializer is responsible for removing instances 
+    # from both the database and the corresponding folder where the image file is stored
+    def delete(self, instance):
+        try:
+            default_storage.delete(instance.imagePath)
+        except Exception as e:
+            raise ValidationError('Failed to delete image {}'.format(instance.imagePath))
+
+        instance.delete()
+
 
 class NotebookSerializer(serializers.ModelSerializer):
+    images =  serializers.ListField(required=False)
+    images_list = serializers.SerializerMethodField()
+
     class Meta:
         model = Notebook
-        fields = ['id', 'route', 'title', 'note', 'status', 'dateStarted', 'dateCompleted']
+        fields = ['id', 'route', 'title', 'note', 'status', 'dateStarted', 'dateCompleted', 'images', 'images_list']
         extra_kwargs = {'dateStarted': {'read_only': True}, 'dateCompleted': {'read_only': True}}
+
+    # this method retrieves and returns a list of all the images 
+    # associated with the current instance of the Notebook class
+    def get_images_list(self, obj):
+        images = Image.objects.filter(notebook=obj)
+        return [image.imagePath for image in images]
 
     def create(self, validated_data):
         request = self.context.get('request')
@@ -439,7 +509,21 @@ class NotebookSerializer(serializers.ModelSerializer):
             # then the Completed date also becomes today's date
             validated_data['dateCompleted'] = date.today()
 
-        return super().create(validated_data)
+        # the serializer is iterating through the images and assigning 
+        # them to the current notebook and owner before saving them to the database
+        # I am using ImageUploadSerializer
+        images_data = validated_data.pop('images', [])
+        notebook = Notebook.objects.create(**validated_data)
+        images = []
+
+        for image_data in images_data:
+            image_serializer = ImageUploadSerializer(folder_name='notebook_images/', notebook=notebook, owner = member, data={'image': image_data})
+            if image_serializer.is_valid(raise_exception=True):
+                image = image_serializer.save()
+                images.append(image)
+
+        return notebook
+    
 
     def update(self, instance, validated_data):
         request = self.context.get('request')
@@ -461,6 +545,17 @@ class NotebookSerializer(serializers.ModelSerializer):
         elif validated_data['status'].status != 'Completed' and old_status == 'Completed':
             validated_data['dateStarted'] = date.today()
             validated_data['dateCompleted'] = None
+
+        # appending new images to the existing list
+        # the serializer is iterating through the images and assigning 
+        # them to the current notebook and owner before saving them to the database
+        # I am using ImageUploadSerializer
+        images_data = validated_data.pop('images', [])
+
+        for image_data in images_data:
+            image_serializer = ImageUploadSerializer(folder_name='notebook_images/', notebook=instance, owner=member, data={'image': image_data})
+            if image_serializer.is_valid(raise_exception=True):
+                image = image_serializer.save()
 
         return super().update(instance, validated_data)
 
@@ -541,19 +636,6 @@ class RatingFlagSerializer(serializers.ModelSerializer):
             )
 
         return self.instance
-
-
-# # large flag serializer, gives detailed information about rating
-# class LargeRatingFlagSerializer(serializers.ModelSerializer):
-
-#     user = SmallUserSerializer(read_only=True)
-#     route = ExtraSmallRouteSerializer(read_only=True)
-#     attraction = SmallAtractionSerializer(read_only=True)
-
-#     class Meta:
-#         model = Rating
-#         fields = ['user', 'rating', 'comment', 'route', 'attraction']
-
 
 #### RatingFlagType ####
 ########################

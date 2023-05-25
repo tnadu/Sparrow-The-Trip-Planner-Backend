@@ -63,7 +63,7 @@ class Member(models.Model):
     class Meta:
         db_table = 'member'
         ordering = ['baseUser']
-        default_related_name = 'member'
+        default_related_name = 'user'
 
 
 class Group(models.Model):
@@ -77,7 +77,7 @@ class Group(models.Model):
 
 # associative table between 'Member' and 'Group'
 class BelongsTo(models.Model):
-    member = models.ForeignKey('Member', on_delete=models.CASCADE, db_column='member_id')
+    user = models.ForeignKey('Member', on_delete=models.CASCADE, db_column='user_id')
     group = models.ForeignKey('Group', on_delete=models.CASCADE, db_column="group_id")
     isAdmin = models.BooleanField(db_column="isAdmin")
     nickname = models.CharField(max_length=50, null=True, blank=True, db_column="nickname")
@@ -86,7 +86,7 @@ class BelongsTo(models.Model):
         db_table = 'belongsTo'
         default_related_name = 'belongsTo'
         # cannot have multiple identical entries for belonging relationship
-        unique_together = ('member', 'group')
+        unique_together = ('user', 'group')
 
 
 # status model, used to store information about the state of a journey, 
@@ -111,7 +111,7 @@ class Notebook(models.Model):
     note = models.CharField(max_length = 3000, db_column = 'note')
     dateStarted = models.DateField(auto_now_add=True, db_column = 'date_started')
     dateCompleted = models.DateField(null = True, db_column = 'date_completed') # nullable
-
+    
     class Meta:
         db_table = 'notebook'
         # descending order for dateStarted, dateCompleted, in order to show the most recent trips first
@@ -162,3 +162,15 @@ class RatingFlag(models.Model):
         db_table = 'ratingFlag'
         default_related_name = 'ratingFlag'
         
+class Image(models.Model):
+    imagePath = models.CharField(max_length=300, null = False, blank = False, db_column = 'imagePath', db_index=True)
+    notebook = models.ForeignKey('Notebook', on_delete=models.CASCADE, null=True, blank=True, db_column='notebook_id') # nullable
+    attraction = models.ForeignKey('Attraction', on_delete=models.CASCADE, null=True, blank=True, db_column='attraction_id') # nullable
+    # setting up a timestamp is useful for letting users know when an image was taken 
+    # and for indicating if the information may be outdated or no longer available
+    timestamp = models.DateTimeField(auto_now_add=True, null = False, db_column = 'datePosted')
+    owner = models.ForeignKey('Member', null=True, on_delete=models.CASCADE, db_column='owner_id')
+
+    class Meta:
+        db_table = 'Image'
+        default_related_name = 'image'

@@ -1,5 +1,7 @@
 from django.urls import path
 from .views import *
+from django.conf import settings
+from django.conf.urls.static import static
 
 app_name = 'core'
 
@@ -86,11 +88,11 @@ attractionDetail = AttractionViewSet.as_view({
 #####################
 
 belongsToList = BelongsToViewSet.as_view({
-    'post': 'create'
+    'post': 'create',
+    'get': 'list'
 })
 
 belongsToDetail = BelongsToViewSet.as_view({
-    'get' : 'retrieve',
     'put': 'update',
     'patch': 'partial_update',
     'delete': 'destroy'
@@ -128,8 +130,8 @@ notebookDetail = NotebookViewSet.as_view({
 #####################
 
 IsWithinList = IsWithinViewSet.as_view({
-    'post' : 'create',
-    'get': 'list'
+    'get': 'list',
+    'post': 'create',
 })
 
 IsWithinDetail = IsWithinViewSet.as_view({
@@ -153,6 +155,10 @@ RatingFlagDetail = RatingFlagViewSet.as_view({
     'delete' : 'destroy'
 })
 
+ImageDetail = ImageViewSet.as_view({
+    'delete':'destroy'
+})
+
 
 ##### RatingFlagType #####
 #####################
@@ -172,20 +178,16 @@ TagList = TagViewSet.as_view({
     'get': 'list'
 })
 
-TagDetail = TagViewSet.as_view({
-    'get' : 'retrieve',
-})
-
 
 ##### IsTag #####
 #####################
 
 IsTaggedList = IsTaggedViewSet.as_view({
+    'get': 'list',
     'post': 'create'
 })
 
 IsTaggedDetail = IsTaggedViewSet.as_view({
-    'get' : 'retrieve',
     'delete': 'destroy'
 })
 
@@ -215,6 +217,8 @@ urlpatterns = [
     path('notebook/list/', notebookList, name='notebook-list'),
     path('notebook/detail/<int:pk>/', notebookDetail, name='notebook-detail'),
 
+    path('image/detail/<int:pk>/', ImageDetail, name='image-detail'),
+
     path('status/list/', statusList, name='status-list'),
     path('status/detail/<int:pk>/', statusDetail, name='status-detail'),
 
@@ -228,7 +232,6 @@ urlpatterns = [
     path('ratingFlagType/detail/<int:pk>/', RatingFlagTypeDetail, name='ratingFlagType-detail'),
 
     path('tag/list/', TagList, name='tag-list'),
-    path('tag/detail/<int:pk>/', TagDetail, name='tag-detail'),
 
     path('isTagged/list/', IsTaggedList, name='isTagged-list'),
     path('isTagged/detail/<int:pk>/', IsTaggedDetail, name='isTagged-detail')
