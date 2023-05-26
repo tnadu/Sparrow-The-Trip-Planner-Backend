@@ -69,7 +69,7 @@ class IsWithinViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateModelM
 
     def get_queryset(self):
         if self.action == 'list':
-            initialQuerySet = isWithin.object.all()
+            initialQuerySet = isWithin.objects.all()
             filteredIds = [IsWithin.id for IsWithin in initialQuerySet if RouteIsAuthorizedToMakeChanges().has_object_permission(self.request, self, IsWithin.route)]
             querySet = initialQuerySet.filter(id__in=filteredIds)
 

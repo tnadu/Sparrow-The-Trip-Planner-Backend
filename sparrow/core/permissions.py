@@ -5,21 +5,30 @@ from .models import *
 
 class IsTheUserMakingTheRequest(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
+        if not request.user:
+            return False
+
         return request.user == obj.baseUser
 
 
 class IsOwnedByTheUserMakingTheRequest(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
+        if not request.user:
+            return False
+
         return request.user == obj.user.baseUser
 
 
 class IsInGroup(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
+        if not request.user:
+            return False
+
         user_id = request.user.id
         group_id = obj.id
 
         try:
-            is_in_group = BelongsTo.objects.get(user_id = user_id, group_id = group_id)
+            BelongsTo.objects.get(user_id = user_id, group_id = group_id)
             return True
         except BelongsTo.DoesNotExist:
             return False
@@ -27,6 +36,9 @@ class IsInGroup(permissions.BasePermission):
 
 class IsAdminOfGroup(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
+        if not request.user:
+            return False
+
         user_id = request.user.id
         group_id = obj.id
 
@@ -48,8 +60,8 @@ class BelongsToAuthorization(permissions.BasePermission):
 
         # the request data is not validated against the corresponding
         # serializer before the permission checking, and since whether
-        # or not the user is allowed to use this action depends upon
-        # the validity of the data, it is serialized on the fly
+        # the user is allowed to use this action depends upon the validity
+        # of the data, it is serialized on the fly
         serializer = BelongsToSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
@@ -153,7 +165,7 @@ class RatingFlagAuthorization(permissions.BasePermission):
             return True
 
         # only the user who posted a rating is allowed to modify/delete it
-        return IsTheUserMakingTheRequest().has_object_permission(request, view, obj.user)
+        return IsOwnedByTheUserMakingTheRequest().has_object_permission(request, view, obj)
 
 
 class IsWithinAuthorization(permissions.BasePermission):
