@@ -31,28 +31,33 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'corsheaders',
 ]
-
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
 ]
 
-# used for react login & signup
+
+# allow the server serving the frontend
+# to access requested resources
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
 ]
+
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000',
 ]
+
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:3000',    
+    'http://localhost:3000',
 ]
+
+CORS_ALLOW_CREDENTIALS = True
 
 
 ROOT_URLCONF = 'sparrow.urls'

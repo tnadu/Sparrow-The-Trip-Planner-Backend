@@ -306,7 +306,7 @@ class ListRouteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Route
-        fields = ['id', 'title', 'description', 'verified', 'publicationDate', 'user', 'group']
+        fields = ['id', 'title', 'description', 'verified', 'startingPointLat', 'startingPointLon', 'publicationDate', 'user', 'group']
         extra_kwargs = {'publicationDate': {'read_only': True}}
 
 
