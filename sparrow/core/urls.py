@@ -6,9 +6,6 @@ from django.conf.urls.static import static
 app_name = 'core'
 
 
-##### Route #####
-#################
-
 routeList = RouteViewSet.as_view({
     'get': 'list',
     'post': 'create'
@@ -22,9 +19,6 @@ routeDetail = RouteViewSet.as_view({
 })
 
 
-##### Group #####
-#################
-
 groupList = GroupViewSet.as_view({
     'get': 'list',
     'post': 'create'
@@ -37,9 +31,6 @@ groupDetail = GroupViewSet.as_view({
     'delete': 'destroy'
 })
 
-
-##### Member #####
-##################
 
 memberList = MemberViewSet.as_view({
     'get': 'list',
@@ -68,9 +59,6 @@ login = LoginViewSet.as_view({
 logout = LogoutView.as_view()
 
 
-##### Attraction #####
-######################
-
 attractionList = AttractionViewSet.as_view({
     'get': 'list',
     'post': 'create'
@@ -84,9 +72,6 @@ attractionDetail = AttractionViewSet.as_view({
 })
 
 
-##### BelongsTo #####
-#####################
-
 belongsToList = BelongsToViewSet.as_view({
     'post': 'create',
     'get': 'list'
@@ -99,9 +84,6 @@ belongsToDetail = BelongsToViewSet.as_view({
 })
 
 
-##### Status #####
-##################
-
 statusList = StatusViewSet.as_view({
     'get': 'list'
 })
@@ -110,9 +92,6 @@ statusDetail = StatusViewSet.as_view({
     'get': 'retrieve'
 })
 
-
-##### Notebook #####
-#####################
 
 notebookList = NotebookViewSet.as_view({
     'get' : 'list',
@@ -126,8 +105,6 @@ notebookDetail = NotebookViewSet.as_view({
     'delete' : 'destroy'
 })
 
-##### IsWithin #####
-#####################
 
 IsWithinList = IsWithinViewSet.as_view({
     'get': 'list',
@@ -140,9 +117,6 @@ IsWithinDetail = IsWithinViewSet.as_view({
     'delete' : 'destroy'
 })
 
-
-##### RatingFlag #####
-######################
 
 RatingFlagList = RatingFlagViewSet.as_view({
     'get': 'list',
@@ -160,9 +134,6 @@ ImageDetail = ImageViewSet.as_view({
 })
 
 
-##### RatingFlagType #####
-#####################
-
 RatingFlagTypeList = RatingFlagTypeViewSet.as_view({
     'get': 'list'
 })
@@ -171,16 +142,10 @@ RatingFlagTypeDetail = RatingFlagTypeViewSet.as_view({
 })
 
 
-##### Tag #####
-#####################
-
 TagList = TagViewSet.as_view({
     'get': 'list'
 })
 
-
-##### IsTag #####
-#####################
 
 IsTaggedList = IsTaggedViewSet.as_view({
     'get': 'list',

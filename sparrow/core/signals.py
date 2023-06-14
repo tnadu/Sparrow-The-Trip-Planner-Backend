@@ -44,6 +44,7 @@ def ratingFlagTypeSeed(sender, **kwargs):
         fixture_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'initial_ratingFlagType.json')
         call_command('loaddata', fixture_path)
 
+
 # this function is responsible for creating sub-directories within the "media" folder
 # the sub-directories are created based on the type of images, 
 # which could be either related to notebooks or attractions
@@ -55,6 +56,7 @@ def create_media_subdirectories(sender, **kwargs):
         for path in images_dir:
             if not os.path.exists(path):
                 os.makedirs(path)
+
 
 # this is a "cron job" implemented as a signal receiver, which is triggered when a Notebook instance is about to be deleted
 # it deletes all associated Image instances for the Notebook by iterating through them 

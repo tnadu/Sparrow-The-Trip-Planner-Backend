@@ -161,7 +161,8 @@ class RatingFlag(models.Model):
     class Meta:
         db_table = 'ratingFlag'
         default_related_name = 'ratingFlag'
-        
+
+
 class Image(models.Model):
     imagePath = models.CharField(max_length=300, null = False, blank = False, db_column = 'imagePath', db_index=True)
     notebook = models.ForeignKey('Notebook', on_delete=models.CASCADE, null=True, blank=True, db_column='notebook_id') # nullable

@@ -30,13 +30,6 @@ class RouteViewSet(ModelViewSet):
             return ListRouteSerializer
         return RouteSerializer
 
-        # if self.action == 'list':
-        #     return SmallRouteSerializer
-        # elif self.action in ['create', 'update', 'partial_update']:
-        #     return RouteSerializer
-        # else:
-        #     return LargeRouteSerializer
-
     def get_permissions(self):
         # route can be accessed only if it is public
         if self.action == 'retrieve':
@@ -48,19 +41,6 @@ class RouteViewSet(ModelViewSet):
 
         # any authenticated user can create routes
         return [IsAuthenticated()]
-
-    # # toggle the public field
-    # # detail = True means it is applied only for an instance
-    # # it will respond only to update-type requests
-    # @action(detail = True, methods=['PUT', 'PATCH', 'GET'])
-    # def publicToggle(self, request, pk):
-
-    #     routeObject = self.get_object()
-    #     routeObject.public = not routeObject.public
-
-    #     serializer = RouteSerializer(routeObject, data=request.data, context={'request': request})
-    #     serializer.is_valid(raise_exception=True)
-    #     serializer.save()
 
 
 class IsWithinViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
@@ -220,50 +200,6 @@ class BelongsToViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateModel
         return BelongsTo.objects.all()
 
 
-
-### BACK-UP: for belongsTo
-# class BelongsToViewSet(ModelViewSet):
-#     queryset = BelongsTo.objects.all()
-
-#     filterset_fields = ['member__baseUser__username', 'group__name', 'nickname']
-#     search_fields = ['nickname']
-
-#     def get_serializer_class(self):
-#         if self.action == 'get_group_members':
-#             return MemberBelongsToSerializer
-
-#         if self.action == 'get_all_groups_for_member':
-#             return GroupBelongsToSerializer
-        
-#         return WriteBelongsToSerializer
-
-#     # action that will list all the users that exist 
-#     # within a specified group, specification given by
-#     # the group's PK
-#     @action(methods=['get'])
-#     def get_group_members(self, request, pk=None):
-#         try:
-#             group_members = BelongsTo.objects.filter(group = pk)
-#             group_members_serialized = self.get_serializer(group_members, many=True)
-#             return Response(group_members_serialized.data)
-        
-#         except BelongsTo.DoesNotExist:
-#             return Response(status=status.HTTP_404_NOT_FOUND)
-            
-#     # action that will list all groups that a particular
-#     # user is included in; identification being made with 
-#     # the user's PK
-#     @action(methods=['get'])
-#     def get_all_groups_for_member(self, request, pk=None):
-#         try: 
-#             all_groups = BelongsTo.objects.filter(member = pk)
-#             all_groups_serialized = self.get_serializer(all_groups, many=True)
-#             return Response(all_groups_serialized.data)
-        
-#         except BelongsTo.DoesNotExist:
-#             return Response(status=status.HTTP_404_NOT_FOUND)
-
-
 class NotebookViewSet(ModelViewSet):
     queryset = Notebook.objects.all()
     filterset_fields = ["user_id"]
@@ -274,18 +210,6 @@ class NotebookViewSet(ModelViewSet):
             return ListNotebookSerializer
         
         return NotebookSerializer
-        # if self.request.method in permissions.SAFE_METHODS:     # get, head, options
-        #     # if details about a specific notebook are requested
-        #     if self.action == 'retrieve':
-        #         return LargeNotebookSerializer
-        #     # otherwise, general information about the notebook entry is presented
-        #     return SmallNotebookSerializer
-
-        # # if a specific notebook entry is being modified
-        # if self.action == 'create' or self.action == 'update':
-        #     return WriteNotebookSerializer
-
-        # return LargeNotebookSerializer
 
     def get_permissions(self):
         # let anyone create a notebook
@@ -293,6 +217,7 @@ class NotebookViewSet(ModelViewSet):
             return [IsAuthenticated()]
 
         return [IsOwnedByTheUserMakingTheRequest()]
+
 
 class StatusViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
     queryset = Status.objects.all()
@@ -336,6 +261,7 @@ class IsTaggedViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateModelM
     serializer_class = IsTaggedSerializer
     permission_classes = [IsAuthenticated]
     filterset_fields = ['attraction_id', 'tag_id']
+
 
 class ImageViewSet(ModelViewSet):
     queryset = Image.objects.all()
