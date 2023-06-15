@@ -55,7 +55,8 @@
     "model": "core.Member",
     "pk": 3,
     "fields": {
-      "baseUser": 3
+      "baseUser": 3,
+      "profilePhoto": "test-photo.jpeg"
     }
   }
 ]
