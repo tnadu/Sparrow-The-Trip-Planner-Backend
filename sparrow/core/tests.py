@@ -4,6 +4,76 @@ from rest_framework.test import APITestCase
 from .models import *
 
 
+class RouteTests(APITestCase):
+    fixtures = ['testing-members.json', 'testing-groups.json', 'testing-belongsTo.json', 'testing-attractions.json', 'testing-routes.json']
+
+    def testPermissions(self):
+        """
+        Verifying that custom permissions work in the following scenarios:
+            1) List:
+                - user test-3 issues a list request => only the first route (public) and the
+                    second route (owned by a group which the user belongs to) are shown
+            2) Retrieve:
+                - user test-3 issues a retrieve request on the second route => works (private,
+                    but owned by a group which the user belongs to)
+                - user test-3 issues a retrieve request on the third route => doesn't work
+                    (private and owned by user-1)
+            3) Delete:
+                - user test-3 issues a delete request on the second route => doesn't work
+                    (not an admin of the group)
+                - user test-3 issues a delete request on the third route => doesn't work
+        """
+
+        user = User.objects.get(pk=3)
+        self.client.force_login(user)
+
+        listRouteURL = reverse('core:route-list')
+        detailSecondRouteURL = reverse('core:route-detail', args=[2])
+        detailThirdRouteURL = reverse('core:route-detail', args=[3])
+
+        # list section
+        response = self.client.get(listRouteURL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 2)
+        # making sure the IDs match up
+        self.assertEqual(response.data['results'][0]['id'], 1)
+        self.assertEqual(response.data['results'][1]['id'], 2)
+
+        # retrieve section
+        response = self.client.get(detailSecondRouteURL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.get(detailThirdRouteURL)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # delete section
+        response = self.client.delete(detailSecondRouteURL)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        response = self.client.delete(detailThirdRouteURL)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class GroupTests(APITestCase):
+    fixtures = ['testing-members.json']
+
+    def testBelongsToUponGroupCreation(self):
+        """
+        Verify that an entry in the BelongsTo table is created whenever a new
+        group is created, with the user making the request as the group admin
+        """
+
+        user = User.objects.get(pk=3)
+        self.client.force_login(user)
+
+        createGroupURL = reverse('core:group-list')
+        data = {'id': 3, 'name': 'group-3', 'description': 'having tons of fun in here!'}
+        response = self.client.post(createGroupURL, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        listBelongsTo = reverse('core:belongsTo-list')
+        response = self.client.get(listBelongsTo)
+        self.assertIn({'id': 5, 'user': 3, 'group': 3, 'isAdmin': True, 'nickname': None}, response.data['results'])
+
+
 class MemberTests(APITestCase):
     fixtures = ['testing-members.json']
 
@@ -137,4 +207,3 @@ class IsTaggedTests(APITestCase):
         response = self.client.get(listTagURL)
         self.assertEqual(len(response.data['results']), 1)
         self.assertEqual(response.data['results'][0], {'id': 3, 'tag': 3, 'attraction': 1})
-

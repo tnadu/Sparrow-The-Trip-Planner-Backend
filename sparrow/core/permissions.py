@@ -28,7 +28,7 @@ class IsInGroup(permissions.BasePermission):
         group_id = obj.id
 
         try:
-            BelongsTo.objects.get(user_id = user_id, group_id = group_id)
+            BelongsTo.objects.get(user_id=user_id, group_id=group_id)
             return True
         except BelongsTo.DoesNotExist:
             return False
@@ -43,7 +43,7 @@ class IsAdminOfGroup(permissions.BasePermission):
         group_id = obj.id
 
         try:
-            is_in_group = BelongsTo.objects.get(user_id = user_id, group_id = group_id)
+            is_in_group = BelongsTo.objects.get(user_id=user_id, group_id=group_id)
             # if the user is an admin, the instance should have isAdmin set to true
             return is_in_group.isAdmin
 
@@ -120,8 +120,8 @@ class RouteIsAuthorizedToMakeChanges(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         # current route is owned be the user making the request
         userCondition = obj.user and IsOwnedByTheUserMakingTheRequest().has_object_permission(request, view, obj)
-        # current route is owned by a group to which the user making the request belongs
-        groupCondition = obj.group and IsInGroup().has_object_permission(request, view, obj.group)
+        # current route is owned by a group to which the user making the request belongs and is an admin of
+        groupCondition = obj.group and IsAdminOfGroup().has_object_permission(request, view, obj.group)
 
         return userCondition or groupCondition
 
@@ -130,7 +130,12 @@ class RouteIsPublic(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         publicCondition = obj.public and permissions.IsAuthenticated().has_permission(request, view)
 
-        return publicCondition or RouteIsAuthorizedToMakeChanges().has_object_permission(request, view, obj)
+        # current route is owned be the user making the request
+        userCondition = obj.user and IsOwnedByTheUserMakingTheRequest().has_object_permission(request, view, obj)
+        # current route is owned by a group to which the user making the request belongs
+        groupCondition = obj.group and IsInGroup().has_object_permission(request, view, obj.group)
+
+        return publicCondition or userCondition or groupCondition
 
 
 class RatingFlagAuthorization(permissions.BasePermission):
