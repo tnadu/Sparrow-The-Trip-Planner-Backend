@@ -1,0 +1,22 @@
+[
+  {
+    "model": "core.Attraction",
+    "pk": 1,
+    "fields": {
+      "name": "an-awesome-attraction-1",
+      "generalDescription": "who wouldn't visit?",
+      "latitude": "40",
+      "longitude": "40"
+    }
+  },
+  {
+    "model": "core.Attraction",
+    "pk": 2,
+    "fields": {
+      "name": "an-awesome-attraction-2",
+      "generalDescription": "who wouldn't visit?",
+      "latitude": "41",
+      "longitude": "41"
+    }
+  }
+]

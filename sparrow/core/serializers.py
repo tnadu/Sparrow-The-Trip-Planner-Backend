@@ -364,7 +364,7 @@ class ImageUploadSerializer(serializers.ModelSerializer):
 
 
 class NotebookSerializer(serializers.ModelSerializer):
-    images =  serializers.ListField(required=False)
+    images = serializers.ListField(required=False)
     images_list = serializers.SerializerMethodField()
 
     class Meta:

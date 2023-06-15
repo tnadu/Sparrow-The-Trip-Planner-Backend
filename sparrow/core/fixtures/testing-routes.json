@@ -1,0 +1,44 @@
+[
+  {
+    "model": "core.Route",
+    "pk": 1,
+    "fields": {
+      "title": "route-1",
+      "description": "book your damn holiday right now!",
+      "verified": "True",
+      "public": "True",
+      "startingPointLat": "35",
+      "startingPointLon": "35",
+      "publicationDate": "2023-06-01",
+      "user": "1"
+    }
+  },
+  {
+    "model": "core.Route",
+    "pk": 2,
+    "fields": {
+      "title": "route-2",
+      "description": "book your damn holiday right now!",
+      "verified": "False",
+      "public": "False",
+      "startingPointLat": "37",
+      "startingPointLon": "37",
+      "publicationDate": "2023-06-01",
+      "group": "1"
+    }
+  },
+  {
+    "model": "core.Route",
+    "pk": 3,
+    "fields": {
+      "title": "route-3",
+      "description": "book your damn holiday right now!",
+      "verified": "False",
+      "public": "False",
+      "startingPointLat": "39",
+      "startingPointLon": "39",
+      "publicationDate": "2023-06-01",
+      "user": "1"
+    }
+  }
+]

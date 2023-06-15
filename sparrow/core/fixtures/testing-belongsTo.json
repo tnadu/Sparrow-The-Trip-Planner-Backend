@@ -1,0 +1,38 @@
+[
+  {
+    "model": "core.BelongsTo",
+    "pk": 1,
+    "fields": {
+      "user": 1,
+      "group": 1,
+      "isAdmin": "True"
+    }
+  },
+  {
+    "model": "core.BelongsTo",
+    "pk": 2,
+    "fields": {
+      "user": 2,
+      "group": 1,
+      "isAdmin": "True"
+    }
+  },
+  {
+    "model": "core.BelongsTo",
+    "pk": 3,
+    "fields": {
+      "user": 3,
+      "group": 1,
+      "isAdmin": "False"
+    }
+  },
+  {
+    "model": "core.BelongsTo",
+    "pk": 4,
+    "fields": {
+      "user": 2,
+      "group": 2,
+      "isAdmin": "True"
+    }
+  }
+]

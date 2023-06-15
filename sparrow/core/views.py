@@ -36,7 +36,7 @@ class RouteViewSet(ModelViewSet):
             return [RouteIsPublic()]
 
         # edited or deleted only if admin or admin of the group
-        if self.action == 'update' or self.action == 'partial_update' or self.action == 'delete':
+        if self.action == 'update' or self.action == 'partial_update' or self.action == 'destroy':
             return [RouteIsAuthorizedToMakeChanges()]
 
         # any authenticated user can create routes
@@ -50,7 +50,7 @@ class IsWithinViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateModelM
     def get_queryset(self):
         if self.action == 'list':
             initialQuerySet = isWithin.objects.all()
-            filteredIds = [IsWithin.id for IsWithin in initialQuerySet if RouteIsAuthorizedToMakeChanges().has_object_permission(self.request, self, IsWithin.route)]
+            filteredIds = [IsWithin.id for IsWithin in initialQuerySet if RouteIsPublic().has_object_permission(self.request, self, IsWithin.route)]
             querySet = initialQuerySet.filter(id__in=filteredIds)
 
             return querySet

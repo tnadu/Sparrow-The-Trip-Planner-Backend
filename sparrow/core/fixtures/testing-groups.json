@@ -1,0 +1,18 @@
+[
+  {
+    "model": "core.Group",
+    "pk": 1,
+    "fields": {
+      "name": "group-1",
+      "description": "just friends sharing holiday plans"
+    }
+  },
+  {
+    "model": "core.Group",
+    "pk": 2,
+    "fields": {
+      "name": "group-2",
+      "description": "just colleagues sharing holiday plans"
+    }
+  }
+]
