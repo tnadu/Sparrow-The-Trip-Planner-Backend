@@ -38,16 +38,17 @@ class RouteViewSet(ModelViewSet):
         #     return LargeRouteSerializer
 
     def get_permissions(self):
-        # route can be accessed only if it is public
-        if self.action == 'retrieve':
-            return [RouteIsPublic()]
+        return [AllowAny()]
+        # # route can be accessed only if it is public
+        # if self.action == 'retrieve':
+        #     return [RouteIsPublic()]
 
-        # edited or deleted only if admin or admin of the group
-        if self.action == 'update' or self.action == 'partial_update' or self.action == 'delete':
-            return [RouteIsAuthorizedToMakeChanges()]
+        # # edited or deleted only if admin or admin of the group
+        # if self.action == 'update' or self.action == 'partial_update' or self.action == 'delete':
+        #     return [RouteIsAuthorizedToMakeChanges()]
 
-        # any authenticated user can create routes
-        return [IsAuthenticated()]
+        # # any authenticated user can create routes
+        # return [IsAuthenticated()]
 
     # # toggle the public field
     # # detail = True means it is applied only for an instance
@@ -100,16 +101,17 @@ class GroupViewSet(ModelViewSet):
         instance.save()
 
     def get_permissions(self):
-        # if the use tries to see a group/ list of groups, check if
-        # he/she appears in the group
-        if self.action == 'list' or self.action == 'retrieve':
-            return [IsInGroup()]
+        return [AllowAny()]
+        # # if the use tries to see a group/ list of groups, check if
+        # # he/she appears in the group
+        # if self.action == 'list' or self.action == 'retrieve':
+        #     return [IsInGroup()]
 
-        if self.action == 'create':
-            return [IsAuthenticated()]
+        # if self.action == 'create':
+        #     return [IsAuthenticated()]
 
-        # other actions should only be taken by admins
-        return [IsAdminOfGroup()]
+        # # other actions should only be taken by admins
+        # return [IsAdminOfGroup()]
 
 
 class MemberViewSet(ModelViewSet):
@@ -135,14 +137,16 @@ class MemberViewSet(ModelViewSet):
         return MemberSerializer
 
     def get_permissions(self):
-        # condition for list, retrieve goes here (IsAuthenticated)
-        if self.action == 'list' or self.action == 'retrieve':
-            return [IsAuthenticated()]
-        # anyone can register
-        if self.action == 'create':
-            return [AllowAny()]
+        return [AllowAny()]
+        
+        # # condition for list, retrieve goes here (IsAuthenticated)
+        # if self.action == 'list' or self.action == 'retrieve':
+        #     return [IsAuthenticated()]
+        # # anyone can register
+        # if self.action == 'create':
+        #     return [AllowAny()]
 
-        return [IsTheUserMakingTheRequest()]
+        # return [IsTheUserMakingTheRequest()]
 
     # custom deletion logic
     def destroy(self, request, *args, **kwargs):
@@ -195,7 +199,7 @@ class ChangePasswordViewSet(mixins.UpdateModelMixin, GenericViewSet):
 class AttractionViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin):
     queryset = Attraction.objects.all()
     serializer_class = AttractionSerializer
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
     filterset_fields = ['ratingFlag__id', 'isWithin__route_id', 'isTagged__tag__tagName']
     search_fields = ['name', 'generalDescription']
     ordering_fields = ['isWithin__orderNumber']
@@ -204,7 +208,7 @@ class AttractionViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveMo
 class BelongsToViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
     serializer_class = BelongsToSerializer
     filterset_fields = ['user_id', 'group_id']
-    permission_classes = [BelongsToAuthorization]
+    #permission_classes = [BelongsToAuthorization]
 
     def get_queryset(self):
         if self.action == 'list':
@@ -267,7 +271,7 @@ class BelongsToViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateModel
 class NotebookViewSet(ModelViewSet):
     queryset = Notebook.objects.all()
     filterset_fields = ["user_id"]
-    permission_classes = [IsOwnedByTheUserMakingTheRequest]
+    #permission_classes = [IsOwnedByTheUserMakingTheRequest]
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -297,7 +301,7 @@ class NotebookViewSet(ModelViewSet):
 class StatusViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
     queryset = Status.objects.all()
     serializer_class = StatusSerializer
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
     filterset_fields = ['notebook__id']
 
 
@@ -305,7 +309,7 @@ class RatingFlagViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateMode
                                      mixins.UpdateModelMixin, mixins.DestroyModelMixin):
     serializer_class = RatingFlagSerializer
     filterset_fields = ['route_id', 'attraction_id']
-    permission_classes = [RatingFlagAuthorization]
+    #permission_classes = [RatingFlagAuthorization]
 
     def get_queryset(self):
         # users can create both ratings and flags (instances with a ratingFlagType greater than 5)
@@ -320,21 +324,21 @@ class RatingFlagViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateMode
 class RatingFlagTypeViewSet(GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
     queryset = RatingFlagType.objects.all()
     serializer_class = RatingFlagTypeSerializer
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
     filterset_fields = ['ratingFlag__id']
 
 
 class TagViewSet(GenericViewSet, mixins.ListModelMixin):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
     filterset_fields = ['isTagged__attraction_id']
 
 
 class IsTaggedViewSet(GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin):
     queryset = IsTagged.objects.all()
     serializer_class = IsTaggedSerializer
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
     filterset_fields = ['attraction_id', 'tag_id']
 
 class ImageViewSet(ModelViewSet):
