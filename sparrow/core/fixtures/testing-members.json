@@ -1,0 +1,61 @@
+[
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+      "username": "test-1",
+      "password": "extremely-secure-123",
+      "first_name": "Test",
+      "last_name": "1",
+      "email": "test-1@domain.com",
+      "is_superuser": "True"
+    }
+  },
+  {
+    "model": "core.Member",
+    "pk": 1,
+    "fields": {
+      "baseUser": 1
+    }
+  },
+
+  {
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+      "username": "test-2",
+      "password": "extremely-secure-123",
+      "first_name": "Test",
+      "last_name": "2",
+      "email": "test-2@domain.com",
+      "is_superuser": "False"
+    }
+  },
+  {
+    "model": "core.Member",
+    "pk": 2,
+    "fields": {
+      "baseUser": 2
+    }
+  },
+
+  {
+    "model": "auth.user",
+    "pk": 3,
+    "fields": {
+      "username": "test-3",
+      "password": "extremely-secure-123",
+      "first_name": "Test",
+      "last_name": "3",
+      "email": "test-3@domain.com",
+      "is_superuser": "False"
+    }
+  },
+  {
+    "model": "core.Member",
+    "pk": 3,
+    "fields": {
+      "baseUser": 3
+    }
+  }
+]
