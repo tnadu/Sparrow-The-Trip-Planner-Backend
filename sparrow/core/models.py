@@ -17,6 +17,9 @@ class isWithin (models.Model):
         unique_together = ('route', 'attraction')
         default_related_name = 'isWithin'
 
+    def __str__(self):
+        return f'Attraction "{self.attraction}" in route "{self.route}"'
+
 
 class Route(models.Model):
     title = models.CharField(max_length=50, db_column='title')
@@ -39,7 +42,7 @@ class Route(models.Model):
             raise ValidationError("Either a group or a member must be specified!")
 
     def __str__(self):
-        return self.title + self.description
+        return self.title
 
 
 class Attraction(models.Model):
@@ -51,7 +54,10 @@ class Attraction(models.Model):
     class Meta:
         db_table = 'attraction'
         ordering = ['name']
-        default_related_name = 'attraction' 
+        default_related_name = 'attraction'
+
+    def __str__(self):
+        return self.name
 
 
 # member model, extending the User model via a one-to-one relationship;
@@ -65,6 +71,9 @@ class Member(models.Model):
         ordering = ['baseUser']
         default_related_name = 'user'
 
+    def __str__(self):
+        return self.baseUser.username
+
 
 class Group(models.Model):
     name = models.CharField(max_length=30, db_column='name')
@@ -73,6 +82,9 @@ class Group(models.Model):
     class Meta:
         db_table = 'group'
         default_related_name = 'group'
+
+    def __str__(self):
+        return self.name
 
 
 # associative table between 'Member' and 'Group'
@@ -88,6 +100,9 @@ class BelongsTo(models.Model):
         # cannot have multiple identical entries for belonging relationship
         unique_together = ('user', 'group')
 
+    def __str__(self):
+        return f'User "{self.user}" is in group "{self.group}" as "{self.nickname}"'
+
 
 # status model, used to store information about the state of a journey, 
 # such as whether it is completed, finished, ongoing, etc.
@@ -97,6 +112,9 @@ class Status(models.Model):
     class Meta:
         db_table = 'status'
         default_related_name = 'status'
+
+    def __str__(self):
+        return self.status
     
 
 # notebook model, used to store information about a user's experience with a particular route
@@ -118,6 +136,9 @@ class Notebook(models.Model):
         ordering = ['-dateStarted', '-dateCompleted', 'title']
         default_related_name = 'notebook'
 
+    def __str__(self):
+        return f'"{self.title}" by {self.user.username}'
+
         
 class Tag(models.Model):
     tagName = models.CharField(max_length=50, db_column='tag_name')
@@ -127,6 +148,9 @@ class Tag(models.Model):
         ordering = ['tagName']
         default_related_name = 'tag'
 
+    def __str__(self):
+        return self.tagName
+
 
 class RatingFlagType(models.Model):
     type = models.CharField(max_length=50, db_column='type')
@@ -134,6 +158,9 @@ class RatingFlagType(models.Model):
     class Meta:
         db_table = 'ratingFlagType'
         default_related_name = 'ratingFlagType'
+
+    def __str__(self):
+        return self.type
 
 
 # many - many between Tag & Attraction
@@ -148,6 +175,9 @@ class IsTagged(models.Model):
         # orders the isTagged objects by the id of the Attraction, in reverse order of the id of the isTagged model itself
         # so that the most recent tag for each Attraction appears first.
         ordering = ['attraction', '-id']
+
+    def __str__(self):
+        return f'"{self.attraction.name}" tagged as "{self.tag.tagName}"'
   
 
 # a rating can be associated with either a route or an attraction    
@@ -162,6 +192,9 @@ class RatingFlag(models.Model):
         db_table = 'ratingFlag'
         default_related_name = 'ratingFlag'
 
+    def __str__(self):
+        return f'"{self.user.baseUser.username}" rated resource as "{self.rating.type}": "{self.comment}..."'
+
 
 class Image(models.Model):
     imagePath = models.CharField(max_length=300, null = False, blank = False, db_column = 'imagePath', db_index=True)
@@ -175,3 +208,6 @@ class Image(models.Model):
     class Meta:
         db_table = 'Image'
         default_related_name = 'image'
+
+    def __str__(self):
+        return self.imagePath

@@ -19,4 +19,4 @@ You can access the user stories for our project using this [link](https://docs.g
 During the development of the application, we used Trello as a tool to effectively manage and organize our tasks. You can access the backlog by following this [link](https://trello.com/b/9HMD6CwE/backend).
 
 ## Demo
-Link to YouTube demo: 
+Link to YouTube demo: https://youtu.be/_qnA91qkBCI
